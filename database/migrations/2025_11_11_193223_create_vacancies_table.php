@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('vacancies', function (Blueprint $table) {
             $table->ulid('id');
+            $table->foreignId('user_id')->index();
             $table->string('title');
             $table->string('source')->nullable();
             $table->text('content')->nullable();

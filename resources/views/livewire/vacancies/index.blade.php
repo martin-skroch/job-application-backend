@@ -117,11 +117,6 @@ new class extends Component {
         $this->isEditing = false;
         $this->vacancyId = null;
     }
-
-    public function onClose(): void
-    {
-        $this->resetForm();
-    }
 }; ?>
 
 <section class="space-y-6">
@@ -131,7 +126,7 @@ new class extends Component {
             <flux:subheading size="lg">{{ __('Manage you vacancies') }}</flux:subheading>
         </div>
         <div>
-            <flux:button icon:leading="plus" variant="primary" :loading="false" wire:click="open">
+            <flux:button variant="primary" :loading="false" wire:click="open">
                 {{ __('Create Vacancy') }}
             </flux:button>
         </div>
@@ -196,7 +191,7 @@ new class extends Component {
 
     {{ $vacancies->links() }}
 
-    <x-flyout name="vacancy-modal" wire:close="onClose">
+    <x-flyout name="vacancy-modal" wire:close="resetForm">
         <flux:heading size="xl" level="1">{{ $isEditing ? __('Edit') : __('Create') }}</flux:heading>
         <flux:subheading size="lg">{{ __('Manage your experiences') }}</flux:subheading>
         <flux:separator variant="subtle" />
@@ -266,8 +261,7 @@ new class extends Component {
 
             <div class="inline-flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ $isEditing ? 'Save' : __('Create') }}</flux:button>
-                <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}
-                </flux:button>
+                <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
             </div>
         </form>
 

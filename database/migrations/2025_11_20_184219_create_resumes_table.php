@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('resumes', function (Blueprint $table) {
             $table->ulid('id');
+            $table->foreignId('user_id')->index();
             $table->string('image')->nullable();
             $table->string('name')->nullable();
             $table->tinyText('address')->nullable();

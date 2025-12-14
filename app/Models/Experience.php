@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -60,8 +61,16 @@ class Experience extends Model
      * @return string
      */
     public function getDurationAttribute(): string
-    {        
+    {
         return $this->entry->longAbsoluteDiffForHumans($this->exit?->addDay(), 2);
+    }
+
+    /**
+     * Get the user that owns the experience.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function resumes(): BelongsToMany

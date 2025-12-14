@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 
@@ -85,5 +86,13 @@ class Vacancy extends Model
                 ->map(fn(Workplace $w): string|null => __(Str::title($w->name)))
                 ->join(', ');
         });
+    }
+
+    /**
+     * Get the user that owns the resume.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

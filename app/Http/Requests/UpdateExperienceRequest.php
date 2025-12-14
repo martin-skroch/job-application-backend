@@ -9,7 +9,7 @@ class UpdateExperienceRequest extends StoreExperienceRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**

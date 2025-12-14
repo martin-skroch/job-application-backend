@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -44,8 +45,16 @@ class Skill extends Model
      * @return string
      */
     public function getRatingInPercentAttribute(): string
-    {        
+    {
         return round($this->rating / 6 * 100);
+    }
+
+    /**
+     * Get the user that owns the resume.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function resumes(): BelongsToMany

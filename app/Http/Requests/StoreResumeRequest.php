@@ -38,8 +38,8 @@ class StoreResumeRequest extends FormRequest
         $date = Rule::date()->format('Y-m-d');
 
         return [
-            'image' => ['nullable', $image],
             'name' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', $image],
             'address' => ['nullable', 'string', 'max:1000'],
             'post_code' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],

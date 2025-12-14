@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('experiences', function (Blueprint $table) {
             $table->ulid('id');
+            $table->foreignId('user_id')->index();
             $table->string('position');
             $table->string('institution')->nullable();
             $table->string('location')->nullable();

@@ -105,11 +105,6 @@ new class extends Component {
         $this->isEditing = false;
         $this->experienceId = null;
     }
-
-    public function onClose(): void
-    {
-        $this->resetForm();
-    }
 }; ?>
 
 <section class="space-y-6">
@@ -191,7 +186,7 @@ new class extends Component {
             @endforeach
         </div>
 
-        <x-flyout name="experience-modal" wire:close="onClose">
+        <x-flyout name="experience-modal" wire:close="resetForm">
             <flux:heading size="xl" level="1">{{ $isEditing ? __('Edit') : __('Create') }}</flux:heading>
             <flux:subheading size="lg">{{ __('Manage your experiences') }}</flux:subheading>
             <flux:separator variant="subtle" />

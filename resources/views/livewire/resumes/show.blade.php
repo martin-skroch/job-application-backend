@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Requests\UpdateResumeRequest;
+use App\Models\User;
 use App\Models\Resume;
 use Flux\Flux;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -10,10 +11,11 @@ use Livewire\WithFileUploads;
 new class extends Component {
     use WithFileUploads;
 
+    public User $user;
     public Resume $resume;
 
-    public $image = null;
     public ?string $name = null;
+    public $image = null;
     public ?string $address = null;
     public ?string $post_code = null;
     public ?string $location = null;
@@ -25,8 +27,9 @@ new class extends Component {
 
     public function mount(): void
     {
-        $this->image = $this->resume->image;
+        $this->user = auth()->user();
         $this->name = $this->resume->name;
+        $this->image = $this->resume->image;
         $this->address = $this->resume->address;
         $this->post_code = $this->resume->post_code;
         $this->location = $this->resume->location;
@@ -58,6 +61,18 @@ new class extends Component {
         $this->close();
 
         $this->dispatch('resume-saved');
+    }
+
+    public function delete(string $id): void
+    {
+        $experience = $this->user->resumes()->where('id', $id);
+        $experience->delete();
+
+        $this->close();
+
+        session()->flash('status', __('Resume deleted.'));
+
+        $this->redirectRoute('resumes.index', navigate: true);
     }
 
     public function unsetImage(): void {
@@ -113,7 +128,7 @@ new class extends Component {
 
             <div class="grid grid-cols-5 items-start gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthdate') }}</div>
-                <div class="col-span-4">{{ $resume->birthdate?->isoFormat('LL') }}</div>
+                <div class="col-span-4">{{ $resume->birthdate?->isoFormat('LL') ?? '-' }}</div>
             </div>
 
             <div class="grid grid-cols-5 items-start gap-6">
@@ -138,7 +153,7 @@ new class extends Component {
         </div>
     </x-resumes.layout>
 
-    <x-flyout name="resume-modal" variant="flyout" class="w-full lg:w-3/5 xl:w-2/5 space-y-6">
+    <x-flyout name="resume-modal">
         <flux:heading size="xl" level="1">{{ __('Edit') }}</flux:heading>
         <flux:subheading size="lg">{{ __('Manage you resume') }}</flux:subheading>
         <flux:separator variant="subtle" />
@@ -163,17 +178,17 @@ new class extends Component {
 
             <flux:textarea wire:model="address" :label="__('Address')" />
 
-            <div class="grid grid-cols-2 items-start gap-6">
+            <div class="grid min-2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="post_code" :label="__('Post code')" />
                 <flux:input wire:model="location" :label="__('Location')" />
             </div>
 
-            <div class="grid grid-cols-2 items-start gap-6">
+            <div class="grid mminax-2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="birthdate" type="date" :label="__('Birthdate')" />
                 <flux:input wire:model="birthplace" :label="__('Birthplace')" />
             </div>
 
-            <div class="grid grid-cols-2 items-start gap-6">
+            <div class="grid min-2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="phone" :label="__('Phone')" />
                 <flux:input wire:model="email" :label="__('Email')" />
             </div>
@@ -185,5 +200,11 @@ new class extends Component {
                 <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
             </div>
         </form>
+
+        <flux:separator variant="subtle" />
+
+        <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $resume->id }}')" wire:confirm="{{ __('Are you sure you want to delete this resume?') }}">
+            {{ __('Delete') }}
+        </flux:button>
     </x-flyout>
 </section>
