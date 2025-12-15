@@ -66,14 +66,6 @@ class User extends Authenticatable
     /**
      * Get the experiences for user.
      */
-    public function vacancies(): HasMany
-    {
-        return $this->hasMany(Vacancy::class);
-    }
-
-    /**
-     * Get the experiences for user.
-     */
     public function resumes(): HasMany
     {
         return $this->hasMany(Resume::class);
@@ -82,16 +74,8 @@ class User extends Authenticatable
     /**
      * Get the experiences for user.
      */
-    public function experiences(): HasMany
+    public function vacancies(): HasMany
     {
-        return $this->hasMany(Experience::class);
-    }
-
-    /**
-     * Get the experiences for user.
-     */
-    public function skills(): HasMany
-    {
-        return $this->hasMany(Skill::class);
+        return $this->hasMany(Vacancy::class);
     }
 }

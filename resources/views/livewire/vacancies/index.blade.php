@@ -33,7 +33,7 @@ new class extends Component {
 
     public function with(): array
     {
-        $vacancies = Vacancy::paginate();
+        $vacancies = auth()->user()->vacancies()->paginate();
 
         return compact('vacancies');
     }
@@ -74,9 +74,9 @@ new class extends Component {
         $validated = $this->validate($request->rules());
 
         if ($hasId) {
-            Vacancy::where('id', $this->vacancyId)->update($validated);
+            auth()->user()->vacancies()->where('id', $this->vacancyId)->update($validated);
         } else {
-            Vacancy::create($validated);
+            auth()->user()->vacancies()->create($validated);
         }
 
         Flux::modal('vacancy-modal')->close();
@@ -86,7 +86,7 @@ new class extends Component {
 
     public function delete(string $id): void
     {
-        Vacancy::where('id', $this->vacancyId)->delete();
+        auth()->user()->vacancies()->where('id', $this->vacancyId)->delete();
 
         Flux::modal('vacancy-modal')->close();
 

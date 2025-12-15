@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Http\UploadedFile;
+
 class UpdateResumeRequest extends StoreResumeRequest
 {
     /**

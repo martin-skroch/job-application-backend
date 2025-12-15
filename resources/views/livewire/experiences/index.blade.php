@@ -23,6 +23,11 @@ new class extends Component {
     public ?string $description = '';
     public bool $active = false;
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', $this->resume);
+    }
+
     public function open(?string $id = null): void
     {
         $this->resetForm();
@@ -197,7 +202,7 @@ new class extends Component {
                 <flux:input wire:model="institution" :label="__('Institution')" type="text" />
                 <flux:input wire:model="location" :label="__('Location')" type="text" />
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid min-2xl:grid-cols-2 items-start gap-6">
                     <flux:input wire:model="entry" :label="__('Entry')" type="date" required />
 
                     <flux:field>

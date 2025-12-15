@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Resume;
 use App\Http\Requests\StoreResumeRequest;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
@@ -22,6 +23,11 @@ new class extends Component {
     public ?string $email = null;
     public ?string $website = null;
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Resume::class);
+    }
+
     public function with(): array
     {
         $resumes = auth()->user()->resumes()->paginate();
@@ -36,6 +42,8 @@ new class extends Component {
 
     public function open(): void
     {
+        $this->authorize('create', Resume::class);
+
         $this->resetForm();
 
         Flux::modal('resume-modal')->show();
@@ -43,6 +51,8 @@ new class extends Component {
 
     public function create(): void
     {
+        $this->authorize('create', Resume::class);
+
         $validated = $this->validate();
 
         if ($this->image instanceof TemporaryUploadedFile) {
@@ -99,7 +109,6 @@ new class extends Component {
             <flux:button variant="primary" :loading="false" wire:click="open">
                 {{ __('Create Resume') }}
             </flux:button>
-
         </div>
     </div>
 
@@ -108,7 +117,10 @@ new class extends Component {
     <div class="grid lg:grid-cols-2 2xl:grid-cols-3 gap-6">
         @foreach ($resumes as $resume)
         <x-card :href="route('resumes.show', $resume)" wire:key="{{ $resume->id }}" wire:navigate>
-            <x-slot:heading>{{ $resume->name }}</x-slot>
+            <x-slot:heading class="flex items-center gap-3">
+                <flux:avatar size="xs" :src="$resume->image ? Storage::url($resume->image) : null" />
+                {{ $resume->name }}
+            </x-slot>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div class="flex items-center gap-2">

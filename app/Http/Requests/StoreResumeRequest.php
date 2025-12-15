@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\Rules\ImageFile;
 
 class StoreResumeRequest extends FormRequest
 {
@@ -23,6 +24,22 @@ class StoreResumeRequest extends FormRequest
      */
     public function rules(): array
     {
+        return [
+            'name' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', $this->imageRule()],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'post_code' => ['nullable', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'birthdate' => ['nullable', Rule::date()->format('Y-m-d'), 'max:255'],
+            'birthplace' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
+            'website' => ['nullable', 'url:http,https'],
+        ];
+    }
+
+    protected function imageRule(): ImageFile
+    {
         $dimensions = Rule::dimensions()
             ->minWidth(256)
             ->minHeight(256)
@@ -35,19 +52,6 @@ class StoreResumeRequest extends FormRequest
             ->dimensions($dimensions)
         ;
 
-        $date = Rule::date()->format('Y-m-d');
-
-        return [
-            'name' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', $image],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'post_code' => ['nullable', 'string', 'max:255'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'birthdate' => ['nullable', $date, 'max:255'],
-            'birthplace' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email'],
-            'website' => ['nullable', 'url:http,https'],
-        ];
+        return $image;
     }
 }

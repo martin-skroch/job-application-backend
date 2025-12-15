@@ -6,14 +6,17 @@ use App\Casts\Salary;
 use App\Enum\Workplace;
 use App\Enum\SalaryPeriod;
 use Illuminate\Support\Str;
+use App\Policies\VacancyPolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 
+#[UsePolicy(VacancyPolicy::class)]
 class Vacancy extends Model
 {
     /** @use HasFactory<\Database\Factories\VacancyFactory> */

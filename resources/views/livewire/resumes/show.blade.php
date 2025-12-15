@@ -27,9 +27,10 @@ new class extends Component {
 
     public function mount(): void
     {
+        $this->authorize('view', $this->resume);
+
         $this->user = auth()->user();
         $this->name = $this->resume->name;
-        $this->image = $this->resume->image;
         $this->address = $this->resume->address;
         $this->post_code = $this->resume->post_code;
         $this->location = $this->resume->location;
@@ -45,37 +46,47 @@ new class extends Component {
         return (new UpdateResumeRequest())->rules();
     }
 
+    public function open(): void
+    {
+        $this->authorize('update', $this->resume);
+
+        Flux::modal('resume-modal')->show();
+    }
+
     public function save(): void
     {
+        $this->authorize('update', $this->resume);
+
         $validated = $this->validate();
 
         if ($this->image instanceof TemporaryUploadedFile) {
             $validated['image'] = $this->image->store('avatars', 'public');
+        } else {
+            unset($validated['image']);
         }
 
         $this->resume->fill($validated);
         $this->resume->save();
-
-        session()->flash('status', __('Resume updated.'));
 
         $this->close();
 
         $this->dispatch('resume-saved');
     }
 
-    public function delete(string $id): void
+    public function delete(): void
     {
-        $experience = $this->user->resumes()->where('id', $id);
-        $experience->delete();
+        $this->authorize('delete', $this->resume);
+
+        $this->resume->delete();
 
         $this->close();
-
-        session()->flash('status', __('Resume deleted.'));
 
         $this->redirectRoute('resumes.index', navigate: true);
     }
 
-    public function unsetImage(): void {
+    public function unsetImage(): void
+    {
+        $this->resume->image = null;
         $this->image = null;
     }
 
@@ -93,8 +104,8 @@ new class extends Component {
         if ($image instanceof TemporaryUploadedFile) {
             $imageUrl = $image->temporaryUrl();
             $imageName = $image->getClientOriginalName();
-        } elseif ($image !== null) {
-            $imageUrl = Storage::url($image);
+        } elseif ($resume->image !== null) {
+            $imageUrl = Storage::url($resume->image);
             $imageLabel = __('Update the image');
         }
     @endphp
@@ -105,48 +116,50 @@ new class extends Component {
                 {{ __('Saved.') }}
             </x-action-message>
 
-            <flux:modal.trigger name="resume-modal">
-                <flux:button variant="primary">{{ __('Edit') }}</flux:button>
-            </flux:modal.trigger>
+            <flux:button variant="primary" :loading="false" wire:click="open">
+                {{ __('Edit') }}
+            </flux:button>
         </x-slot>
 
         <div class="space-y-6">
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Image') }}</div>
-                <div class="col-span-4"><flux:avatar class="size-24" :src="$imageUrl" /></div>
+                <div class="col-span-4">
+                    <flux:avatar class="xl" :src="$imageUrl" />
+                </div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Name') }}</div>
                 <div class="col-span-4">{{ $resume->name }}</div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Address') }}</div>
                 <div class="col-span-4">{{ $resume->address }}<br>{{ $resume->post_code }} {{ $resume->location }}</div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthdate') }}</div>
                 <div class="col-span-4">{{ $resume->birthdate?->isoFormat('LL') ?? '-' }}</div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthplace') }}</div>
                 <div class="col-span-4">{{ $resume->birthplace ?? '-' }}</div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Phone') }}</div>
                 <div class="col-span-4">{{ $resume->phone ?? '-' }}</div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Email') }}</div>
                 <div class="col-span-4">{{ $resume->email ?? '-' }}</div>
             </div>
 
-            <div class="grid grid-cols-5 items-start gap-6">
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Website') }}</div>
                 <div class="col-span-4">{{ $resume->website ?? '-' }}</div>
             </div>
@@ -155,7 +168,6 @@ new class extends Component {
 
     <x-flyout name="resume-modal">
         <flux:heading size="xl" level="1">{{ __('Edit') }}</flux:heading>
-        <flux:subheading size="lg">{{ __('Manage you resume') }}</flux:subheading>
         <flux:separator variant="subtle" />
 
         <form class="space-y-6" wire:submit="save">
@@ -176,14 +188,14 @@ new class extends Component {
                 <flux:error name="image" />
             </flux:field>
 
-            <flux:textarea wire:model="address" :label="__('Address')" />
+            <flux:textarea wire:model="address" rows="2" :label="__('Address')" />
 
             <div class="grid min-2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="post_code" :label="__('Post code')" />
                 <flux:input wire:model="location" :label="__('Location')" />
             </div>
 
-            <div class="grid mminax-2xl:grid-cols-2 items-start gap-6">
+            <div class="grid min-2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="birthdate" type="date" :label="__('Birthdate')" />
                 <flux:input wire:model="birthplace" :label="__('Birthplace')" />
             </div>
@@ -203,7 +215,7 @@ new class extends Component {
 
         <flux:separator variant="subtle" />
 
-        <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $resume->id }}')" wire:confirm="{{ __('Are you sure you want to delete this resume?') }}">
+        <flux:button class="mb-0" variant="danger" wire:click="delete" wire:confirm="{{ __('Are you sure you want to delete this resume?') }}">
             {{ __('Delete') }}
         </flux:button>
     </x-flyout>
