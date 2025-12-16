@@ -137,9 +137,6 @@ new class extends Component {
             </flux:button>
         </x-slot>
 
-        @dump($deleteImage)
-        @dump($resume->image)
-
         <div class="space-y-6">
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Image') }}</div>
