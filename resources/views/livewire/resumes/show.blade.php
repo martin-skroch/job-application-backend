@@ -66,8 +66,6 @@ new class extends Component {
     {
         $this->authorize('update', $this->resume);
 
-        $storage = Storage::disk('public');
-
         $validated = $this->validate();
 
         if ($this->image instanceof TemporaryUploadedFile) {
@@ -75,8 +73,8 @@ new class extends Component {
             $this->resume->image = $validated['image'];
         }
 
-        if ($this->deleteImage !== null && $storage->exists($this->deleteImage)) {
-            $storage->delete($this->deleteImage);
+        if ($this->deleteImage !== null && Storage::exists($this->deleteImage)) {
+            Storage::delete($this->deleteImage);
             $this->deleteImage = null;
         }
 
