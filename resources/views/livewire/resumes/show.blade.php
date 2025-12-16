@@ -25,12 +25,15 @@ new class extends Component {
     public ?string $email = null;
     public ?string $website = null;
 
+    public ?string $deleteImage = null;
+
     public function mount(): void
     {
         $this->authorize('view', $this->resume);
 
         $this->user = auth()->user();
         $this->name = $this->resume->name;
+        $this->image = $this->resume->image;
         $this->address = $this->resume->address;
         $this->post_code = $this->resume->post_code;
         $this->location = $this->resume->location;
@@ -43,7 +46,13 @@ new class extends Component {
 
     public function rules(): array
     {
-        return (new UpdateResumeRequest())->rules();
+        $rules = (new UpdateResumeRequest())->rules();
+
+        if (is_string($this->image) && strlen($this->image) > 0) {
+            unset($rules['image']);
+        }
+
+        return $rules;
     }
 
     public function open(): void
@@ -57,12 +66,18 @@ new class extends Component {
     {
         $this->authorize('update', $this->resume);
 
+        $storage = Storage::disk('public');
+
         $validated = $this->validate();
 
         if ($this->image instanceof TemporaryUploadedFile) {
             $validated['image'] = $this->image->store('avatars', 'public');
-        } else {
-            unset($validated['image']);
+            $this->resume->image = $validated['image'];
+        }
+
+        if ($this->deleteImage !== null && $storage->exists($this->deleteImage)) {
+            $storage->delete($this->deleteImage);
+            $this->deleteImage = null;
         }
 
         $this->resume->fill($validated);
@@ -86,6 +101,7 @@ new class extends Component {
 
     public function unsetImage(): void
     {
+        $this->deleteImage = $this->resume->image;
         $this->resume->image = null;
         $this->image = null;
     }
@@ -120,6 +136,9 @@ new class extends Component {
                 {{ __('Edit') }}
             </flux:button>
         </x-slot>
+
+        @dump($deleteImage)
+        @dump($resume->image)
 
         <div class="space-y-6">
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
