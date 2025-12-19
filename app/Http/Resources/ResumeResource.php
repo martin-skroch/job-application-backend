@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Experience;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ResumeResource extends JsonResource
@@ -15,9 +16,15 @@ class ResumeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $image = null;
+
+        if (Storage::exists($this->image)) {
+            $image = Storage::url($this->image);
+        }
+
         return [
             'id' => $this->id,
-            'image' => $this->image,
+            'image' => $image,
             'name' => $this->name,
             'address' => $this->address,
             'post_code' => $this->post_code,
