@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Policies\ResumePolicy;
+use Illuminate\Support\Carbon;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\ResumeObserver;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,16 @@ class Resume extends Model
         return [
             'birthdate' => 'date',
         ];
+    }
+
+    /**
+     * Make the birthdate nullable
+     *
+     * @return Carbon|null
+     */
+    public function getBirthdateAttribute($value): Carbon|null
+    {
+        return empty($value) ? null : Carbon::parse($value);
     }
 
     /**
