@@ -16,10 +16,10 @@ class ResumeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $image = null;
+        $image = $this->image;
 
-        if (Storage::exists($this->image)) {
-            $image = Storage::url($this->image);
+        if (Storage::exists($image)) {
+            $image = Storage::url($image);
         }
 
         return [
