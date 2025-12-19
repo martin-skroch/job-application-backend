@@ -42,10 +42,6 @@
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
-
-    a[href] {
-        @apply text-accent-content hover:underline;
-    }
 }
 
 [data-flux-field]:not(ui-radio, ui-checkbox) {
