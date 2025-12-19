@@ -76,6 +76,7 @@ new class extends Component {
     public function delete(string $id): void
     {
         $experience = Experience::where('id', $id);
+
         $experience->delete();
 
         Flux::modal('experience-modal')->close();

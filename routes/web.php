@@ -22,14 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 
     Volt::route('resumes', 'resumes.index')->name('resumes.index');
-    Volt::route('resumes/create', 'resumes.create')->name('resumes.create');
     Volt::route('resumes/{resume}', 'resumes.show')->name('resumes.show');
-    Volt::route('resumes/{resume}/edit', 'resumes.edit')->name('resumes.edit');
-
     Volt::route('resumes/{resume}/experiences', 'experiences.index')->name('resumes.experiences');
     Volt::route('resumes/{resume}/skills', 'skills.index')->name('resumes.skills');
-    Volt::route('resumes/{resume}/certificates', 'resumes.certificates.index')->name('resumes.certificates');
-    Volt::route('resumes/{resume}/languages', 'resumes.languages.index')->name('resumes.languages');
+    Volt::route('resumes/{resume}/api', 'resumes.api')->name('resumes.api');
 
     Volt::route('vacancies', 'vacancies.index')->name('vacancies.index');
     Volt::route('vacancies/create', 'vacancies.create')->name('vacancies.create');
@@ -55,18 +51,6 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 });
-
-Route::get('r/{resume}', function(Request $request, Resume $resume): JsonResponse|ResumeResource {
-
-    $token = $request->bearerToken();
-
-    if (!$resume || $resume->token !== $token) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    return new ResumeResource($resume);
-
-})->name('resume');
 
 Route::get('redirect', function(Request $request): RedirectResponse {
 

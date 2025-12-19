@@ -59,7 +59,7 @@ new class extends Component {
             $validated['image'] = $this->image->store('avatars', 'public');
         }
 
-        $resume = auth()->user()->resumes()->create($validated);
+        $resume = Resume::create($validated);
 
         $this->redirectRoute('resumes.show', $resume, navigate: true);
     }

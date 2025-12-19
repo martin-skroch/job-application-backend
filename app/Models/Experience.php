@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\OwnerScope;
+use App\Observers\ExperienceObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ScopedBy([OwnerScope::class])]
+#[ObservedBy([ExperienceObserver::class])]
 class Experience extends Model
 {
     /** @use HasFactory<\Database\Factories\ExperienceFactory> */
@@ -73,8 +78,8 @@ class Experience extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function resumes(): BelongsToMany
+    public function resume(): BelongsTo
     {
-        return $this->belongsToMany(Resume::class);
+        return $this->belongsTo(Resume::class);
     }
 }

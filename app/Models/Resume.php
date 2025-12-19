@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\OwnerScope;
 use App\Policies\ResumePolicy;
+use App\Models\Scopes\OwnerScope;
+use App\Observers\ResumeObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -11,10 +12,12 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[ScopedBy([OwnerScope::class])]
 #[UsePolicy(ResumePolicy::class)]
+#[ObservedBy([ResumeObserver::class])]
 class Resume extends Model
 {
     /** @use HasFactory<\Database\Factories\ResumeFactory> */
