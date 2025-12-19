@@ -148,35 +148,58 @@ new class extends Component {
                 <div class="col-span-4">{{ $resume->name }}</div>
             </div>
 
+            @if(!empty($resume->address) || !empty($resume->post_code) || !empty($resume->location))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Address') }}</div>
-                <div class="col-span-4">{{ $resume->address }}<br>{{ $resume->post_code }} {{ $resume->location }}</div>
+                <div class="col-span-4">
+                    @empty(!$resume->address){{ $resume->address }}<br>@endempty
+                    {{ $resume->post_code }} {{ $resume->location }}
+                </div>
             </div>
+            @endif
 
+            @if(!empty($resume->birthdate))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthdate') }}</div>
-                <div class="col-span-4">{{ $resume->birthdate?->isoFormat('LL') ?? '-' }}</div>
+                <div class="col-span-4">{{ $resume->birthdate?->isoFormat('LL') }}</div>
             </div>
+            @endif
 
+            @if(!empty($resume->birthplace))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthplace') }}</div>
-                <div class="col-span-4">{{ $resume->birthplace ?? '-' }}</div>
+                <div class="col-span-4">{{ $resume->birthplace }}</div>
             </div>
+            @endif
 
+            @if(!empty($resume->birthplace))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Phone') }}</div>
-                <div class="col-span-4">{{ $resume->phone ?? '-' }}</div>
+                <div class="col-span-4">{{ $resume->phone }}</div>
             </div>
+            @endif
 
+            @if(!empty($resume->email))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Email') }}</div>
-                <div class="col-span-4">{{ $resume->email ?? '-' }}</div>
+                <div class="col-span-4">
+                    <a href="mailto:{{ $resume->email }}" target="_blank" rel="noopener">
+                        {{ $resume->email }}
+                    </a>
+                </div>
             </div>
+            @endif
 
+            @if(!empty($resume->website))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Website') }}</div>
-                <div class="col-span-4">{{ $resume->website ?? '-' }}</div>
+                <div class="col-span-4">
+                    <a href="{{ route('redirect', ['url' => $resume->website]) }}" target="_blank" rel="noopener">
+                        {{ $resume->website }}
+                    </a>
+                </div>
             </div>
+            @endif
         </div>
     </x-resumes.layout>
 
