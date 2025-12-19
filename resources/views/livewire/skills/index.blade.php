@@ -27,7 +27,7 @@ new class extends Component {
             $this->isEditing = true;
             $this->skillId = $id;
 
-            $skill = $this->resume->skills()->where('skills.id', $this->skillId)->firstOrFail();
+            $skill = $this->resume->skills()->where('skills.id', $id)->firstOrFail();
 
             $this->name = $skill->name;
             $this->info = $skill->info;

@@ -183,7 +183,7 @@ new class extends Component {
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Email') }}</div>
                 <div class="col-span-4">
-                    <a href="mailto:{{ $resume->email }}" target="_blank" rel="noopener">
+                    <a class="text-accent-content hover:underline" href="mailto:{{ $resume->email }}" target="_blank" rel="noopener">
                         {{ $resume->email }}
                     </a>
                 </div>
@@ -194,7 +194,7 @@ new class extends Component {
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Website') }}</div>
                 <div class="col-span-4">
-                    <a href="{{ route('redirect', ['url' => $resume->website]) }}" target="_blank" rel="noopener">
+                    <a class="text-accent-content hover:underline" href="{{ route('redirect', ['url' => $resume->website]) }}" target="_blank" rel="noopener">
                         {{ $resume->website }}
                     </a>
                 </div>
