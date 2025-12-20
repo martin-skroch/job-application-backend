@@ -16,13 +16,16 @@ class ResumeSeeder extends Seeder
      */
     public function run(): void
     {
+        $name = 'Martin Skroch';
+        $email = 'moin@martin-skroch.de';
+
         $user = User::factory()->withoutTwoFactor()->create([
-            'name' => 'Martin',
-            'email' => 'moin@martin-skroch.de',
+            'name' => $name,
+            'email' => $email,
         ]);
 
         $resume = $user->resumes()->create([
-            'name' => 'Martin Skroch',
+            'name' => $name,
             'image' => null,
             'address' => null,
             'post_code' => null,
@@ -30,20 +33,79 @@ class ResumeSeeder extends Seeder
             'birthdate' => null,
             'birthplace' => 'Neubrandenburg',
             'phone' => null,
-            'email' => 'moin@martin-skroch.de',
+            'email' => $email,
             'website' => 'https://martin-skroch.de',
         ]);
 
-        // Resume::factory(2)
-        //     ->has(Experience::factory()->count(10))
-        //     ->create()
-        //     ->each(function (Resume $resume) {
-        //         foreach (Skill::factory(10)->create() as $index => $skill) {
-        //             $resume->skills()->attach($skill->id, [
-        //                 'order' => $index + 1,
-        //             ]);
-        //         }
-        //     })
-        // ;
+        $resume->experiences()->create([
+            'user_id' => $user->id,
+            'position' => 'Full Stack Web Developer',
+            'location' => 'Ilmenau (Remote)',
+            'entry' => '2025-08-01',
+            'exit' => null,
+            'active' => true,
+        ]);
+
+        $resume->experiences()->create([
+            'user_id' => $user->id,
+            'position' => 'Full Stack Web Developer',
+            'location' => 'Neubrandenburg',
+            'entry' => '2024-08-01',
+            'exit' => '2025-07-31',
+            'active' => true,
+        ]);
+
+        $resume->experiences()->create([
+            'user_id' => $user->id,
+            'position' => 'Full Stack Web Developer',
+            'location' => 'Neubrandenburg (Hybrid)',
+            'entry' => '2015-10-01',
+            'exit' => '2022-10-31',
+            'active' => true,
+        ]);
+
+        $resume->skills()->create([
+            'user_id' => $user->id,
+            'name' => 'PHP',
+            'rating' => 5,
+            'order' => 1,
+        ]);
+
+        $resume->skills()->create([
+            'user_id' => $user->id,
+            'name' => 'JavaScript',
+            'rating' => 5,
+            'order' => 2,
+        ]);
+
+        $resume->skills()->create([
+            'user_id' => $user->id,
+            'name' => 'Dart',
+            'info' => 'Flutter',
+            'rating' => 3,
+            'order' => 3,
+        ]);
+
+        $resume->skills()->create([
+            'user_id' => $user->id,
+            'name' => 'MySQL',
+            'rating' => 3,
+            'order' => 4,
+        ]);
+
+        $resume->skills()->create([
+            'user_id' => $user->id,
+            'name' => 'HTML',
+            'rating' => 6,
+            'order' => 5,
+        ]);
+
+        $resume->skills()->create([
+            'user_id' => $user->id,
+            'name' => 'CSS',
+            'info' => 'PostCSS, SASS, LESS',
+            'rating' => 6,
+            'order' => 6,
+        ]);
     }
 }

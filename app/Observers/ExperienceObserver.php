@@ -12,6 +12,8 @@ class ExperienceObserver
      */
     public function creating(Experience $experience): void
     {
-        $experience->user_id = Auth::user()->id;
+        if ($experience->user_id === null) {
+            $experience->user_id = Auth::user()?->id;
+        }
     }
 }

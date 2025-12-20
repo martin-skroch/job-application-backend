@@ -12,6 +12,8 @@ class SkillObserver
      */
     public function creating(Skill $skill): void
     {
-        $skill->user_id = Auth::user()->id;
+        if ($skill->user_id === null) {
+            $skill->user_id = Auth::user()?->id;
+        }
     }
 }
