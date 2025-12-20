@@ -15,9 +15,9 @@ new class extends Component {
     public ?string $experienceId = null;
 
     public string $position = '';
-    public string $institution = '';
-    public string $location = '';
-    public string $type = '';
+    public ?string $institution = '';
+    public ?string $location = '';
+    public ?string $type = '';
     public string $entry = '';
     public ?string $exit = null;
     public ?string $description = '';
