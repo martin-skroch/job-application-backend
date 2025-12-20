@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Observers\SkillObserver;
+use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,9 +12,8 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[ScopedBy([OwnerScope::class])]
+#[ScopedBy([OwnerScope::class, OrderScope::class])]
 #[ObservedBy([SkillObserver::class])]
 class Skill extends Model
 {
@@ -30,7 +30,8 @@ class Skill extends Model
     protected $fillable = [
         'name',
         'info',
-        'rating'
+        'rating',
+        'order',
     ];
 
     /**
@@ -42,6 +43,7 @@ class Skill extends Model
     {
         return [
             'rating' => 'integer',
+            'order' => 'integer',
         ];
     }
 
@@ -63,8 +65,8 @@ class Skill extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function resumes(): BelongsToMany
+    public function resume(): BelongsTo
     {
-        return $this->belongsToMany(Resume::class);
+        return $this->belongsTo(Resume::class);
     }
 }

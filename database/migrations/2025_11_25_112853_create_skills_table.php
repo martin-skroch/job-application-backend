@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('skills', function (Blueprint $table) {
             $table->ulid('id');
             $table->foreignId('user_id')->index();
+            $table->foreignId('resume_id')->index();
             $table->string('name');
             $table->string('info')->nullable();
             $table->tinyInteger('rating')->unsigned()->nullable();
+            $table->smallInteger('order')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ScopedBy([OwnerScope::class])]
 #[UsePolicy(ResumePolicy::class)]
@@ -75,16 +75,13 @@ class Resume extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function experiences(): BelongsToMany
+    public function experiences(): HasMany
     {
-        return $this->belongsToMany(Experience::class);
+        return $this->hasMany(Experience::class);
     }
 
-    public function skills(): BelongsToMany
+    public function skills(): HasMany
     {
-        return $this->belongsToMany(Skill::class)
-            ->withPivot('order')
-            ->orderByPivot('order','asc');
-        ;
+        return $this->hasMany(Skill::class);
     }
 }

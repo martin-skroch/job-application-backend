@@ -17,25 +17,26 @@ new class extends Component {
     public string $name = '';
     public ?string $info = '';
     public ?int $rating = null;
-    public ?int $order = null;
+    public string $order = '';
 
     public function open(?string $id = null): void
     {
         $this->resetForm();
 
-        if (Str::isUlid($id)) {
-            $this->isEditing = true;
+        $this->isEditing = Str::isUlid($id);
+
+        if ($this->isEditing) {
             $this->skillId = $id;
 
-            $skill = $this->resume->skills()->where('skills.id', $id)->firstOrFail();
+            $skill = $this->resume->skills()->where('id', $id)->firstOrFail();
 
             $this->name = $skill->name;
             $this->info = $skill->info;
             $this->rating = $skill->rating;
-            $this->order = $skill->pivot->order;
+            $this->order = $skill->order;
         } else {
-            $this->isEditing = false;
-            $this->order = $this->resume->skills()->count();
+            $lastOrderNumber = $this->resume->skills()->select('order')->latest('order')->first()?->order;
+            $this->order = $lastOrderNumber + 1;
         }
 
         Flux::modal('skill-modal')->show();
@@ -43,26 +44,12 @@ new class extends Component {
 
     public function save(): void
     {
-        $hasId = $this->skillId !== null && Str::isUlid($this->skillId);
-        $request = $hasId ? new UpdateSkillRequest() : new StoreSkillRequest();
-
-        $validated = $this->validate($request->rules());
-
-        unset($validated['order']);
-
-        if ($hasId) {
-            $skill = $this->resume->skills()->where('id', $this->skillId);
-            $skill->update($validated);
-
-            $this->resume->skills()->updateExistingPivot($this->skillId, [
-                'order' => $this->order,
-            ]);
+        if (Str::isUlid($this->skillId)) {
+            $validated = $this->validate((new UpdateSkillRequest())->rules());
+            $this->resume->skills()->where('id', $this->skillId)->update($validated);
         } else {
-            $skill = Skill::create($validated);
-
-            $this->resume->skills()->attach($skill, [
-                'order' => $this->order,
-            ]);
+            $validated = $this->validate((new StoreSkillRequest())->rules());
+            $this->resume->skills()->create($validated);
         }
 
         Flux::modal('skill-modal')->close();
@@ -84,17 +71,13 @@ new class extends Component {
             'name',
             'info',
             'rating',
+            'order',
         ]);
 
         $this->resetErrorBag();
 
         $this->isEditing = false;
         $this->skillId = null;
-    }
-
-    public function onClose(): void
-    {
-        $this->resetForm();
     }
 }; ?>
 <section class="space-y-6">
@@ -121,7 +104,7 @@ new class extends Component {
                     </div>
 
                     <div class="col-span-1 text-end font-mono">
-                        <flux:badge size="sm">{{ $skill->pivot->order }}</flux:badge>
+                        <flux:badge size="sm">{{ $skill->order }}</flux:badge>
                     </div>
 
                     <div class="col-span-1 text-end">
@@ -132,8 +115,8 @@ new class extends Component {
             @endforeach
         </div>
 
-        <x-flyout name="skill-modal" wire:close="onClose">
-            <flux:heading size="xl" level="1">{{ $isEditing ? __('Edit') : __('Create') }}</flux:heading>
+        <x-flyout name="skill-modal" wire:close="resetForm">
+            <flux:heading size="xl" level="1">{{ Str::isUlid($skillId) ? __('Edit') : __('Create') }}</flux:heading>
             <flux:subheading size="lg">{{ __('Manage your skills') }}</flux:subheading>
             <flux:separator variant="subtle" />
 

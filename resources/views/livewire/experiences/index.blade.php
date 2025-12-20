@@ -57,15 +57,14 @@ new class extends Component {
     {
         $hasId = $this->experienceId !== null && Str::isUlid($this->experienceId);
         $request = $hasId ? new UpdateExperienceRequest() : new StoreExperienceRequest();
+        $experiences = $this->resume->experiences();
 
         $validated = $this->validate($request->rules());
 
         if ($hasId) {
-            $experience = $this->resume->experiences()->where('id', $this->experienceId);
-            $experience->update($validated);
+            $experiences->where('id', $this->experienceId)->update($validated);
         } else {
-            $experience = Experience::create($validated);
-            $this->resume->experiences()->attach($experience);
+            $experiences->create($validated);
         }
 
         Flux::modal('experience-modal')->close();
@@ -193,8 +192,7 @@ new class extends Component {
         </div>
 
         <x-flyout name="experience-modal" wire:close="resetForm">
-            <flux:heading size="xl" level="1">{{ $isEditing ? __('Edit') : __('Create') }}</flux:heading>
-            <flux:subheading size="lg">{{ __('Manage your experiences') }}</flux:subheading>
+            <flux:heading size="xl" level="1">{{ $isEditing ? __('Edit Experience') : __('Add Experience') }}</flux:heading>
             <flux:separator variant="subtle" />
 
             <form class="space-y-6" wire:submit="save">
@@ -203,7 +201,7 @@ new class extends Component {
                 <flux:input wire:model="institution" :label="__('Institution')" type="text" />
                 <flux:input wire:model="location" :label="__('Location')" type="text" />
 
-                <div class="grid min-2xl:grid-cols-2 items-start gap-6">
+                <div class="grid 2xl:grid-cols-2 items-start gap-6">
                     <flux:input wire:model="entry" :label="__('Entry')" type="date" required />
 
                     <flux:field>
