@@ -172,7 +172,7 @@ new class extends Component {
             </div>
             @endif
 
-            @if(!empty($resume->birthplace))
+            @if(!empty($resume->phone))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Phone') }}</div>
                 <div class="col-span-4">{{ $resume->phone }}</div>
