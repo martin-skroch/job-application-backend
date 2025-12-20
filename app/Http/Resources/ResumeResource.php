@@ -18,7 +18,7 @@ class ResumeResource extends JsonResource
     {
         $image = $this->image;
 
-        if (Storage::exists($image)) {
+        if ($image !== null && Storage::exists($image)) {
             $image = Storage::url($image);
         }
 
