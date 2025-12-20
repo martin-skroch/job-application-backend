@@ -24,8 +24,8 @@ class StoreSkillRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'info' => ['nullable', 'string', 'max:255'],
-            'rating' => ['nullable', 'numeric', 'min:0', 'max:10'],
-            'order' => ['nullable', 'integer', 'min:0'],
+            'rating' => ['nullable', 'numeric', 'min:0', 'max:6'],
+            'order' => ['nullable', 'integer', 'min:-32768', 'max:32767'],
         ];
     }
 }
