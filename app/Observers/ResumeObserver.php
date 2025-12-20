@@ -13,8 +13,11 @@ class ResumeObserver
      */
     public function creating(Resume $resume): void
     {
-        $resume->user_id = Auth::user()->id;
         $resume->token = $this->generateToken();
+
+        if ($resume->user_id === null) {
+            $resume->user_id = Auth::user()?->id;
+        }
     }
 
     /**
