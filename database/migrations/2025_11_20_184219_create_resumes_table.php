@@ -24,7 +24,8 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('website')->nullable();
-            $table->string('token', 64)->nullable()->unique();
+            $table->boolean('api_active')->default(false);
+            $table->string('api_token', 64)->nullable()->unique();
             $table->timestamps();
             $table->softDeletes();
         });

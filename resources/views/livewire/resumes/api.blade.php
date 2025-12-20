@@ -1,36 +1,44 @@
 <?php
 
-use App\Http\Requests\UpdateResumeRequest;
-use App\Models\User;
 use App\Models\Resume;
-use Flux\Flux;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Volt\Component;
-use Livewire\WithFileUploads;
 
 new class extends Component {
-    use WithFileUploads;
-
     public Resume $resume;
+
+    public bool $apiActive = true;
+    public ?string $apiToken = null;
 
     public function mount(): void
     {
         $this->authorize('view', $this->resume);
+
+        $this->apiActive = $this->resume->api_active;
+        $this->apiToken = $this->resume->api_token;
+    }
+
+    public function save()
+    {
+        $this->resume->update([
+            'api_active' => $this->apiActive
+        ]);
     }
 }; ?>
 <section class="space-y-6">
     <x-resumes.layout :resume="$resume" :heading="__('Overview')" :subheading="__('Manage your personal data.')">
-        <table class="border border-gray-300">
-            <tbody>
-                <tr>
-                    <th class="border border-gray-300 p-2 text-left">{{ __('URL') }}</th>
-                    <td class="border border-gray-300 p-2 text-left"><code>{{ route('api.resume', $resume) }}</code></td>
-                </tr>
-                <tr>
-                    <th class="border border-gray-300 p-2 text-left">{{ __('Token') }}</th>
-                    <td class="border border-gray-300 p-2 text-left"><code>{{ $resume->token }}</code></td>
-                </tr>
-            </tbody>
-        </table>
+
+        <div class="space-y-4 -mt-4">
+            <flux:switch wire:change="save" wire:model.live="apiActive" :label="__('Enable API Endpoint')" align="left" />
+
+            @if ($apiActive)
+                <flux:input :value="route('api.resume', $resume)" readonly copyable />
+                <flux:input :value="$apiToken" readonly copyable />
+
+                <h3>{{ __('Example') }}</h3>
+                <pre class="bg-zinc-700 border border-zinc-500 rounded-md p-6">curl {{ route('api.resume', $resume) }} \
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer {{ $apiToken }}"</pre>
+            @endif
+        </div>
     </x-resumes.layout>
 </section>

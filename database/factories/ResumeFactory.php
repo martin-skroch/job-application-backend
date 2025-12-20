@@ -31,7 +31,8 @@ class ResumeFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => Str::slug($name) . '@' . $domain,
             'website' => 'https://' . $domain,
-            'token' => Str::random(64),
+            'api_active' => false,
+            'api_token' => Str::random(64),
         ];
     }
 }

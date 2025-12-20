@@ -7,10 +7,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Resources\ResumeResource;
 
 Route::get('resume/{resume}', function(Request $request, Resume $resume): JsonResponse|ResumeResource {
+    if (!$resume->api_active) {
+        return response()->json(['message' => 'Not found'], 404);
+    }
 
-    $token = $request->bearerToken();
+    $apiToken = $request->bearerToken();
 
-    if (!$resume || $resume->token !== $token) {
+    if (!$resume || $resume->api_token !== $apiToken) {
         return response()->json(['message' => 'Unauthorized'], 401);
     }
 

@@ -43,6 +43,7 @@ class Resume extends Model
         'phone',
         'email',
         'website',
+        'api_active'
     ];
 
     /**
@@ -54,6 +55,7 @@ class Resume extends Model
     {
         return [
             'birthdate' => 'date',
+            'api_active' => 'boolean',
         ];
     }
 
