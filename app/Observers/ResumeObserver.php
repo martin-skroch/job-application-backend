@@ -20,17 +20,6 @@ class ResumeObserver
         }
     }
 
-    /**
-     * Handle the Resume "updated" event.
-     */
-    public function retrieved(Resume $resume): void
-    {
-        if ($resume->api_token === null) {
-            $resume->api_token = $this->generateToken();
-            $resume->save();
-        }
-    }
-
     private function generateToken(): string
     {
         return Str::random(64);
