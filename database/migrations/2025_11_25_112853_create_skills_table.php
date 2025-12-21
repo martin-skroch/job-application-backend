@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('skills', function (Blueprint $table) {
-            $table->ulid('id');
+            $table->ulid('id')->primary();
             $table->foreignId('user_id')->index();
             $table->foreignUlid('resume_id')->index();
             $table->string('name');
