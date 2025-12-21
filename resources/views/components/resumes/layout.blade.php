@@ -19,8 +19,8 @@
                 {{ __('Skills') }}
             </flux:navlist.item>
 
-            <flux:navlist.item :href="route('resumes.api', $resume)" :current="request()->routeIs('resumes.api')" wire:navigate>
-                {{ __('API') }}
+            <flux:navlist.item :href="route('resumes.settings', $resume)" :current="request()->routeIs('resumes.settings')" wire:navigate>
+                {{ __('Settings') }}
             </flux:navlist.item>
         </flux:navlist>
     </div>

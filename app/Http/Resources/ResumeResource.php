@@ -34,8 +34,8 @@ class ResumeResource extends JsonResource
             'phone' => $this->phone,
             'email' => $this->email,
             'website' => $this->website,
-            'experiences' => ExperienceResource::collection($this->experiences),
-            'skills' => SkillResource::collection($this->skills),
+            'experiences' => $this->whenCounted('experiences'),
+            'skills' => $this->whenCounted('skills'),
         ];
     }
 }

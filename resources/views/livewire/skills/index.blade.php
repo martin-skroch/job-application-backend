@@ -88,7 +88,7 @@ new class extends Component {
             </flux:button>
         </x-slot>
 
-        <div class="space-y-4">
+        <div class="space-y-2 -mt-4">
             @foreach ($resume->skills as $skill)
                 <div class="grid grid-cols-4 items-center">
                     <div class="col-span-1 flex gap-2 items-center">

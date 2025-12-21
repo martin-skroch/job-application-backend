@@ -1,14 +1,10 @@
 <?php
 
-use App\Models\Resume;
 use Livewire\Volt\Volt;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
-use App\Http\Resources\ResumeResource;
-use Illuminate\Support\Facades\Redirect;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,7 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('resumes/{resume}', 'resumes.show')->name('resumes.show');
     Volt::route('resumes/{resume}/experiences', 'experiences.index')->name('resumes.experiences');
     Volt::route('resumes/{resume}/skills', 'skills.index')->name('resumes.skills');
-    Volt::route('resumes/{resume}/api', 'resumes.api')->name('resumes.api');
+    Volt::route('resumes/{resume}/settings', 'resumes.settings')->name('resumes.settings');
 
     Volt::route('vacancies', 'vacancies.index')->name('vacancies.index');
     Volt::route('vacancies/create', 'vacancies.create')->name('vacancies.create');

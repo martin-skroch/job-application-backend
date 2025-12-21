@@ -1,22 +1,12 @@
 <?php
 
-use App\Models\Resume;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
-use App\Http\Resources\ResumeResource;
+use App\Http\Controllers\Api\ResumesController;
+use App\Http\Controllers\Api\ExperiencesController;
+use App\Http\Controllers\Api\SkillsController;
 
-Route::get('resume/{resume}', function(Request $request, Resume $resume): JsonResponse|ResumeResource {
-    if (!$resume->api_active) {
-        return response()->json(['message' => 'Not found'], 404);
-    }
-
-    $apiToken = $request->bearerToken();
-
-    if (!$resume || $resume->api_token !== $apiToken) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    return new ResumeResource($resume);
-
-})->name('api.resume');
+Route::group(['as' => 'api.'], function () {
+    Route::get('resume/{resume}', ResumesController::class)->name('resume');
+    Route::get('resume/{resume}/experiences', ExperiencesController::class)->name('resume.experiences');
+    Route::get('resume/{resume}/skills', SkillsController::class)->name('resume.skills');
+});

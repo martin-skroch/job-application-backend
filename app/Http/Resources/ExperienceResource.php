@@ -34,6 +34,7 @@ class ExperienceResource extends JsonResource
             'entry' => $entry,
             'exit' => $exit,
             'duration' => $this->duration,
+            'skills' => SkillResource::collection($this->skills),
             'description' => $this->description,
         ];
     }
