@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[ScopedBy([OwnerScope::class, OrderScope::class])]
 #[ObservedBy([SkillObserver::class])]
@@ -68,5 +69,10 @@ class Skill extends Model
     public function resume(): BelongsTo
     {
         return $this->belongsTo(Resume::class);
+    }
+
+    public function experiences(): BelongsToMany
+    {
+        return $this->belongsToMany(Experience::class);
     }
 }
