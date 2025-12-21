@@ -2,12 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Experience;
-use App\Models\Resume;
-use App\Models\Skill;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Skill;
+use RuntimeException;
+use App\Models\Resume;
+use App\Models\Experience;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class ResumeSeeder extends Seeder
 {
@@ -16,96 +18,41 @@ class ResumeSeeder extends Seeder
      */
     public function run(): void
     {
-        $name = 'Martin Skroch';
-        $email = 'moin@martin-skroch.de';
+        $json = File::get(database_path('data/resume.json'));
+        $data = json_decode($json, true);
+
+        $name = $data['name'];
+        $email = $data['email'];
 
         $user = User::factory()->withoutTwoFactor()->create([
             'name' => $name,
             'email' => $email,
         ]);
 
-        $resume = $user->resumes()->create([
+        $resume = $user->resumes()->create(attributes: [
             'name' => $name,
-            'image' => null,
-            'address' => null,
-            'post_code' => null,
-            'location' => null,
-            'birthdate' => null,
-            'birthplace' => 'Neubrandenburg',
-            'phone' => null,
             'email' => $email,
-            'website' => 'https://martin-skroch.de',
+            'birthplace' => $data['birthplace'],
+            'website' => $data['website'],
         ]);
 
-        $resume->experiences()->create([
-            'user_id' => $user->id,
-            'position' => 'Full Stack Web Developer',
-            'location' => 'Ilmenau (Remote)',
-            'entry' => '2025-08-01',
-            'exit' => null,
-            'active' => true,
-        ]);
+        $skills = collect();
 
-        $resume->experiences()->create([
-            'user_id' => $user->id,
-            'position' => 'Full Stack Web Developer',
-            'location' => 'Neubrandenburg',
-            'entry' => '2024-08-01',
-            'exit' => '2025-07-31',
-            'active' => true,
-        ]);
+        foreach($data['skills'] as $order => $skill) {
+            $skill = $resume->skills()->create(array_merge($skill, [
+                'user_id' => $resume->user->id,
+                'order' => $order,
+            ]));
 
-        $resume->experiences()->create([
-            'user_id' => $user->id,
-            'position' => 'Full Stack Web Developer',
-            'location' => 'Neubrandenburg (Hybrid)',
-            'entry' => '2015-10-01',
-            'exit' => '2022-10-31',
-            'active' => true,
-        ]);
+            $skills->push($skill->id);
+        }
 
-        $resume->skills()->create([
-            'user_id' => $user->id,
-            'name' => 'PHP',
-            'rating' => 5,
-            'order' => 1,
-        ]);
+        foreach($data['experiences'] as $experience) {
+            $experience = $resume->experiences()->create(array_merge($experience, [
+                'user_id' => $resume->user->id,
+            ]));
 
-        $resume->skills()->create([
-            'user_id' => $user->id,
-            'name' => 'JavaScript',
-            'rating' => 5,
-            'order' => 2,
-        ]);
-
-        $resume->skills()->create([
-            'user_id' => $user->id,
-            'name' => 'Dart',
-            'info' => 'Flutter',
-            'rating' => 3,
-            'order' => 3,
-        ]);
-
-        $resume->skills()->create([
-            'user_id' => $user->id,
-            'name' => 'MySQL',
-            'rating' => 3,
-            'order' => 4,
-        ]);
-
-        $resume->skills()->create([
-            'user_id' => $user->id,
-            'name' => 'HTML',
-            'rating' => 6,
-            'order' => 5,
-        ]);
-
-        $resume->skills()->create([
-            'user_id' => $user->id,
-            'name' => 'CSS',
-            'info' => 'PostCSS, SASS, LESS',
-            'rating' => 6,
-            'order' => 6,
-        ]);
+            $experience->skills()->syncWithoutDetaching($skills->shuffle()->take(4));
+        }
     }
 }

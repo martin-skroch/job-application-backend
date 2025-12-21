@@ -1,0 +1,44 @@
+{
+    "name": "Martin Skroch",
+    "email": "moin@martin-skroch.de",
+    "birthplace": "Neubrandenburg",
+    "website": "https://martin-skroch.de",
+    "experiences": [
+        {
+            "position": "Full Stack Web Developer",
+            "location": "Ilmenau (Remote)",
+            "entry": "2025-08-01",
+            "exit": null,
+            "active": true
+        },
+        {
+            "position": "Full Stack Web Developer",
+            "location": "Neubrandenburg",
+            "entry": "2024-08-01",
+            "exit": "2025-07-31",
+            "active": true
+        },
+        {
+            "position": "Full Stack Web Developer",
+            "location": "Neubrandenburg (Hybrid)",
+            "entry": "2015-10-01",
+            "exit": "2022-10-31",
+            "active": true
+        }
+    ],
+    "skills": [
+        { "name": "PHP", "rating": 5 },
+        { "name": "JavaScript", "rating": 5 },
+        { "name": "Dart", "rating": 3 },
+        { "name": "MySQL", "rating": 3 },
+        { "name": "HTML", "rating": 6 },
+        { "name": "CSS", "rating": 6 },
+        { "name": "Laravel", "rating": 5 },
+        { "name": "Symfony", "rating": 3 },
+        { "name": "Vue.js", "rating": 4 },
+        { "name": "Nuxt", "rating": 4 },
+        { "name": "Tailwind CSS", "rating": 5 },
+        { "name": "Bootstrap", "rating": 5 },
+        { "name": "jQuery", "rating": 4 }
+    ]
+}
