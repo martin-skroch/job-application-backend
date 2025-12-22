@@ -7,14 +7,32 @@
                 <flux:navlist.item :href="route('two-factor.show')" :current="request()->routeIs('two-factor.show')" wire:navigate>{{ __('Two-Factor Auth') }}</flux:navlist.item>
             @endif
             <flux:navlist.item :href="route('appearance.edit')" :current="request()->routeIs('appearance.edit')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
+            <flux:navlist.item :href="route('tokens.edit')" :current="request()->routeIs('tokens.edit')" wire:navigate>{{ __('Personal access tokens') }}</flux:navlist.item>
         </flux:navlist>
     </div>
 
     <flux:separator class="md:hidden" />
 
     <div class="flex-1 self-stretch max-md:pt-6">
-        <flux:heading>{{ $heading ?? '' }}</flux:heading>
-        <flux:subheading>{{ $subheading ?? '' }}</flux:subheading>
+        <div class="flex items-center">
+
+            <div class="grow">
+                @isset($heading)
+                <flux:heading>{{ $heading }}</flux:heading>
+                @endisset
+
+                @isset($subheading)
+                <flux:subheading>{{ $subheading }}</flux:subheading>
+                @endisset
+            </div>
+
+            @if(isset($actions) && !empty($actions))
+            <div class="flex items-center gap-6">
+                {{ $actions }}
+            </div>
+            @endif
+
+        </div>
 
         <div class="mt-5 w-full max-w-lg">
             {{ $slot }}
