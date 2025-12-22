@@ -27,6 +27,7 @@ class ResumeSeeder extends Seeder
         $user = User::factory()->withoutTwoFactor()->create([
             'name' => $name,
             'email' => $email,
+            'timezone' => $data['timezone'],
         ]);
 
         $resume = $user->resumes()->create(attributes: [
