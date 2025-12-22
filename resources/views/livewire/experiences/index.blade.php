@@ -6,7 +6,6 @@ use App\Models\Experience;
 use App\Models\Resume;
 use Flux\Flux;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Collection;
 use Livewire\Volt\Component;
 
 new class extends Component {
@@ -72,7 +71,7 @@ new class extends Component {
             $experience = $experiences->create($validated);
         }
 
-        $experience->skills()->syncWithoutDetaching($skills);
+        $experience->skills()->sync($skills);
 
         Flux::modal('experience-modal')->close();
 
