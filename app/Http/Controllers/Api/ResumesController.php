@@ -16,18 +16,6 @@ class ResumesController extends Controller
      */
     public function __invoke(Request $request, Resume $resume): JsonResource|JsonResponse
     {
-        if (!$resume->api_active) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
-
-        $apiToken = $request->bearerToken();
-
-        if (!$resume || $resume->api_token !== $apiToken) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        $resource = $resume->loadCount('experiences', 'skills');
-
-        return new ResumeResource($resource);
+        return new ResumeResource($resume->loadCount('experiences', 'skills'));
     }
 }

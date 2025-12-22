@@ -17,18 +17,6 @@ class SkillsController extends Controller
      */
     public function __invoke(Request $request, Resume $resume): JsonResource|JsonResponse
     {
-        if (!$resume->api_active) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
-
-        $apiToken = $request->bearerToken();
-
-        if (!$resume || $resume->api_token !== $apiToken) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        $resource = $resume->skills;
-
-        return SkillResource::collection($resource);
+        return SkillResource::collection($resume->skills);
     }
 }
