@@ -79,6 +79,14 @@ new class extends Component {
         $this->isEditing = false;
         $this->skillId = null;
     }
+
+    public function updateOrder(array $items): void
+    {
+        foreach ($items as $item) {
+            $skill = Skill::where('id', $item['id'])->where('resume_id', $this->resume->id);
+            $skill->update(['order' => $item['order']]);
+        }
+    }
 }; ?>
 <section class="space-y-6">
     <x-resumes.layout :resume="$resume" :heading="__('Skills')" :subheading="__('Manage your skills.')">
@@ -88,11 +96,19 @@ new class extends Component {
             </flux:button>
         </x-slot>
 
-        <div class="space-y-2 -mt-4">
+        <div class="flex flex-col" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
+
             @foreach ($resume->skills as $skill)
-                <div class="grid grid-cols-4 items-center">
+            <flux:callout class="border-0 not-first:rounded-t-none not-last:rounded-b-none" :data-id="$skill->id" x-sort:item inline>
+
+                <div class="grid grid-cols-4 items-center text-sm">
                     <div class="col-span-1 flex gap-2 items-center">
-                        <span>{{ $skill->name }}</span>
+                        <button class="cursor-move me-2 text-zinc-500 hover:text-zinc-300" x-sort:handle>
+                            <flux:icon name="chevron-up-down" />
+                        </button>
+
+                        <span class="font-medium">{{ $skill->name }}</span>
+
                         @if($skill->info)
                             <small class="text-zinc-500">({{ $skill->info }})</small>
                         @endif
@@ -100,7 +116,7 @@ new class extends Component {
 
                     <div class="col-span-1 text-center">
                         <div class="bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden relative">
-                            <div class="bg-[var(--color-accent)] w-[var(--width)] h-4" style="--width:{{ $skill->ratingInPercent }}%"></div>
+                            <div class="bg-(--color-accent) w-(--width) h-4" style="--width:{{ $skill->ratingInPercent }}%"></div>
                             <div class="absolute inset-0 text-[0.65rem] font-mono flex items-center justify-center"></div>
                         </div>
                     </div>
@@ -110,11 +126,12 @@ new class extends Component {
                     </div>
 
                     <div class="col-span-1 text-end">
-                        <flux:button variant="primary" size="sm" wire:click="open('{{ $skill->id }}')">{{ __('Edit') }}</flux:button>
+                        <flux:button variant="filled" size="sm" wire:click="open('{{ $skill->id }}')">{{ __('Edit') }}</flux:button>
                     </div>
                 </div>
-                <flux:separator variant="subtle" />
+            </flux:callout>
             @endforeach
+
         </div>
 
         <x-flyout name="skill-modal" wire:close="resetForm">
