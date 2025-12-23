@@ -18,7 +18,7 @@ new class extends Component {
     {
         $this->validate([
             'name' => ['required', 'string', 'min:3', 'max:255'],
-            'expiredAt' => ['date', 'after:today'],
+            'expiredAt' => ['nullable', 'date', 'after:today'],
         ]);
 
         $expiredAt = $this->expiredAt;

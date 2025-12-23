@@ -131,7 +131,7 @@ new class extends Component {
             @foreach ($resume->experiences as $experience)
                 <div class="grid grid-cols-5{{ !$experience->active ? ' opacity-60' : '' }}">
 
-                    <div class="col-span-1 px-8 pb-12 space-y-2 text-end">
+                    <div class="col-span-1 px-8 pb-12 space-y-3 text-end">
                         <div class="inline-flex items-center gap-2 whitespace-nowrap font-mono">
                             {{ $experience->entry->format('m/Y') }} -
                             {{ $experience->exit?->format('m/Y') ?? __('Today') }}
@@ -155,19 +155,18 @@ new class extends Component {
                             <flux:button size="xs"
                                 wire:click="toggleActive('{{ $experience->id }}', {{ $experience->active }})">
                                 <span class="me-1">{{ $experience->active ? __('Active') : __('Inactive') }}</span>
-                                <span
-                                    class="inline-flex size-2 rounded-full {{ $experience->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
+                                <span class="inline-flex size-2 rounded-full {{ $experience->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
                             </flux:button>
                         </flux:button.group>
                     </div>
 
-                    <div class="col-span-4 px-8 pb-12 space-y-2 relative">
+                    <div class="col-span-4 px-8 pb-12 space-y-3 relative">
                         <h2 class="text-xl relative">
                             {{ $experience->position }}
                             <span class="absolute size-4 rounded-full bg-zinc-700 -left-10 top-1.5"></span>
                         </h2>
 
-                        <div class="text-zinc-400 space-y-2">
+                        <div class="text-zinc-400 space-y-3">
                             @if ($experience->type)
                                 <div class="flex items-center gap-2 text-sm">
                                     <div class="font-bold">{{ __('Type') }}:</div>
@@ -188,7 +187,7 @@ new class extends Component {
                                 </div>
                             @endif
 
-                            <div class="flex gap-2">
+                            <div class="flex flex-wrap gap-2">
                                 @foreach ($experience->skills as $skill)
                                 <flux:badge size="sm">{{ $skill->name }}</flux:badge>
                                 @endforeach
