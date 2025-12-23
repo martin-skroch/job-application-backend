@@ -93,7 +93,9 @@ new class extends Component {
                 <div class="grid grid-cols-4 items-center">
                     <div class="col-span-1 flex gap-2 items-center">
                         <span>{{ $skill->name }}</span>
-                        @if($skill->info) <small class="text-zinc-500">({{ $skill->info }})</small>@endif
+                        @if($skill->info)
+                            <small class="text-zinc-500">({{ $skill->info }})</small>
+                        @endif
                     </div>
 
                     <div class="col-span-1 text-center">
@@ -141,8 +143,7 @@ new class extends Component {
             @if ($skillId)
                 <flux:separator variant="subtle" />
 
-                <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $skillId }}')"
-                    wire:confirm="{{ __('Are you sure you want to delete this skill?') }}">
+                <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $skillId }}')" wire:confirm="{{ __('Are you sure you want to delete this skill?') }}">
                     {{ __('Delete') }}
                 </flux:button>
             @endif
