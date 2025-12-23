@@ -96,10 +96,10 @@ new class extends Component {
             </flux:button>
         </x-slot>
 
-        <div class="flex flex-col" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
+        <div class="flex flex-col gap-px" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
 
             @foreach ($resume->skills as $skill)
-            <flux:callout class="border-0 not-first:rounded-t-none not-last:rounded-b-none" :data-id="$skill->id" x-sort:item inline>
+            <flux:callout class="border-0 not-first:rounded-t-none not-last:rounded-b-none p-0!" :data-id="$skill->id" x-sort:item inline>
 
                 <div class="grid grid-cols-4 items-center text-sm">
                     <div class="col-span-1 flex gap-2 items-center">
@@ -116,8 +116,8 @@ new class extends Component {
 
                     <div class="col-span-1 text-center">
                         <div class="bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden relative">
-                            <div class="bg-(--color-accent) w-(--width) h-4" style="--width:{{ $skill->ratingInPercent }}%"></div>
-                            <div class="absolute inset-0 text-[0.65rem] font-mono flex items-center justify-center"></div>
+                            <div class="bg-(--color-accent) w-(--width) h-2" style="--width:{{ $skill->ratingInPercent }}%"></div>
+                            <div class="absolute inset-0 flex items-center justify-center"></div>
                         </div>
                     </div>
 
@@ -125,8 +125,10 @@ new class extends Component {
                         <flux:badge size="sm">{{ $skill->order }}</flux:badge>
                     </div>
 
-                    <div class="col-span-1 text-end">
-                        <flux:button variant="filled" size="sm" wire:click="open('{{ $skill->id }}')">{{ __('Edit') }}</flux:button>
+                    <div class="col-span-1 text-end -me-2">
+                        <flux:button variant="ghost" size="sm" wire:click="open('{{ $skill->id }}')" square>
+                            <flux:icon name="pencil-square" class="size-4" />
+                        </flux:button>
                     </div>
                 </div>
             </flux:callout>

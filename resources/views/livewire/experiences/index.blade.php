@@ -7,13 +7,14 @@ use App\Models\Resume;
 use Flux\Flux;
 use Illuminate\Support\Str;
 use Livewire\Volt\Component;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 new class extends Component {
     public Resume $resume;
 
     public bool $isEditing = false;
 
-    public ?string $experienceId = null;
     public string $position = '';
     public ?string $institution = '';
     public ?string $location = '';
@@ -23,6 +24,9 @@ new class extends Component {
     public array $skills = [];
     public ?string $description = '';
     public bool $active = false;
+
+    public ?string $experienceId = null;
+    public ?Collection $experienceSkills = null;
 
     public function mount(): void
     {
@@ -117,6 +121,33 @@ new class extends Component {
         $this->isEditing = false;
         $this->experienceId = null;
     }
+
+    public function editSkills(string $experienceId): void
+    {
+        $this->experienceId = $experienceId;
+        $this->experienceSkills = Experience::findOrFail($this->experienceId)->skills;
+
+        Flux::modal('experience-skills-modal')->show();
+    }
+
+    public function reorderSkills(array $items): void
+    {
+        $experience = Experience::findOrFail($this->experienceId);
+
+        foreach ($items as $item) {
+            $experience->skills()->updateExistingPivot($item['id'], [
+                'order' => $item['order']
+            ]);
+        }
+
+        $this->experienceSkills = $experience->skills;
+    }
+
+    public function resetSkills(): void
+    {
+        $this->experienceId = null;
+        $this->experienceSkills = null;
+    }
 }; ?>
 
 <section class="space-y-6">
@@ -152,8 +183,7 @@ new class extends Component {
                                 {{ __('Edit') }}
                             </flux:button>
 
-                            <flux:button size="xs"
-                                wire:click="toggleActive('{{ $experience->id }}', {{ $experience->active }})">
+                            <flux:button size="xs" wire:click="toggleActive('{{ $experience->id }}', {{ $experience->active }})">
                                 <span class="me-1">{{ $experience->active ? __('Active') : __('Inactive') }}</span>
                                 <span class="inline-flex size-2 rounded-full {{ $experience->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
                             </flux:button>
@@ -162,7 +192,7 @@ new class extends Component {
 
                     <div class="col-span-4 px-8 pb-12 space-y-3 relative">
                         <h2 class="text-xl relative">
-                            {{ $experience->position }}
+                            {{ $experience->position }} <flux:badge size="sm">({{ $experience->id }})</flux:badge>
                             <span class="absolute size-4 rounded-full bg-zinc-700 -left-10 top-1.5"></span>
                         </h2>
 
@@ -191,6 +221,10 @@ new class extends Component {
                                 @foreach ($experience->skills as $skill)
                                 <flux:badge size="sm">{{ $skill->name }}</flux:badge>
                                 @endforeach
+
+                                <flux:button variant="primary" size="xs" icon="pencil" wire:click="editSkills('{{ $experience->id }}')">
+                                    {{ __('Edit') }}
+                                </flux:button>
                             </div>
                         </div>
 
@@ -255,10 +289,41 @@ new class extends Component {
         @if ($experienceId)
             <flux:separator variant="subtle" />
 
-            <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $experienceId }}')"
-                wire:confirm="{{ __('Are you sure you want to delete this experience?') }}">
+            <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $experienceId }}')" wire:confirm="{{ __('Are you sure you want to delete this experience?') }}">
                 {{ __('Delete') }}
             </flux:button>
         @endif
+    </x-flyout>
+
+    <x-flyout name="experience-skills-modal" wire:close="resetSkills">
+        <flux:heading size="xl" level="1">{{ __('Edit Skills') }}</flux:heading>
+        <flux:separator variant="subtle" />
+
+        <div class="flex flex-col gap-px" x-sort x-on:sort.stop="$wire.reorderSkills(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
+
+            @foreach ($experienceSkills?->all() ?? [] as $skill)
+            <flux:callout class="border-0 not-first:rounded-t-none not-last:rounded-b-none p-0!" :data-id="$skill->id" x-sort:item inline>
+
+                <div class="flex items-center text-sm">
+                    <div class="flex items-center gap-2 grow">
+                        <button class="cursor-move me-2 text-zinc-500 hover:text-zinc-300" x-sort:handle>
+                            <flux:icon name="chevron-up-down" />
+                        </button>
+
+                        <span class="font-medium">{{ $skill->name }}</span>
+
+                        @if($skill->info)
+                            <small class="text-zinc-500">({{ $skill->info }})</small>
+                        @endif
+                    </div>
+
+                    <div class="col-span-1 text-end font-mono">
+                        {{ $skill->pivot->order ?? '' }}
+                    </div>
+                </div>
+            </flux:callout>
+            @endforeach
+
+        </div>
     </x-flyout>
 </section>

@@ -88,6 +88,9 @@ class Experience extends Model
 
     public function skills(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class);
+        return $this->belongsToMany(Skill::class)
+            ->using(ExperienceSkill::class)
+            ->withPivot('order')
+            ->orderByPivot('order');
     }
 }
