@@ -25,6 +25,6 @@ $PHP_BIN artisan optimize:clear
 $PHP_BIN artisan event:cache
 $PHP_BIN artisan route:cache
 $PHP_BIN artisan view:cache
-$PHP_BIN artisan icons:cache
+# $PHP_BIN artisan icons:cache
 
 echo "🚀 Application deployed!"
