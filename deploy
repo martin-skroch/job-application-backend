@@ -13,7 +13,7 @@ git reset --hard
 git clean -d -f
 git pull origin master --rebase
 
-$COMPOSER install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+$COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # npm ci --audit false
 # npm run build
