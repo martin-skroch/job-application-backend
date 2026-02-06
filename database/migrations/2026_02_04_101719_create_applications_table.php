@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('applications', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('title');
-            $table->string('source')->nullable();
+            $table->string('title')->nullable();
+            $table->string('source');
             $table->text('notes')->nullable();
             $table->string('contact_name')->nullable();
             $table->string('contact_email')->nullable();
@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('company_name')->nullable();
             $table->tinyText('company_address')->nullable();
             $table->string('company_website')->nullable();
-            $table->foreignUlid('profile_id')->index();
-            $table->foreignId('user_id')->index();
+            $table->foreignUlid('profile_id')->nullable()->index();
+            $table->foreignId('user_id')->nullable()->index();
             $table->dateTime('sent_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
