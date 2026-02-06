@@ -2,6 +2,9 @@
 
 source .env
 
+$PHP_BIN -v
+$COMPOSER_BIN -V
+
 cd /api.skroch.de/httpdocs
 
 # $PHP_BIN artisan down --refresh=15 --retry=60
