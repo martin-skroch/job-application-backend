@@ -46,9 +46,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('redirect', function(Request $request): RedirectResponse {
-
-dd($request->has('url'));
-
     if (!$request->has('url')) {
         abort(404);
     }
