@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RedirectController;
 use Livewire\Volt\Volt;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
@@ -7,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->away('https://martin.skroch.de');
+    return redirect()->away(config('app.frontend_url'));
     // return view('welcome');
 })->name('home');
 
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('redirect', RedirectController::class)->name('redirect');
+
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
@@ -34,23 +37,12 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
     Volt::route('settings/tokens', 'settings.tokens')->name('tokens.edit');
 
-    Volt::route('settings/two-factor', 'settings.two-factor')
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('two-factor.show');
+    Volt::route('settings/two-factor', 'settings.two-factor')->middleware(
+        when(
+            Features::canManageTwoFactorAuthentication()
+                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+            ['password.confirm'],
+            [],
+        ),
+    )->name('two-factor.show');
 });
-
-Route::get('redirect', function(Request $request): RedirectResponse {
-    if (!$request->has('url')) {
-        abort(404);
-    }
-
-    return redirect()->away($request->string('url'));
-
-})->name('redirect');
