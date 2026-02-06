@@ -31,8 +31,6 @@ class ProfileFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => Str::slug($name) . '@' . $domain,
             'website' => 'https://' . $domain,
-            'api_active' => false,
-            'api_token' => Str::random(64),
         ];
     }
 }

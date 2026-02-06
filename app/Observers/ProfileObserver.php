@@ -13,8 +13,6 @@ class ProfileObserver
      */
     public function creating(Profile $profile): void
     {
-        $profile->api_token = $this->generateToken();
-
         if ($profile->user_id === null) {
             $profile->user_id = Auth::user()?->id;
         }
