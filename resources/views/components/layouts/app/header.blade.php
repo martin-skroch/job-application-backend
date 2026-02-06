@@ -16,12 +16,12 @@
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
 
-                <flux:navbar.item icon="briefcase" :href="route('vacancies.index')" :current="request()->routeIs('vacancies.*')" wire:navigate>
-                    {{ __('Vacancies') }}
+                <flux:navbar.item icon="paper-airplane" :href="route('applications.index')" :current="request()->routeIs('applications.*')" wire:navigate>
+                    {{ __('Applications') }}
                 </flux:navbar.item>
 
-                <flux:navbar.item icon="briefcase" :href="route('resumes.index')" :current="request()->routeIs('resumes.*')" wire:navigate>
-                    {{ __('Resumes') }}
+                <flux:navbar.item icon="briefcase" :href="route('profiles.index')" :current="request()->routeIs('profiles.*')" wire:navigate>
+                    {{ __('Profiles') }}
                 </flux:navbar.item>
             </flux:navbar>
 

@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Resume;
-use App\Http\Requests\StoreResumeRequest;
+use App\Models\Profile;
+use App\Http\Requests\StoreProfileRequest;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Livewire\Volt\Component;
@@ -25,33 +25,33 @@ new class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('viewAny', Resume::class);
+        $this->authorize('viewAny', Profile::class);
     }
 
     public function with(): array
     {
-        $resumes = auth()->user()->resumes()->paginate();
-
-        return compact('resumes');
+        return [
+            'profiles' => auth()->user()->profiles()->paginate(),
+        ];
     }
 
     public function rules(): array
     {
-        return (new StoreResumeRequest())->rules();
+        return (new StoreProfileRequest())->rules();
     }
 
     public function open(): void
     {
-        $this->authorize('create', Resume::class);
+        $this->authorize('create', Profile::class);
 
         $this->resetForm();
 
-        Flux::modal('resume-modal')->show();
+        Flux::modal('profile-modal')->show();
     }
 
     public function create(): void
     {
-        $this->authorize('create', Resume::class);
+        $this->authorize('create', Profile::class);
 
         $validated = $this->validate();
 
@@ -59,9 +59,9 @@ new class extends Component {
             $validated['image'] = $this->image->store('avatars', 'public');
         }
 
-        $resume = Resume::create($validated);
+        $profile = Profile::create($validated);
 
-        $this->redirectRoute('resumes.show', $resume, navigate: true);
+        $this->redirectRoute('profiles.show', $profile, navigate: true);
     }
 
     public function unsetImage(): void {
@@ -102,12 +102,12 @@ new class extends Component {
     @endphp
     <div class="flex items-center">
         <div class="grow">
-            <flux:heading size="xl" level="1">{{ __('Resumes') }}</flux:heading>
-            <flux:subheading size="lg">{{ __('Manage you resumes') }}</flux:subheading>
+            <flux:heading size="xl" level="1">{{ __('Profiles') }}</flux:heading>
+            <flux:subheading size="lg">{{ __('Manage you profiles') }}</flux:subheading>
         </div>
         <div>
             <flux:button variant="primary" :loading="false" wire:click="open">
-                {{ __('Create Resume') }}
+                {{ __('Create new Profile') }}
             </flux:button>
         </div>
     </div>
@@ -115,22 +115,22 @@ new class extends Component {
     <flux:separator variant="subtle" />
 
     <div class="grid lg:grid-cols-2 2xl:grid-cols-3 gap-6">
-        @foreach ($resumes as $resume)
-        <x-card :href="route('resumes.show', $resume)" wire:key="{{ $resume->id }}" wire:navigate>
+        @foreach ($profiles as $profile)
+        <x-card :href="route('profiles.show', $profile)" wire:key="{{ $profile->id }}" wire:navigate>
             <x-slot:heading class="flex items-center gap-3">
-                <flux:avatar size="xs" :src="$resume->image ? Storage::url($resume->image) : null" />
-                {{ $resume->name }}
+                <flux:avatar size="xs" :src="$profile->image ? Storage::url($profile->image) : null" />
+                {{ $profile->name }}
             </x-slot>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div class="flex items-center gap-2">
-                    @php $experienceCount = $resume->experiences()->count(); @endphp
+                    @php $experienceCount = $profile->experiences()->count(); @endphp
                     <flux:badge size="sm">{{ $experienceCount }}</flux:badge>
                     {{ trans_choice('Experience|Experiences', $experienceCount) }}
                 </div>
 
                 <div class="flex items-center gap-2">
-                    @php $skillCount = $resume->skills()->count(); @endphp
+                    @php $skillCount = $profile->skills()->count(); @endphp
                     <flux:badge size="sm">{{ $skillCount }}</flux:badge>
                     {{ trans_choice('Skill|Skills', $skillCount) }}
                 </div>
@@ -139,10 +139,10 @@ new class extends Component {
         @endforeach
     </div>
 
-    {{ $resumes->links() }}
+    {{ $profiles->links() }}
 
-    <x-flyout name="resume-modal" wire:close="resetForm">
-        <flux:heading size="xl" level="1">{{ __('Create Resume') }}</flux:heading>
+    <x-flyout name="profile-modal" wire:close="resetForm">
+        <flux:heading size="xl" level="1">{{ __('Create new Profile') }}</flux:heading>
         <flux:separator variant="subtle" />
 
         <form class="space-y-6" wire:submit="create">

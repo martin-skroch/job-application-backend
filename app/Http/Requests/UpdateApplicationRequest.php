@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Http\UploadedFile;
+use App\Models\Application;
 
-class UpdateResumeRequest extends StoreResumeRequest
+class UpdateApplicationRequest extends StoreApplicationRequest
 {
     /**
      * Determine if the user is authorized to make this request.

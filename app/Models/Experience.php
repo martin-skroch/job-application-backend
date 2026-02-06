@@ -81,9 +81,9 @@ class Experience extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function resume(): BelongsTo
+    public function profile(): BelongsTo
     {
-        return $this->belongsTo(Resume::class);
+        return $this->belongsTo(Profile::class);
     }
 
     public function skills(): BelongsToMany

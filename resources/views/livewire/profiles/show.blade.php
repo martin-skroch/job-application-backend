@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Requests\UpdateResumeRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
-use App\Models\Resume;
+use App\Models\Profile;
 use Flux\Flux;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Volt\Component;
@@ -12,7 +12,7 @@ new class extends Component {
     use WithFileUploads;
 
     public User $user;
-    public Resume $resume;
+    public Profile $profile;
 
     public ?string $name = null;
     public $image = null;
@@ -29,24 +29,24 @@ new class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('view', $this->resume);
+        $this->authorize('view', $this->profile);
 
         $this->user = auth()->user();
-        $this->name = $this->resume->name;
-        $this->image = $this->resume->image;
-        $this->address = $this->resume->address;
-        $this->post_code = $this->resume->post_code;
-        $this->location = $this->resume->location;
-        $this->birthdate = $this->resume->birthdate?->format('Y-m-d');
-        $this->birthplace = $this->resume->birthplace;
-        $this->phone = $this->resume->phone;
-        $this->email = $this->resume->email;
-        $this->website = $this->resume->website;
+        $this->name = $this->profile->name;
+        $this->image = $this->profile->image;
+        $this->address = $this->profile->address;
+        $this->post_code = $this->profile->post_code;
+        $this->location = $this->profile->location;
+        $this->birthdate = $this->profile->birthdate?->format('Y-m-d');
+        $this->birthplace = $this->profile->birthplace;
+        $this->phone = $this->profile->phone;
+        $this->email = $this->profile->email;
+        $this->website = $this->profile->website;
     }
 
     public function rules(): array
     {
-        $rules = (new UpdateResumeRequest())->rules();
+        $rules = (new UpdateProfileRequest())->rules();
 
         if (is_string($this->image) && strlen($this->image) > 0) {
             unset($rules['image']);
@@ -57,20 +57,20 @@ new class extends Component {
 
     public function open(): void
     {
-        $this->authorize('update', $this->resume);
+        $this->authorize('update', $this->profile);
 
-        Flux::modal('resume-modal')->show();
+        Flux::modal('profile-modal')->show();
     }
 
     public function save(): void
     {
-        $this->authorize('update', $this->resume);
+        $this->authorize('update', $this->profile);
 
         $validated = $this->validate();
 
         if ($this->image instanceof TemporaryUploadedFile) {
             $validated['image'] = $this->image->store('avatars', 'public');
-            $this->resume->image = $validated['image'];
+            $this->profile->image = $validated['image'];
         }
 
         if ($this->deleteImage !== null && Storage::exists($this->deleteImage)) {
@@ -78,35 +78,35 @@ new class extends Component {
             $this->deleteImage = null;
         }
 
-        $this->resume->fill($validated);
-        $this->resume->save();
+        $this->profile->fill($validated);
+        $this->profile->save();
 
         $this->close();
 
-        $this->dispatch('resume-saved');
+        $this->dispatch('profile-saved');
     }
 
     public function delete(): void
     {
-        $this->authorize('delete', $this->resume);
+        $this->authorize('delete', $this->profile);
 
-        $this->resume->delete();
+        $this->profile->delete();
 
         $this->close();
 
-        $this->redirectRoute('resumes.index', navigate: true);
+        $this->redirectRoute('profiles.index', navigate: true);
     }
 
     public function unsetImage(): void
     {
-        $this->deleteImage = $this->resume->image;
-        $this->resume->image = null;
+        $this->deleteImage = $this->profile->image;
+        $this->profile->image = null;
         $this->image = null;
     }
 
     public function close(): void
     {
-        Flux::modal('resume-modal')->close();
+        Flux::modal('profile-modal')->close();
     }
 }; ?>
 <section class="space-y-6">
@@ -118,15 +118,15 @@ new class extends Component {
         if ($image instanceof TemporaryUploadedFile) {
             $imageUrl = $image->temporaryUrl();
             $imageName = $image->getClientOriginalName();
-        } elseif ($resume->image !== null) {
-            $imageUrl = Storage::url($resume->image);
+        } elseif ($profile->image !== null) {
+            $imageUrl = Storage::url($profile->image);
             $imageLabel = __('Update the image');
         }
     @endphp
 
-    <x-resumes.layout :resume="$resume" :heading="__('Overview')" :subheading="__('Manage your personal data.')">
+    <x-profiles.layout :profile="$profile" :heading="__('Overview')" :subheading="__('Manage your personal data.')">
         <x-slot:actions>
-            <x-action-message on="resume-saved">
+            <x-action-message on="profile-saved">
                 {{ __('Saved.') }}
             </x-action-message>
 
@@ -145,65 +145,65 @@ new class extends Component {
 
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Name') }}</div>
-                <div class="col-span-4">{{ $resume->name }}</div>
+                <div class="col-span-4">{{ $profile->name }}</div>
             </div>
 
-            @if(!empty($resume->address) || !empty($resume->post_code) || !empty($resume->location))
+            @if(!empty($profile->address) || !empty($profile->post_code) || !empty($profile->location))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Address') }}</div>
                 <div class="col-span-4">
-                    @empty(!$resume->address){{ $resume->address }}<br>@endempty
-                    {{ $resume->post_code }} {{ $resume->location }}
+                    @empty(!$profile->address){{ $profile->address }}<br>@endempty
+                    {{ $profile->post_code }} {{ $profile->location }}
                 </div>
             </div>
             @endif
 
-            @if(!empty($resume->birthdate))
+            @if(!empty($profile->birthdate))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthdate') }}</div>
-                <div class="col-span-4">{{ $resume->birthdate?->isoFormat('LL') }}</div>
+                <div class="col-span-4">{{ $profile->birthdate?->isoFormat('LL') }}</div>
             </div>
             @endif
 
-            @if(!empty($resume->birthplace))
+            @if(!empty($profile->birthplace))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Birthplace') }}</div>
-                <div class="col-span-4">{{ $resume->birthplace }}</div>
+                <div class="col-span-4">{{ $profile->birthplace }}</div>
             </div>
             @endif
 
-            @if(!empty($resume->phone))
+            @if(!empty($profile->phone))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Phone') }}</div>
-                <div class="col-span-4">{{ $resume->phone }}</div>
+                <div class="col-span-4">{{ $profile->phone }}</div>
             </div>
             @endif
 
-            @if(!empty($resume->email))
+            @if(!empty($profile->email))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Email') }}</div>
                 <div class="col-span-4">
-                    <a class="text-accent-content hover:underline" href="mailto:{{ $resume->email }}" target="_blank" rel="noopener">
-                        {{ $resume->email }}
+                    <a class="text-accent-content hover:underline" href="mailto:{{ $profile->email }}" target="_blank" rel="noopener">
+                        {{ $profile->email }}
                     </a>
                 </div>
             </div>
             @endif
 
-            @if(!empty($resume->website))
+            @if(!empty($profile->website))
             <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
                 <div class="col-span-1 font-bold">{{ __('Website') }}</div>
                 <div class="col-span-4">
-                    <a class="text-accent-content hover:underline" href="{{ route('redirect', ['url' => $resume->website]) }}" target="_blank" rel="noopener">
-                        {{ $resume->website }}
+                    <a class="text-accent-content hover:underline" href="{{ route('redirect', ['url' => $profile->website]) }}" target="_blank" rel="noopener">
+                        {{ $profile->website }}
                     </a>
                 </div>
             </div>
             @endif
         </div>
-    </x-resumes.layout>
+    </x-profiles.layout>
 
-    <x-flyout name="resume-modal">
+    <x-flyout name="profile-modal">
         <flux:heading size="xl" level="1">{{ __('Edit') }}</flux:heading>
         <flux:separator variant="subtle" />
 
@@ -252,7 +252,7 @@ new class extends Component {
 
         <flux:separator variant="subtle" />
 
-        <flux:button class="mb-0" variant="danger" wire:click="delete" wire:confirm="{{ __('Are you sure you want to delete this resume?') }}">
+        <flux:button class="mb-0" variant="danger" wire:click="delete" wire:confirm="{{ __('Are you sure you want to delete this profile?') }}">
             {{ __('Delete') }}
         </flux:button>
     </x-flyout>

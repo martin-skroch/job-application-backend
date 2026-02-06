@@ -2,12 +2,12 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Experience;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ResumeResource extends JsonResource
+class ProfileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,9 +17,16 @@ class ResumeResource extends JsonResource
     public function toArray(Request $request): array
     {
         $image = $this->image;
+        $birthdate = null;
+        $age = null;
 
         if ($image !== null && Storage::exists($image)) {
             $image = Storage::url($image);
+        }
+
+        if ($this->birthdate instanceof Carbon) {
+            $birthdate = $this->birthdate->format('Y-m-d');
+            $age = $this->birthdate->age;
         }
 
         return [
@@ -29,8 +36,9 @@ class ResumeResource extends JsonResource
             'address' => $this->address,
             'post_code' => $this->post_code,
             'location' => $this->location,
-            'birthdate' => $this->birthdate,
+            'birthdate' => $birthdate,
             'birthplace' => $this->birthplace,
+            'age' => $age,
             'phone' => $this->phone,
             'email' => $this->email,
             'website' => $this->website,

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Resume;
+use App\Models\Profile;
 
 class UpdateExperienceRequest extends StoreExperienceRequest
 {
@@ -19,8 +19,8 @@ class UpdateExperienceRequest extends StoreExperienceRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(Resume $resume): array
+    public function rules(Profile $profile): array
     {
-        return parent::rules($resume);
+        return parent::rules($profile);
     }
 }

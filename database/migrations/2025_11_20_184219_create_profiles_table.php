@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('resumes', function (Blueprint $table) {
+        Schema::create('profiles', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignId('user_id')->index();
             $table->string('image')->nullable();
@@ -24,8 +24,6 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('website')->nullable();
-            $table->boolean('api_active')->default(false);
-            $table->string('api_token', 64)->nullable()->unique();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -36,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resumes');
+        Schema::dropIfExists('profiles');
     }
 };

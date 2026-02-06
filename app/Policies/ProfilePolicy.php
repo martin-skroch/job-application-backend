@@ -2,26 +2,26 @@
 
 namespace App\Policies;
 
-use App\Models\Resume;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Models\Profile;
+use Illuminate\Support\Facades\Auth;
 
-class ResumePolicy
+class ProfilePolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->id === Auth::user()->id;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Resume $resume): bool
+    public function view(User $user, Profile $profile): bool
     {
-        return $user->id === $resume->user_id;
+        return $user->id === $profile->user_id;
     }
 
     /**
@@ -29,38 +29,38 @@ class ResumePolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->id === Auth::user()->id;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Resume $resume): bool
+    public function update(User $user, Profile $profile): bool
     {
-        return $user->id === $resume->user_id;
+        return $user->id === $profile->user_id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Resume $resume): bool
+    public function delete(User $user, Profile $profile): bool
     {
-        return $user->id === $resume->user_id;
+        return $user->id === $profile->user_id;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Resume $resume): bool
+    public function restore(User $user, Profile $profile): bool
     {
-        return false;
+        return $user->id === $profile->user_id;
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Resume $resume): bool
+    public function forceDelete(User $user, Profile $profile): bool
     {
-        return false;
+        return $user->id === $profile->user_id;
     }
 }

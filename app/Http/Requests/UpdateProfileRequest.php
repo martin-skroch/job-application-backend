@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
-class UpdateVacancyRequest extends StoreVacancyRequest
+use Illuminate\Http\UploadedFile;
+
+class UpdateProfileRequest extends StoreProfileRequest
 {
     /**
      * Determine if the user is authorized to make this request.

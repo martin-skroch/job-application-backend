@@ -23,8 +23,8 @@ class ExperienceResource extends JsonResource
             'entry' => $this->entry,
             'exit' => $this->exit,
             'duration' => $this->duration,
-            'skills' => SkillResource::collection($this->skills),
             'description' => $this->description,
+            'skills' => SkillResource::collection($this->skills),
         ];
     }
 }

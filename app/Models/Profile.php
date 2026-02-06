@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Policies\ResumePolicy;
 use Illuminate\Support\Carbon;
 use App\Models\Scopes\OwnerScope;
-use App\Observers\ResumeObserver;
+use App\Observers\ProfileObserver;
+use App\Policies\ProfilePolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -17,9 +17,9 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ScopedBy([OwnerScope::class])]
-#[UsePolicy(ResumePolicy::class)]
-#[ObservedBy([ResumeObserver::class])]
-class Resume extends Model
+#[UsePolicy(ProfilePolicy::class)]
+#[ObservedBy([ProfileObserver::class])]
+class Profile extends Model
 {
     /** @use HasFactory<\Database\Factories\ResumeFactory> */
     use HasFactory;
@@ -70,7 +70,7 @@ class Resume extends Model
     }
 
     /**
-     * Get the user that owns the resume.
+     * Get the user that owns the profile.
      */
     public function user(): BelongsTo
     {

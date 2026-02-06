@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Resume;
+use App\Models\Profile;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
@@ -22,13 +22,13 @@ class StoreExperienceRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(Resume $resume): array
+    public function rules(Profile $profile): array
     {
         $date = Rule::date()->format('Y-m-d');
 
         $skillsExistsRule = Rule::exists('skills', 'id')
-            ->where(function(Builder $query) use ($resume): void {
-                $query->where('resume_id', $resume->id);
+            ->where(function(Builder $query) use ($profile): void {
+                $query->where('profile_id', $profile->id);
             })
         ;
 

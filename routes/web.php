@@ -17,16 +17,12 @@ Route::view('dashboard', 'dashboard')
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 
-    Volt::route('resumes', 'resumes.index')->name('resumes.index');
-    Volt::route('resumes/{resume}', 'resumes.show')->name('resumes.show');
-    Volt::route('resumes/{resume}/experiences', 'experiences.index')->name('resumes.experiences');
-    Volt::route('resumes/{resume}/skills', 'skills.index')->name('resumes.skills');
-    Volt::route('resumes/{resume}/settings', 'resumes.settings')->name('resumes.settings');
+    Volt::route('applications', 'applications.index')->name('applications.index');
 
-    Volt::route('vacancies', 'vacancies.index')->name('vacancies.index');
-    Volt::route('vacancies/create', 'vacancies.create')->name('vacancies.create');
-    Volt::route('vacancies/{vacancy}', 'vacancies.show')->name('vacancies.show');
-    Volt::route('vacancies/{vacancy}/edit', 'vacancies.edit')->name('vacancies.edit');
+    Volt::route('profiles', 'profiles.index')->name('profiles.index');
+    Volt::route('profiles/{profile}', 'profiles.show')->name('profiles.show');
+    Volt::route('profiles/{profile}/experiences', 'experiences.index')->name('profiles.experiences');
+    Volt::route('profiles/{profile}/skills', 'skills.index')->name('profiles.skills');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -50,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('redirect', function(Request $request): RedirectResponse {
+
+dd($request->has('url'));
 
     if (!$request->has('url')) {
         abort(404);

@@ -2,14 +2,14 @@
 
 use App\Http\Requests\StoreSkillRequest;
 use App\Http\Requests\UpdateSkillRequest;
-use App\Models\Resume;
+use App\Models\Profile;
 use App\Models\Skill;
 use Flux\Flux;
 use Illuminate\Support\Str;
 use Livewire\Volt\Component;
 
 new class extends Component {
-    public Resume $resume;
+    public Profile $profile;
 
     public bool $isEditing = false;
     public ?string $skillId = null;
@@ -28,14 +28,14 @@ new class extends Component {
         if ($this->isEditing) {
             $this->skillId = $id;
 
-            $skill = $this->resume->skills()->where('id', $id)->firstOrFail();
+            $skill = $this->profile->skills()->where('id', $id)->firstOrFail();
 
             $this->name = $skill->name;
             $this->info = $skill->info;
             $this->rating = $skill->rating;
             $this->order = $skill->order;
         } else {
-            $lastOrderNumber = $this->resume->skills()->select('order')->latest('order')->first()?->order;
+            $lastOrderNumber = $this->profile->skills()->select('order')->latest('order')->first()?->order;
             $this->order = $lastOrderNumber + 1;
         }
 
@@ -46,10 +46,10 @@ new class extends Component {
     {
         if (Str::isUlid($this->skillId)) {
             $validated = $this->validate((new UpdateSkillRequest())->rules());
-            $this->resume->skills()->where('id', $this->skillId)->update($validated);
+            $this->profile->skills()->where('id', $this->skillId)->update($validated);
         } else {
             $validated = $this->validate((new StoreSkillRequest())->rules());
-            $this->resume->skills()->create($validated);
+            $this->profile->skills()->create($validated);
         }
 
         Flux::modal('skill-modal')->close();
@@ -83,13 +83,13 @@ new class extends Component {
     public function updateOrder(array $items): void
     {
         foreach ($items as $item) {
-            $skill = Skill::where('id', $item['id'])->where('resume_id', $this->resume->id);
+            $skill = Skill::where('id', $item['id'])->where('profile_id', $this->profile->id);
             $skill->update(['order' => $item['order']]);
         }
     }
 }; ?>
 <section class="space-y-6">
-    <x-resumes.layout :resume="$resume" :heading="__('Skills')" :subheading="__('Manage your skills.')">
+    <x-profiles.layout :profile="$profile" :heading="__('Skills')" :subheading="__('Manage your skills.')">
         <x-slot:actions>
             <flux:button variant="primary" :loading="false" wire:click="open">
                 {{ __('Add Skill') }}
@@ -98,7 +98,7 @@ new class extends Component {
 
         <div class="flex flex-col gap-px" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
 
-            @foreach ($resume->skills as $skill)
+            @foreach ($profile->skills as $skill)
             <flux:callout class="border-0 not-first:rounded-t-none not-last:rounded-b-none p-0!" :data-id="$skill->id" x-sort:item inline>
 
                 <div class="grid grid-cols-4 items-center text-sm">
@@ -167,5 +167,5 @@ new class extends Component {
                 </flux:button>
             @endif
         </x-flyout>
-    </x-resumes.layout>
+    </x-profiles.layout>
 </section>

@@ -59,16 +59,16 @@ class Skill extends Model
     }
 
     /**
-     * Get the user that owns the resume.
+     * Get the user that owns the profile.
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function resume(): BelongsTo
+    public function profile(): BelongsTo
     {
-        return $this->belongsTo(Resume::class);
+        return $this->belongsTo(Profile::class);
     }
 
     public function experiences(): BelongsToMany

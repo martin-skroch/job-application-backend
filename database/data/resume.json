@@ -1,9 +1,9 @@
 {
     "name": "Martin Skroch",
-    "email": "moin@martin-skroch.de",
+    "email": "martin@skroch.de",
     "timezone": "Europe/Berlin",
     "birthplace": "Neubrandenburg",
-    "website": "https://martin-skroch.de",
+    "website": "https://martin.skroch.de",
     "experiences": [
         {
             "position": "Full Stack Web Developer",
@@ -14,7 +14,7 @@
         },
         {
             "position": "Full Stack Web Developer",
-            "location": "Neubrandenburg",
+            "location": "Ueckermünde",
             "entry": "2024-08-01",
             "exit": "2025-07-31",
             "active": true

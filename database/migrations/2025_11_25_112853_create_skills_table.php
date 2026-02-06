@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('skills', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignId('user_id')->index();
-            $table->foreignUlid('resume_id')->index();
+            $table->foreignUlid('profile_id')->index();
             $table->string('name');
             $table->string('info')->nullable();
             $table->tinyInteger('rating')->unsigned()->nullable();

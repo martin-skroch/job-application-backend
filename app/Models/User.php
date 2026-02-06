@@ -68,9 +68,17 @@ class User extends Authenticatable
     /**
      * Get the experiences for user.
      */
-    public function resumes(): HasMany
+    public function applications(): HasMany
     {
-        return $this->hasMany(Resume::class);
+        return $this->hasMany(Application::class);
+    }
+
+    /**
+     * Get the experiences for user.
+     */
+    public function profiles(): HasMany
+    {
+        return $this->hasMany(Profile::class);
     }
 
     /**

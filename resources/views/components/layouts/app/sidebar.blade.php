@@ -17,12 +17,12 @@
                         {{ __('Dashboard') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item icon="briefcase" :href="route('vacancies.index')" :current="request()->routeIs('vacancies.*')" wire:navigate>
-                        {{ __('Vacancies') }}
+                    <flux:navlist.item icon="paper-airplane" :href="route('applications.index')" :current="request()->routeIs('applications.*')" wire:navigate>
+                        {{ __('Applications') }}
                     </flux:navlist.item>
 
-                    <flux:navlist.item icon="document-text" :href="route('resumes.index')" :current="request()->routeIs('resumes.*')" wire:navigate>
-                        {{ __('Resumes') }}
+                    <flux:navlist.item icon="document-text" :href="route('profiles.index')" :current="request()->routeIs('profiles.*')" wire:navigate>
+                        {{ __('Profiles') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
