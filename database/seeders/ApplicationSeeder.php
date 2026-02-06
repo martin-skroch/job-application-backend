@@ -17,7 +17,7 @@ class ApplicationSeeder extends Seeder
     {
         Profile::withoutGlobalScope(OwnerScope::class)->each(function(Profile $profile): void {
             Application::factory(5)->create([
-                'resume_id' => $profile->id,
+                'profile_id' => $profile->id,
                 'user_id' => $profile->user_id,
             ]);
         });
