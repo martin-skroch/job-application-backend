@@ -15,19 +15,16 @@ git pull origin master --rebase
 
 $COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
-# npm ci --audit false
-# npm run build
+npm ci --audit false
+npm run build
 
-# # $PHP_BIN artisan storage:link
-# $PHP_BIN artisan migrate --force
-# $PHP_BIN artisan optimize:clear
-# # $PHP_BIN artisan optimize
-# $PHP_BIN artisan event:cache
-# $PHP_BIN artisan route:cache
-# $PHP_BIN artisan view:cache
-# $PHP_BIN artisan icons:cache
-
-# $PHP_BIN artisan queue:restart
-# $PHP_BIN artisan up
+# $PHP_BIN artisan storage:link
+$PHP_BIN artisan migrate --force
+$PHP_BIN artisan optimize:clear
+# $PHP_BIN artisan optimize
+$PHP_BIN artisan event:cache
+$PHP_BIN artisan route:cache
+$PHP_BIN artisan view:cache
+$PHP_BIN artisan icons:cache
 
 echo "🚀 Application deployed!"
