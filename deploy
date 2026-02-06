@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+source .env
+
+cd /api.skroch.de/httpdocs
+
+# $PHP_BIN artisan down --refresh=15 --retry=60
+
+git reset --hard
+git clean -d -f
+git pull origin master --rebase
+
+$COMPOSER install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# npm ci --audit false
+# npm run build
+
+# # $PHP_BIN artisan storage:link
+# $PHP_BIN artisan migrate --force
+# $PHP_BIN artisan optimize:clear
+# # $PHP_BIN artisan optimize
+# $PHP_BIN artisan event:cache
+# $PHP_BIN artisan route:cache
+# $PHP_BIN artisan view:cache
+# $PHP_BIN artisan icons:cache
+
+# $PHP_BIN artisan queue:restart
+# $PHP_BIN artisan up
+
+echo "🚀 Application deployed!"
