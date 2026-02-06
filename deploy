@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 if [ ! -f .env ]; then
-    echo "The .env file required for deployment does not exist!"
+    echo "The .env file required for deployment does not exist."
     exit
 fi
 
 source .env
 
 if [ "$APP_ENV" == "local" ]; then
-    echo "The deployment will only be executed if the value of APP_ENV is not 'local'!"
+    echo "The deployment will only be executed if the value of APP_ENV is not 'local'."
     exit
 fi
 
@@ -22,6 +22,10 @@ $COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloa
 
 npm ci --audit false
 npm run build
+
+if [ -z "${APP_KEY}" ]; then
+    $PHP_BIN artisan key:generate --ansi
+fi
 
 # $PHP_BIN artisan storage:link
 $PHP_BIN artisan migrate --force
