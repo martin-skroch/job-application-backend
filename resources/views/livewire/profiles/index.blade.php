@@ -2,11 +2,11 @@
 
 use App\Models\Profile;
 use App\Http\Requests\StoreProfileRequest;
+use Flux\Flux;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithPagination;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
-use Flux\Flux;
 
 new class extends Component {
     use WithFileUploads;

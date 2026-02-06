@@ -110,6 +110,8 @@ new class extends Component {
     public function resetForm(): void
     {
         $this->reset([
+            'isEditing',
+            'experienceId',
             'position',
             'institution',
             'location',
@@ -122,9 +124,6 @@ new class extends Component {
         ]);
 
         $this->resetErrorBag();
-
-        $this->isEditing = false;
-        $this->experienceId = null;
     }
 
     public function chooseSkill(): void

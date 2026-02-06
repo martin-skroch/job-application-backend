@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use App\Http\Resources\ImpressionResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ApplicationResource extends JsonResource
@@ -19,6 +20,7 @@ class ApplicationResource extends JsonResource
         $profile = $this->whenNotNull($this->profile);
         $experiences = $this->whenNotNull($this->profile?->experiences);
         $skills = $this->whenNotNull($this->profile?->skills);
+        $impressions = $this->whenNotNull($this->profile?->impressions);
 
         return [
             'id' => $this->id,
@@ -26,6 +28,7 @@ class ApplicationResource extends JsonResource
             'profile' => new ProfileResource($profile),
             'experiences' => ExperienceResource::collection($experiences),
             'skills' => SkillResource::collection($skills),
+            'impressions' => ImpressionResource::collection($impressions),
         ];
     }
 }

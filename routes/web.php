@@ -2,9 +2,7 @@
 
 use App\Http\Controllers\RedirectController;
 use Livewire\Volt\Volt;
-use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('profiles/{profile}', 'profiles.show')->name('profiles.show');
     Volt::route('profiles/{profile}/experiences', 'experiences.index')->name('profiles.experiences');
     Volt::route('profiles/{profile}/skills', 'skills.index')->name('profiles.skills');
+    Volt::route('profiles/{profile}/impressions', 'impressions.index')->name('profiles.impressions');
 });
 
 Route::middleware(['auth'])->group(function () {

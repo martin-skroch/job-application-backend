@@ -256,7 +256,7 @@ new class extends Component {
                 <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
 
                 @if (Str::isUlid($applicationId))
-                <flux:button variant="danger" wire:click="delete('{{ $applicationId }}')"  wire:confirm="{{ __('Are you sure you want to delete this application?') }}" class="ms-auto not-hover:">{{ __('Delete') }}</flux:button>
+                <flux:button variant="danger" wire:click="delete('{{ $applicationId }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}" class="ms-auto not-hover:">{{ __('Delete') }}</flux:button>
                 @endif
             </div>
         </form>

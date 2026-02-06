@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\Rules\ImageFile;
 
-class StoreProfileRequest extends FormRequest
+class StoreImpressionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,23 +25,18 @@ class StoreProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', $this->imageRule()],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'post_code' => ['nullable', 'string', 'max:255'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'birthdate' => ['nullable', Rule::date()->format('Y-m-d'), 'max:255'],
-            'birthplace' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email'],
-            'website' => ['nullable', 'url:http,https'],
+            'image' => ['required', $this->imageRule()],
+            'title' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'order' => ['nullable', 'integer', 'min:-32768', 'max:32767'],
+            'active' => ['required', 'boolean'],
         ];
     }
 
     protected function imageRule(): ImageFile
     {
-        $min = 256;
-        $max = $min * 4;
+        $min = 512;
+        $max = $min * 10;
 
         $dimensions = Rule::dimensions()
             ->minWidth($min)
@@ -50,6 +45,6 @@ class StoreProfileRequest extends FormRequest
             ->maxHeight($max)
         ;
 
-        return File::image()->max(5 * 1024)->dimensions($dimensions);
+        return File::image()->max(10 * 1024)->dimensions($dimensions);
     }
 }

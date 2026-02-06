@@ -15,9 +15,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[ObservedBy([ExperienceObserver::class])]
 #[ScopedBy([OwnerScope::class])]
 #[ScopedBy([ActiveScope::class])]
-#[ObservedBy([ExperienceObserver::class])]
 class Experience extends Model
 {
     /** @use HasFactory<\Database\Factories\ExperienceFactory> */

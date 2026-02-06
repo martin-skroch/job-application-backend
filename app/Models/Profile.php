@@ -86,4 +86,9 @@ class Profile extends Model
     {
         return $this->hasMany(Skill::class);
     }
+
+    public function impressions(): HasMany
+    {
+        return $this->hasMany(Impression::class);
+    }
 }
