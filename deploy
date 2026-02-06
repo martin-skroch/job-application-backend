@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
+if [ ! -f .env ]; then
+    echo "The .env file required for deployment does not exist!"
+    exit
+fi
+
 source .env
 
-$PHP_BIN -v
-$COMPOSER_BIN -V
-
-cd /api.skroch.de/httpdocs
+if [ "$APP_ENV" == "local" ]; then
+    echo "The deployment will only be executed if the value of APP_ENV is not 'local'!"
+    exit
+fi
 
 # $PHP_BIN artisan down --refresh=15 --retry=60
 
