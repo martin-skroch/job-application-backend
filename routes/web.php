@@ -7,7 +7,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->away('https://martin.skroch.de');
+    // return view('welcome');
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
