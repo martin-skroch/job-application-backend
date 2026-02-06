@@ -27,7 +27,7 @@ if [ -z "${APP_KEY}" ]; then
     $PHP_BIN artisan key:generate --ansi
 fi
 
-# $PHP_BIN artisan storage:link
+$PHP_BIN artisan storage:link --relative
 $PHP_BIN artisan migrate --force
 $PHP_BIN artisan optimize:clear
 # $PHP_BIN artisan optimize
