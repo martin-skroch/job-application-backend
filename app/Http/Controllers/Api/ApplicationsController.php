@@ -13,10 +13,7 @@ use Illuminate\Support\Facades\App;
 
 class ApplicationsController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request, Application $application): JsonResource|JsonResponse
+    public function fetch(Request $request, Application $application): JsonResource|JsonResponse
     {
         if (!$application->sent_at instanceof Carbon) {
             return new JsonResponse('Not found', 404);
@@ -25,6 +22,29 @@ class ApplicationsController extends Controller
         if (App::environment('local')) {
             sleep(1);
         }
+
+        return new ApplicationResource($application);
+    }
+
+    public function request(Request $request)
+    {
+        $validated = $request->validate([
+            'company' =>  ['required', 'string', 'max:255'],
+            'name' =>  ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string'],
+            'website' => ['nullable', 'url:http,https', 'max:255'],
+            'message' => ['nullable', 'string'],
+        ]);
+
+        $application = $request->user()->applications()->create([
+            'company_name' => $validated['company'],
+            'contact_name' => $validated['name'],
+            'contact_email' => $validated['email'],
+            'contact_phone' => $validated['phone'],
+            'company_website' => $validated['website'],
+            'notes' => $validated['message'],
+        ]);
 
         return new ApplicationResource($application);
     }

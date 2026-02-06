@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('applications', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('title')->nullable();
-            $table->string('source');
+            $table->string('source')->nullable();
             $table->text('notes')->nullable();
             $table->string('contact_name')->nullable();
             $table->string('contact_email')->nullable();

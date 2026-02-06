@@ -14,6 +14,8 @@ class ExperienceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $skills = $this->whenNotNull($this->skills);
+
         return [
             'id' => $this->id,
             'position' => $this->position,
@@ -24,7 +26,7 @@ class ExperienceResource extends JsonResource
             'exit' => $this->exit,
             'duration' => $this->duration,
             'description' => $this->description,
-            'skills' => SkillResource::collection($this->skills),
+            'skills' => SkillResource::collection($skills),
         ];
     }
 }

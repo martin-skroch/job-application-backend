@@ -57,7 +57,7 @@ new class extends Component {
             $this->company_address = $application->company_address;
             $this->company_website = $application->company_website;
 
-            $this->profile_id = $application->profile->id;
+            $this->profile_id = $application->profile?->id;
 
         }
 
@@ -141,55 +141,45 @@ new class extends Component {
 
         @foreach ($applications as $application)
         <x-card>
-            <div class="space-y-4">
-                <div class="grid grid-cols-7 gap-8 items-center">
-                    <div class="col-span-2 text-lg font-medium">
-                        {{ $application->title }}
-                    </div>
-
-                    <div>
-                        <flux:button size="sm" variant="ghost" href="{{ route('profiles.show', $application->profile) }}">
-                            <flux:avatar size="xs" :src="$application->profile->image ? Storage::url($application->profile->image) : null" class="-ml-2" />
-                            {{ $application->profile->name }}
-                        </flux:button>
-                    </div>
-
-                    <div class="inline-flex items-center gap-2">
-                        @if ($application->company_website)
-                        <flux:button size="sm" variant="ghost" href="{{ route('redirect', ['url' => $application->company_website->value()]) }}" target="_blank" rel="noopener">
-                        @endif
-                            {{ $application->company_name }}
-                        @if ($application->company_website)
-                        </flux:button>
-                        @endif
-                    </div>
-
-                    <div>
-                        @php  $mapLink = $application->company_name . '+' . str_replace("\n", ",", $application->company_address); @endphp
-                        @if ($application->company_name || $application->company_address)
-                        <flux:button size="sm" icon="map" variant="ghost" href="https://www.google.de/maps/search/{{ $mapLink }}/" target="_blank" rel="noopener" />
-                        @endif
-                    </div>
-
-                    <div>
-                        @if ($application->sent_at instanceof Carbon)
-                            <x-badge class="bg-emerald-400 text-emerald-950">{{ __('Sent :date', ['date' => $application->sent_at->diffForHumans()]) }}</x-badge>
-                        @else
-                            <x-badge class="bg-zinc-400 text-zinc-950">{{ __('Not sent') }}</x-badge>
-                        @endif
-                    </div>
-
-                    <div class="text-end space-x-3">
-                        @if (!$application->sent_at instanceof Carbon)
-                            <flux:button wire:click="send('{{ $application->id }}')" size="sm">{{ __('Send') }}</flux:button>
-                        @endif
-
-                        <flux:button wire:click="open('{{ $application->id }}')" size="sm">{{ __('Edit') }}</flux:button>
-                    </div>
+            <div class="grid grid-cols-6 gap-8 items-center">
+                <div class="col-span-2 text-lg font-medium">
+                    {{ $application->company_name }}
                 </div>
 
                 <div>
-                    <flux:input size="sm" :value="route('api.application', $application)" disabled readonly copyable />
+                    @if ($application->profile)
+                    <flux:button size="sm" variant="ghost" href="{{ route('profiles.show', $application->profile) }}">
+                        <flux:avatar size="xs" :src="$application->profile->image ? Storage::url($application->profile->image) : null" class="-ml-2" />
+                        {{ $application->profile->name }}
+                    </flux:button>
+                    @endif
+                </div>
+
+                <div>
+                    @if ($application->company_website)
+                    <flux:button size="sm" icon="link" variant="ghost" :href="route('redirect', ['url' => $application->company_website->value()])" target="_blank" rel="noopener" />
+                    @endif
+
+                    @php  $mapLink = $application->company_name . '+' . str_replace("\n", ",", $application->company_address); @endphp
+                    @if ($application->company_name || $application->company_address)
+                    <flux:button size="sm" icon="map" variant="ghost" href="https://www.google.de/maps/search/{{ $mapLink }}/" target="_blank" rel="noopener" />
+                    @endif
+                </div>
+
+                <div>
+                    @if ($application->sent_at instanceof Carbon)
+                        <x-badge class="bg-emerald-400 text-emerald-950">{{ __('Sent :date', ['date' => $application->sent_at->diffForHumans()]) }}</x-badge>
+                    @else
+                        <x-badge class="bg-zinc-400 text-zinc-950">{{ __('Not sent') }}</x-badge>
+                    @endif
+                </div>
+
+                <div class="text-end space-x-3">
+                    @if (!$application->sent_at instanceof Carbon)
+                        <flux:button wire:click="send('{{ $application->id }}')" size="sm">{{ __('Send') }}</flux:button>
+                    @endif
+
+                    <flux:button wire:click="open('{{ $application->id }}')" size="sm">{{ __('Edit') }}</flux:button>
                 </div>
             </div>
         </x-card>
@@ -208,11 +198,11 @@ new class extends Component {
         <form class="space-y-16" wire:submit="save">
             <div class="space-y-6">
                 <div class="grid grid-cols-2 gap-6">
-                    <flux:input wire:model="title" :label="__('Title')" required />
+                    <flux:input wire:model="title" :label="__('Title')" />
                     <flux:input wire:model="source" :label="__('Source')" />
                 </div>
 
-                <flux:select wire:model="profile_id" :label="__('Profile')">
+                <flux:select wire:model="profile_id" :label="__('Profile')" required>
                     <flux:select.option value="" selected hidden>{{ __('Choose profile...') }}</flux:select.option>
                     @foreach (Auth::user()->profiles()->pluck('name',  'id') as $id => $name)
                     <flux:select.option :value="$id">{{ $name }}</flux:select.option>
@@ -248,6 +238,17 @@ new class extends Component {
                     <flux:input wire:model="contact_email" :label="__('Contact email')" />
                     <flux:input wire:model="contact_phone" :label="__('Contact phone')" />
                 </div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="xl" class="mb-2">{{ __('API') }}</flux:heading>
+                    <flux:separator variant="subtle" />
+                </div>
+
+                @if ($applicationId)
+                <flux:input :value="route('api.application', ['application' => $applicationId])" disabled readonly copyable />
+                @endif
             </div>
 
             <div class="flex items-center justify-start gap-4">

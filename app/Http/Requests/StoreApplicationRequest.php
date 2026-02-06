@@ -23,7 +23,7 @@ class StoreApplicationRequest extends FormRequest
     {
         return [
             'title' => ['nullable', 'string', 'max:255'],
-            'source' => ['required', 'url:http,https', 'max:255'],
+            'source' => ['nullable', 'url:http,https', 'max:255'],
             'notes' => ['nullable', 'string'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],

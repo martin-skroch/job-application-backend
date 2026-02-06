@@ -16,12 +16,16 @@ class ApplicationResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $profile = $this->whenNotNull($this->profile);
+        $experiences = $this->whenNotNull($this->profile?->experiences);
+        $skills = $this->whenNotNull($this->profile?->skills);
+
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            'profile' => new ProfileResource($this->profile),
-            'experiences' => ExperienceResource::collection($this->profile->experiences),
-            'skills' => SkillResource::collection($this->profile->skills),
+            'title' => $this->whenHas('title'),
+            'profile' => new ProfileResource($profile),
+            'experiences' => ExperienceResource::collection($experiences),
+            'skills' => SkillResource::collection($skills),
         ];
     }
 }

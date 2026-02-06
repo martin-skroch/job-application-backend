@@ -42,8 +42,6 @@ class ProfileResource extends JsonResource
             'phone' => $this->phone,
             'email' => $this->email,
             'website' => $this->website,
-            'experiences' => $this->whenCounted('experiences'),
-            'skills' => $this->whenCounted('skills'),
         ];
     }
 }
