@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Scopes\ActiveScope;
 use App\Policies\ApplicationPolicy;
@@ -16,8 +17,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[ObservedBy([ImpressionObserver::class])]
 #[UsePolicy(ApplicationPolicy::class)]
-#[ScopedBy([OwnerScope::class])]
-#[ScopedBy([ActiveScope::class])]
+#[ScopedBy([OwnerScope::class, OrderScope::class, ActiveScope::class])]
 class Impression extends Model
 {
     /** @use HasFactory<\Database\Factories\ImpressionFactory> */

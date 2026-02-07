@@ -65,6 +65,14 @@ new class extends Component {
         Flux::modal('skill-modal')->close();
     }
 
+    public function updateOrder(array $items): void
+    {
+        foreach ($items as $item) {
+            $skill = Skill::where('id', $item['id'])->where('profile_id', $this->profile->id);
+            $skill->update(['order' => $item['order']]);
+        }
+    }
+
     public function resetForm(): void
     {
         $this->reset([
@@ -78,14 +86,6 @@ new class extends Component {
 
         $this->isEditing = false;
         $this->skillId = null;
-    }
-
-    public function updateOrder(array $items): void
-    {
-        foreach ($items as $item) {
-            $skill = Skill::where('id', $item['id'])->where('profile_id', $this->profile->id);
-            $skill->update(['order' => $item['order']]);
-        }
     }
 }; ?>
 <section class="space-y-6">

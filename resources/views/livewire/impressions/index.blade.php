@@ -17,18 +17,12 @@ new class extends Component {
     public bool $isEditing = false;
     public ?string $impressionId = null;
 
+    public $currentImage = null;
     public $image = null;
     public ?string $title = null;
     public ?string $description = null;
-    public ?int $order = null;
+    public ?string $order = null;
     public bool $active = false;
-
-    public function updating($property, $value)
-    {
-        if ($property === 'image' && $value instanceof TemporaryUploadedFile) {
-            $this->currentImage = $value;
-        }
-    }
 
     public function open(?string $id = null): void
     {
@@ -42,6 +36,7 @@ new class extends Component {
 
             $impression = $impressions->where('id', $id)->firstOrFail();
 
+            $this->currentImage = $impression->image;
             $this->image = $impression->image;
             $this->title = $impression->title;
             $this->description = $impression->description;
@@ -70,6 +65,10 @@ new class extends Component {
 
         if ($this->image instanceof TemporaryUploadedFile) {
             $validated['image'] = $this->image->store('impressions', 'public');
+
+            if ($this->currentImage !== null && Storage::exists($this->currentImage)) {
+                Storage::delete($this->currentImage);
+            }
         } else {
             unset($validated['image']);
         }
@@ -120,8 +119,17 @@ new class extends Component {
     }
 
     public function unsetImage(): void {
-        // $this->reset('image');
         $this->image = false;
+    }
+
+    public function updateOrder(array $items): void
+    {
+        foreach ($items as $item) {
+            Impression::where([
+                'id' => $item['id'],
+                'profile_id' => $this->profile->id,
+            ])->update(['order' => $item['order']]);
+        }
     }
 
     public function resetForm(): void
@@ -148,29 +156,40 @@ new class extends Component {
             </flux:button>
         </x-slot:actions>
 
-        <div class="space-y-6">
+        <div class="space-y-6" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
             @foreach ($profile->impressions as $impression)
-            <div class="grid grid-cols-6 gap-8{{ !$impression->active ? ' opacity-60' : '' }}">
-                <img class="col-span-1 w-full aspect-square object-cover" src="{{ $impression->image ? Storage::url($impression->image) : null }}" alt="{{ $impression->title }}">
-                <div class="col-span-3 space-y-4">
-                    <h3 class="text-2xl font-bold">{{ $impression->title }}</h3>
-                    <p class="">{{ $impression->description }}</p>
-                </div>
-                <div class="col-span-2 text-end flex gap-2 justify-end">
-                    <flux:button wire:click="toggleActive('{{ $impression->id }}', {{ $impression->active }})">
+            <flux:callout class="group{{ !$impression->active ? ' opacity-60 inactive' : '' }}" inline :data-id="$impression->id" x-sort:item>
+                <x-slot name="icon">
+                    <img src="{{ $impression->image ? Storage::url($impression->image) : null }}" class="size-16 aspect-square object-cover rounded-md me-2 group-[.inactive]:grayscale">
+                </x-slot>
+
+                <flux:callout.heading><div class="text-lg">{{ $impression->title }}</div></flux:callout.heading>
+
+                @if ($impression->description)
+                <flux:callout.text>{{ $impression->description }}</flux:callout.text>
+                @endif
+
+                <x-slot name="actions">
+                    <flux:button size="sm" variant="danger" wire:click="delete('{{ $impression->id }}')" wire:confirm="{{ __('Are you sure you want to delete this impression?') }}">
+                        {{ __('Delete') }}
+                    </flux:button>
+
+                    <flux:button size="sm" variant="filled" wire:click="open('{{ $impression->id }}')">
+                        {{ __('Edit') }}
+                    </flux:button>
+
+                    <flux:button size="sm" wire:click="toggleActive('{{ $impression->id }}', {{ $impression->active }})">
                         <span class="inline-flex size-2.5 rounded-full {{ $impression->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
                         <span class="ms-2">{{ $impression->active ? __('Deactivate') : __('Activate') }}</span>
                     </flux:button>
 
-                    <flux:button variant="filled" wire:click="open('{{ $impression->id }}')">
-                        {{ __('Edit') }}
-                    </flux:button>
+                    <button class="p-2 opacity-60 group-hover:opacity-100 cursor-move" x-sort:handle>
+                        <flux:icon name="chevron-up-down" />
+                    </button>
 
-                    <flux:button variant="danger" wire:click="delete('{{ $impression->id }}')" wire:confirm="{{ __('Are you sure you want to delete this impression?') }}">
-                        {{ __('Delete') }}
-                    </flux:button>
-                </div>
-            </div>
+                    <flux:badge>{{ $impression->order }}</flux:badge>
+                </x-slot>
+            </flux:callout>
             @endforeach
         </div>
 
@@ -192,8 +211,6 @@ new class extends Component {
                     $imageLabel = __('Update the image');
                 }
             @endphp
-
-            @dump($this)
 
             <form class="space-y-6" wire:submit="save">
                 <flux:field>
