@@ -20,8 +20,15 @@ new class extends Component {
     public $image = null;
     public ?string $title = null;
     public ?string $description = null;
-    public string $order = '';
+    public ?int $order = null;
     public bool $active = false;
+
+    public function updating($property, $value)
+    {
+        if ($property === 'image' && $value instanceof TemporaryUploadedFile) {
+            $this->currentImage = $value;
+        }
+    }
 
     public function open(?string $id = null): void
     {
@@ -53,11 +60,18 @@ new class extends Component {
     {
         $hasId = $this->impressionId !== null && Str::isUlid($this->impressionId);
         $request = $hasId ? new UpdateImpressionRequest() : new StoreImpressionRequest();
+
+        if ($this->image !== false && !$this->image instanceof TemporaryUploadedFile) {
+            $this->reset('image');
+        }
+
         $validated = $this->validate($request->rules());
         $impressions = $this->profile->impressions();
 
         if ($this->image instanceof TemporaryUploadedFile) {
             $validated['image'] = $this->image->store('impressions', 'public');
+        } else {
+            unset($validated['image']);
         }
 
         if (Str::isUlid($this->impressionId)) {
@@ -106,7 +120,8 @@ new class extends Component {
     }
 
     public function unsetImage(): void {
-        $this->image = null;
+        // $this->reset('image');
+        $this->image = false;
     }
 
     public function resetForm(): void
@@ -142,17 +157,17 @@ new class extends Component {
                     <p class="">{{ $impression->description }}</p>
                 </div>
                 <div class="col-span-2 text-end flex gap-2 justify-end">
+                    <flux:button wire:click="toggleActive('{{ $impression->id }}', {{ $impression->active }})">
+                        <span class="inline-flex size-2.5 rounded-full {{ $impression->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
+                        <span class="ms-2">{{ $impression->active ? __('Deactivate') : __('Activate') }}</span>
+                    </flux:button>
+
                     <flux:button variant="filled" wire:click="open('{{ $impression->id }}')">
                         {{ __('Edit') }}
                     </flux:button>
 
                     <flux:button variant="danger" wire:click="delete('{{ $impression->id }}')" wire:confirm="{{ __('Are you sure you want to delete this impression?') }}">
                         {{ __('Delete') }}
-                    </flux:button>
-
-                    <flux:button wire:click="toggleActive('{{ $impression->id }}', {{ $impression->active }})">
-                        <span class="inline-flex size-2.5 rounded-full {{ $impression->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
-                        <span class="ms-2">{{ $impression->active ? __('Deactivate') : __('Activate') }}</span>
                     </flux:button>
                 </div>
             </div>
@@ -172,11 +187,13 @@ new class extends Component {
                 if ($image instanceof TemporaryUploadedFile) {
                     $imageUrl = $image->temporaryUrl();
                     $imageName = $image->getClientOriginalName();
-                } elseif ($image !== null) {
+                } elseif ($image) {
                     $imageUrl = Storage::url($image);
                     $imageLabel = __('Update the image');
                 }
             @endphp
+
+            @dump($this)
 
             <form class="space-y-6" wire:submit="save">
                 <flux:field>
@@ -193,9 +210,15 @@ new class extends Component {
 
                     <flux:error name="image" />
                 </flux:field>
+
+                {{-- <flux:input wire:model="image" type="file" :label="__('Image')" required /> --}}
+
                 <flux:input wire:model="title" type="text" :label="__('Title')" required />
+
                 <flux:textarea wire:model="description" :label="__('Description')" />
+
                 <flux:input wire:model="order" type="text" :label="__('Order')" />
+
                 <flux:switch wire:model="active" :label="__('Active')" align="left" />
 
                 <div class="inline-flex items-center gap-4">

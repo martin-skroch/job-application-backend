@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Impression;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\Rules\ImageFile;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreImpressionRequest extends FormRequest
 {
