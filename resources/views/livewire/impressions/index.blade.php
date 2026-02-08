@@ -159,35 +159,40 @@ new class extends Component {
         <div class="space-y-6" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
             @foreach ($profile->impressions as $impression)
             <flux:callout class="group{{ !$impression->active ? ' opacity-60 inactive' : '' }}" inline :data-id="$impression->id" x-sort:item>
-                <x-slot name="icon">
-                    <img src="{{ $impression->image ? Storage::url($impression->image) : null }}" class="size-16 aspect-square object-cover rounded-md me-2 group-[.inactive]:grayscale">
-                </x-slot>
+                <div class="flex max-sm:flex-col gap-2">
+                    <img src="{{ $impression->image ? Storage::url($impression->image) : null }}" class="size-20 aspect-square object-cover rounded-md me-2 group-[.inactive]:grayscale">
 
-                <flux:callout.heading><div class="text-lg">{{ $impression->title }}</div></flux:callout.heading>
+                    <div class="space-y-2">
+                        <div class="text-lg font-medium">{{ $impression->title }}</div>
 
-                @if ($impression->description)
-                <flux:callout.text>{{ $impression->description }}</flux:callout.text>
-                @endif
+                        @if ($impression->description)
+                        <flux:callout.text>{{ $impression->description }}</flux:callout.text>
+                        @endif
+                    </div>
+                </div>
 
                 <x-slot name="actions">
-                    <flux:button size="sm" variant="danger" wire:click="delete('{{ $impression->id }}')" wire:confirm="{{ __('Are you sure you want to delete this impression?') }}">
-                        {{ __('Delete') }}
-                    </flux:button>
+                    <flux:dropdown>
+                        <flux:button icon="ellipsis-horizontal" variant="ghost" />
 
-                    <flux:button size="sm" variant="filled" wire:click="open('{{ $impression->id }}')">
-                        {{ __('Edit') }}
-                    </flux:button>
+                        <flux:menu>
+                            <flux:menu.item icon="pencil-square" wire:click="open('{{ $impression->id }}')">
+                                {{ __('Edit') }}
+                            </flux:menu.item>
 
-                    <flux:button size="sm" wire:click="toggleActive('{{ $impression->id }}', {{ $impression->active }})">
-                        <span class="inline-flex size-2.5 rounded-full {{ $impression->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
-                        <span class="ms-2">{{ $impression->active ? __('Deactivate') : __('Activate') }}</span>
-                    </flux:button>
+                            <flux:menu.separator />
 
-                    <button class="p-2 opacity-60 group-hover:opacity-100 cursor-move" x-sort:handle>
-                        <flux:icon name="chevron-up-down" />
-                    </button>
+                            <flux:menu.item icon="{{ $impression->active ? 'eye-slash' : 'eye' }}" wire:click="toggleActive('{{ $impression->id }}', {{ $impression->active }})">
+                                {{ $impression->active ? __('Deactivate') : __('Activate') }}
+                            </flux:menu.item>
 
-                    <flux:badge>{{ $impression->order }}</flux:badge>
+                            <flux:menu.separator />
+
+                            <flux:menu.item variant="danger" icon="trash" wire:click="delete('{{ $impression->id }}')" wire:confirm="{{ __('Are you sure you want to delete this impression?') }}">
+                                {{ __('Delete') }}
+                            </flux:menu.item>
+                        </flux:menu>
+                    </flux:dropdown>
                 </x-slot>
             </flux:callout>
             @endforeach
@@ -233,8 +238,6 @@ new class extends Component {
                 <flux:input wire:model="title" type="text" :label="__('Title')" required />
 
                 <flux:textarea wire:model="description" :label="__('Description')" />
-
-                <flux:input wire:model="order" type="text" :label="__('Order')" />
 
                 <flux:switch wire:model="active" :label="__('Active')" align="left" />
 
