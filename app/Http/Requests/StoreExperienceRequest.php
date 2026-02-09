@@ -33,12 +33,13 @@ class StoreExperienceRequest extends FormRequest
         ;
 
         return [
-            'position' => ['required', 'string', 'max:255'],
-            'institution' => ['nullable', 'string', 'max:255'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'type' => ['nullable', 'string', 'max:255'],
             'entry' => ['required', $date],
             'exit' => ['nullable', $date],
+            'institution' => ['nullable', 'string', 'max:255'],
+            'position' => ['required', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'office' => ['nullable', 'string', 'max:255'],
+            'type' => ['nullable', 'string', 'max:255'],
             'skills' => ['array'],
             'skills.*' => ['required', 'ulid', $skillsExistsRule],
             'description' => ['nullable', 'string'],

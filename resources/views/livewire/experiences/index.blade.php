@@ -14,12 +14,13 @@ new class extends Component {
 
     public bool $isEditing = false;
 
-    public string $position = '';
-    public ?string $institution = '';
-    public ?string $location = '';
-    public ?string $type = '';
     public string $entry = '';
     public ?string $exit = null;
+    public ?string $institution = '';
+    public string $position = '';
+    public ?string $location = '';
+    public ?string $office;
+    public ?string $type = '';
     public array $skills = [];
     public ?string $description = '';
     public bool $active = false;
@@ -42,16 +43,17 @@ new class extends Component {
         if ($this->isEditing) {
             $experience = Experience::findOrFail($id);
 
-            $this->experienceId = $experience->id;
-            $this->position = $experience->position;
-            $this->institution = $experience->institution;
-            $this->location = $experience->location;
-            $this->type = $experience->type;
             $this->entry = $experience->entry?->format('Y-m-d');
             $this->exit = $experience->exit?->format('Y-m-d');
+            $this->institution = $experience->institution;
+            $this->position = $experience->position;
+            $this->location = $experience->location;
+            $this->office = $experience->office;
+            $this->type = $experience->type;
             $this->skills = $experience->skills->pluck('id')->all();
             $this->description = $experience->description;
             $this->active = $experience->active;
+            $this->experienceId = $experience->id;
 
             $this->experienceSkills = $experience->skills;
         }
@@ -89,11 +91,17 @@ new class extends Component {
 
     public function delete(string $id): void
     {
-        $experience = Experience::where('id', $id);
+        if (!Str::isUlid($id)) {
+            return;
+        }
+
+        $experience = $this->profile->experiences()->find($id);
+
+        if (!$experience instanceof Experience) {
+            return;
+        }
 
         $experience->delete();
-
-        Flux::modal('experience-modal')->close();
     }
 
     public function clearExit(): void
@@ -110,17 +118,18 @@ new class extends Component {
     public function resetForm(): void
     {
         $this->reset([
-            'isEditing',
-            'experienceId',
-            'position',
-            'institution',
-            'location',
-            'type',
             'entry',
             'exit',
+            'isEditing',
+            'institution',
+            'position',
+            'location',
+            'office',
+            'type',
             'skills',
             'description',
             'active',
+            'experienceId',
         ]);
 
         $this->resetErrorBag();
@@ -172,89 +181,82 @@ new class extends Component {
             </flux:button>
         </x-slot>
 
-        <div class="relative pt-6">
+        <div class="space-y-6">
             @foreach ($profile->experiences as $experience)
-            <div class="grid grid-cols-5{{ !$experience->active ? ' opacity-60' : '' }}">
+            <flux:callout class="group{{ !$experience->active ? ' opacity-60 inactive' : '' }}" inline>
 
-                <div class="col-span-1 px-8 pb-12 space-y-3 text-end">
-                    <div class="inline-flex items-center gap-2 whitespace-nowrap font-mono">
-                        {{ $experience->entry->format('m/Y') }} -
-                        {{ $experience->exit?->format('m/Y') ?? __('Today') }}
-                    </div>
+                <div class="text-2xl font-medium font-mono">{{ $experience->from_to }}</div>
 
-                    <div class="flex items-center justify-end gap-2 text-sm text-zinc-500">
+                <div class="text-2xl font-medium">{{ $experience->institution }}</div>
+
+                <div class="flex items-center gap-4">
+                    @if ($experience->duration)
+                    <div class="flex items-center gap-1 text-sm">
                         <flux:icon name="calendar-days" class="size-4" /> {{ $experience->duration }}
                     </div>
+                    @endif
 
                     @if ($experience->location)
-                    <div class="flex items-center justify-end gap-2 text-sm text-zinc-500">
+                    <div class="flex items-center gap-1 text-sm">
                         <flux:icon name="map-pin" class="size-4" /> {{ $experience->location }}
                     </div>
                     @endif
 
-                    <flux:button.group class="mt-4 justify-end">
-                        <flux:button size="xs" wire:click="open('{{ $experience->id }}')">
-                            {{ __('Edit') }}
-                        </flux:button>
-
-                        <flux:button size="xs" wire:click="toggleActive('{{ $experience->id }}', {{ $experience->active }})">
-                            <span class="me-1">{{ $experience->active ? __('Active') : __('Inactive') }}</span>
-                            <span class="inline-flex size-2 rounded-full {{ $experience->active ? 'bg-emerald-400' : 'bg-zinc-500' }}"></span>
-                        </flux:button>
-                    </flux:button.group>
-                </div>
-
-                <div class="col-span-4 px-8 pb-12 space-y-3 relative">
-                    <h2 class="text-xl relative">
-                        {{ $experience->position }}
-                        <span class="absolute size-4 rounded-full bg-zinc-700 -left-10 top-1.5"></span>
-                    </h2>
-
-                    <div class="text-zinc-400 space-y-3">
-                        @if ($experience->type)
-                        <div class="flex items-center gap-2 text-sm">
-                            <div class="font-bold">{{ __('Type') }}:</div>
-                            <div class="truncate">{{ $experience->type }}</div>
-                        </div>
-                        @endif
-
-                        @if ($experience->institution)
-                        <div class="flex items-center gap-2 text-sm">
-                            <div class="font-bold">{{ __('Institution') }}:</div>
-                            <div class="truncate">{{ $experience->institution }}</div>
-                        </div>
-                        @endif
-
-                        @if ($experience->description)
-                        <p class="text-zinc-400">{{ $experience->description }}</p>
-                        @endif
-
-                        @if ($experience->skills->count() > 0)
-                        <div class="flex flex-wrap gap-2" x-sort x-on:sort.stop="$wire.reorderSkills('{{ $experience->id }}', Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
-                            @foreach ($experience->skills as $skill)
-                            <flux:badge size="sm" class="gap-1" :data-id="$skill->id" x-sort:item>
-                                {{ $skill->name }}
-                                <button class="shrink-0 rounded-full hover:bg-red-800" wire:click="removeSkill('{{ $experience->id }}', '{{ $skill->id }}')">
-                                    <flux:icon name="x-mark" class="size-4 p-0.5" />
-                                </button>
-                            </flux:badge>
-                            @endforeach
-
-                            <flux:badge size="sm" wire:click="chooseSkill('{{ $experience->id }}')">
-                                <flux:icon name="plus" />
-                            </flux:badge>
-                        </div>
-                        @endif
+                    @if ($experience->office)
+                    <div class="flex items-center gap-1 text-sm">
+                        <flux:icon name="computer-desktop" class="size-4" /> {{ $experience->office }}
                     </div>
-
-                    <div class="block absolute h-full w-px rounded-full bg-zinc-700 -translate-x-1/2 left-0 top-2 bottom-2"></div>
-
-                    @if ($loop->last)
-                        <div class="block absolute size-3 rotate-45 bg-zinc-700 -left-1.5 -bottom-5"></div>
                     @endif
                 </div>
 
-            </div>
+                <div class="font-medium">{{ $experience->position }}</div>
+
+                @if ($experience->description)
+                <p class="text-zinc-400">{{ $experience->description }}</p>
+                @endif
+
+                @if ($experience->skills->count() > 0)
+                <div class="flex flex-wrap gap-2" x-sort x-on:sort.stop="$wire.reorderSkills('{{ $experience->id }}', Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
+                    @foreach ($experience->skills as $skill)
+                    <flux:badge size="sm" class="gap-1" :data-id="$skill->id" x-sort:item>
+                        {{ $skill->name }}
+                        <button class="shrink-0 rounded-full hover:bg-red-800" wire:click="removeSkill('{{ $experience->id }}', '{{ $skill->id }}')">
+                            <flux:icon name="x-mark" class="size-4 p-0.5" />
+                        </button>
+                    </flux:badge>
+                    @endforeach
+
+                    <flux:badge size="sm" wire:click="chooseSkill('{{ $experience->id }}')">
+                        <flux:icon name="plus" />
+                    </flux:badge>
+                </div>
+                @endif
+
+                <x-slot name="actions">
+                    <flux:dropdown>
+                        <flux:button icon="ellipsis-horizontal" variant="ghost" />
+
+                        <flux:menu>
+                            <flux:menu.item icon="pencil-square" wire:click="open('{{ $experience->id }}')">
+                                {{ __('Edit') }}
+                            </flux:menu.item>
+
+                            <flux:menu.separator />
+
+                            <flux:menu.item icon="{{ $experience->active ? 'eye-slash' : 'eye' }}" wire:click="toggleActive('{{ $experience->id }}', {{ $experience->active }})">
+                                {{ $experience->active ? __('Deactivate') : __('Activate') }}
+                            </flux:menu.item>
+
+                            <flux:menu.separator />
+
+                            <flux:menu.item variant="danger" icon="trash" wire:click="delete('{{ $experience->id }}')" wire:confirm="{{ __('Are you sure you want to delete this impression?') }}">
+                                {{ __('Delete') }}
+                            </flux:menu.item>
+                        </flux:menu>
+                    </flux:dropdown>
+                </x-slot>
+
+            </flux:callout>
             @endforeach
         </div>
     </x-profiles.layout>
@@ -264,11 +266,6 @@ new class extends Component {
         <flux:separator variant="subtle" />
 
         <form class="space-y-6" wire:submit="save">
-            <flux:input wire:model="position" :label="__('Position')" type="text" required />
-            <flux:input wire:model="type" :label="__('Type')" type="text" />
-            <flux:input wire:model="institution" :label="__('Institution')" type="text" />
-            <flux:input wire:model="location" :label="__('Location')" type="text" />
-
             <div class="grid 2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="entry" :label="__('Entry')" type="date" required />
 
@@ -286,6 +283,18 @@ new class extends Component {
                 </flux:field>
             </div>
 
+            <div class="grid 2xl:grid-cols-2 items-start gap-6">
+                <flux:input wire:model="institution" :label="__('Institution')" type="text" required />
+                <flux:input wire:model="position" :label="__('Position')" type="text" />
+            </div>
+
+            <div class="grid 2xl:grid-cols-2 items-start gap-6">
+                <flux:input wire:model="location" :label="__('Location')" type="text" />
+                <flux:input wire:model="office" :label="__('Office')" type="text" />
+            </div>
+
+            <flux:input wire:model="type" :label="__('Type')" type="text" />
+
             <flux:checkbox.group wire:model.live="skills" class="grid grid-cols-3" :label="__('Skills')" >
                 @foreach ($profile->skills as $skill)
                 <flux:checkbox :label="$skill->name" :value="$skill->id" />
@@ -300,16 +309,9 @@ new class extends Component {
                 <flux:button variant="primary" type="submit">{{ $isEditing ? 'Save' : __('Add') }}</flux:button>
                 <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
             </div>
-
-            @if ($experienceId)
-                <flux:separator variant="subtle" />
-
-                <flux:button class="mb-0" variant="danger" wire:click="delete('{{ $experienceId }}')" wire:confirm="{{ __('Are you sure you want to delete this experience?') }}">
-                    {{ __('Delete') }}
-                </flux:button>
-            @endif
         </form>
     </x-flyout>
+
     <x-flyout name="experience-skills-modal">
         <div class="flex flex-col gap-px">
             @foreach ($profileSkills?->all() ?? [] as $skill)

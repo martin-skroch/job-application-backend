@@ -18,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 
     Volt::route('applications', 'applications.index')->name('applications.index');
+    Volt::route('applications/{application}', 'applications.show')->name('applications.show');
 
     Volt::route('profiles', 'profiles.index')->name('profiles.index');
     Volt::route('profiles/{profile}', 'profiles.show')->name('profiles.show');

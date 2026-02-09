@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Scopes\ActiveScope;
 use App\Observers\ExperienceObserver;
@@ -31,12 +32,13 @@ class Experience extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'position',
-        'institution',
-        'location',
-        'type',
         'entry',
         'exit',
+        'institution',
+        'position',
+        'location',
+        'office',
+        'type',
         'description',
         'active',
     ];
@@ -61,6 +63,24 @@ class Experience extends Model
             'exit' => 'date',
             'active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the duration between entry and exit
+     *
+     * @return string
+     */
+    public function getFromToAttribute(): string
+    {
+        $value = $this->entry->format('m/Y');
+
+        if ($this->exit instanceof Carbon) {
+            $value .= ' - ' . $this->exit->format('m/Y');
+        } else {
+            $value .= ' - ' . __('Today');
+        }
+
+        return $value;
     }
 
     /**

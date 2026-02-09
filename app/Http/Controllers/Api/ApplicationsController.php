@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use App\Models\Application;
 use Illuminate\Http\Request;
+use App\Actions\CreateAnalytics;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApplicationResource;
-use App\Models\Application;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\App;
 
 class ApplicationsController extends Controller
 {
+    public function __construct(
+        private readonly CreateAnalytics $createAnalytics
+    ) {}
+
     public function fetch(Request $request, Application $application): JsonResource|JsonResponse
     {
         if (!$application->sent_at instanceof Carbon) {
@@ -45,6 +50,11 @@ class ApplicationsController extends Controller
             'company_website' => $validated['website'],
             'notes' => $validated['message'],
         ]);
+
+        $this->createAnalytics->create(
+            $request,
+            $application,
+        );
 
         return new ApplicationResource($application);
     }

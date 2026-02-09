@@ -143,7 +143,9 @@ new class extends Component {
         <x-card>
             <div class="grid grid-cols-8 gap-8 items-center">
                 <div class="col-span-2 text-lg font-medium">
-                    {{ $application->company_name }}
+                    <flux:button variant="ghost" class="w-full block text-xl justify-start" :href="route('applications.show', $application)">
+                        {{ $application->company_name }}
+                    </flux:button>
                 </div>
 
                 <div class="col-span-2">
