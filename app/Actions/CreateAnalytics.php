@@ -2,11 +2,10 @@
 
 namespace App\Actions;
 
-use App\Models\Analytics;
 use App\Models\Application;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Cookie;
 
 class CreateAnalytics
 {
@@ -29,7 +28,7 @@ class CreateAnalytics
         ]);
 
         if (!$request->hasCookie($cookieName)) {
-            response()->headers->setCookie(cookie()->forever($cookieName, $cookieValue));
+            cookie($cookieName, $cookieValue);
         }
     }
 }
