@@ -141,28 +141,31 @@ new class extends Component {
 
         @foreach ($applications as $application)
         <x-card>
-            <div class="grid grid-cols-6 gap-8 items-center">
+            <div class="grid grid-cols-8 gap-8 items-center">
                 <div class="col-span-2 text-lg font-medium">
                     {{ $application->company_name }}
                 </div>
 
-                <div>
-                    @if ($application->profile)
-                    <flux:button size="sm" variant="ghost" href="{{ route('profiles.show', $application->profile) }}">
-                        <flux:avatar size="xs" :src="$application->profile->image ? Storage::url($application->profile->image) : null" class="-ml-2" />
-                        {{ $application->profile->name }}
-                    </flux:button>
-                    @endif
+                <div class="col-span-2">
+                    <flux:input size="sm" :value="$application->id" disabled readonly copyable />
                 </div>
 
-                <div>
+                <div class="col-span-2">
+                    @if ($application->profile)
+                    <flux:button variant="ghost" :href="route('profiles.show', $application->profile)" :tooltip="__('Profile: :profile', ['profile' => $application->profile->name])">
+                        <x-slot:icon>
+                            <flux:avatar size="xs" class="size-5" :src="$application->profile->image ? Storage::url($application->profile->image) : null" />
+                        </x-slot:icon>
+                    </flux:button>
+                    @endif
+
                     @if ($application->company_website)
-                    <flux:button size="sm" icon="link" variant="ghost" :href="route('redirect', ['url' => $application->company_website->value()])" target="_blank" rel="noopener" />
+                    <flux:button icon="link" variant="ghost" :href="route('redirect', ['url' => $application->company_website->value()])" target="_blank" rel="noopener" :tooltip="$application->company_website" />
                     @endif
 
                     @php  $mapLink = $application->company_name . '+' . str_replace("\n", ",", $application->company_address); @endphp
                     @if ($application->company_name || $application->company_address)
-                    <flux:button size="sm" icon="map" variant="ghost" href="https://www.google.de/maps/search/{{ $mapLink }}/" target="_blank" rel="noopener" />
+                    <flux:button icon="map" variant="ghost" href="https://www.google.de/maps/search/{{ $mapLink }}/" target="_blank" rel="noopener" />
                     @endif
                 </div>
 
@@ -175,11 +178,21 @@ new class extends Component {
                 </div>
 
                 <div class="text-end space-x-3">
-                    @if (!$application->sent_at instanceof Carbon)
-                        <flux:button wire:click="send('{{ $application->id }}')" size="sm">{{ __('Send') }}</flux:button>
-                    @endif
+                     <flux:dropdown>
+                        <flux:button icon="ellipsis-horizontal" variant="ghost" />
 
-                    <flux:button wire:click="open('{{ $application->id }}')" size="sm">{{ __('Edit') }}</flux:button>
+                        <flux:menu>
+                            <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
+                                {{ __('Edit') }}
+                            </flux:menu.item>
+
+                            @if (!$application->sent_at instanceof Carbon)
+                            <flux:menu.item icon="paper-airplane" wire:click="send('{{ $application->id }}')">
+                                {{ __('Send') }}
+                            </flux:menu.item>
+                            @endif
+                        </flux:menu>
+                    </flux:dropdown>
                 </div>
             </div>
         </x-card>
