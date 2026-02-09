@@ -193,6 +193,8 @@ new class extends Component {
                             </flux:menu.item>
                         </flux:menu>
                     </flux:dropdown>
+
+                    <flux:button icon="chevron-up-down" variant="ghost" x-sort:handle />
                 </x-slot>
             </flux:callout>
             @endforeach
