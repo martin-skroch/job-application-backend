@@ -111,6 +111,16 @@ new class extends Component {
         </flux:callout>
     </div>
 
+    @if($application->text)
+    <flux:callout class="p-6">
+        <h3 class="text-lg font-medium text-zinc-400">{{ __('Text') }}</h3>
+
+        <flux:separator variant="subtle" class="my-3" />
+
+        {{ $application->text }}
+    </flux:callout>
+    @endif
+
     @if($application->notes)
     <flux:callout class="p-6">
         <h3 class="text-lg font-medium text-zinc-400">{{ __('Notes') }}</h3>

@@ -19,6 +19,7 @@ new class extends Component {
 
     public ?string $title = null;
     public ?string $source = null;
+    public ?string $text = null;
     public ?string $notes = null;
     public ?string $contact_name = null;
     public ?string $contact_email = null;
@@ -61,6 +62,7 @@ new class extends Component {
 
             $this->title = $application->title;
             $this->source = $application->source;
+            $this->text = $application->text;
             $this->notes = $application->notes;
 
             $this->contact_name = $application->contact_name;
@@ -260,6 +262,8 @@ new class extends Component {
                     @endforeach
                 </flux:select>
 
+                <flux:textarea wire:model="text" :label="__('Text')" />
+
                 <flux:textarea wire:model="notes" :label="__('Notes')" />
             </div>
 
@@ -289,17 +293,6 @@ new class extends Component {
                     <flux:input wire:model="contact_email" :label="__('Contact email')" />
                     <flux:input wire:model="contact_phone" :label="__('Contact phone')" />
                 </div>
-            </div>
-
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="xl" class="mb-2">{{ __('API') }}</flux:heading>
-                    <flux:separator variant="subtle" />
-                </div>
-
-                @if ($applicationId)
-                <flux:input :value="route('api.application', ['application' => $applicationId])" disabled readonly copyable />
-                @endif
             </div>
 
             <div class="flex items-center justify-start gap-4">
