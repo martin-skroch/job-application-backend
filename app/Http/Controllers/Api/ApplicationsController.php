@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use Carbon\Carbon;
 use App\Models\Application;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Actions\CreateAnalytics;
-use App\Actions\PublishApplication;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
@@ -39,24 +36,15 @@ class ApplicationsController extends Controller
             'company' =>  ['required', 'string', 'max:255'],
             'name' =>  ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string'],
-            'website' => ['nullable', 'url:http,https', 'max:255'],
-            'message' => ['nullable', 'string'],
         ]);
 
         $application = $request->user()->applications()->create([
             'company_name' => $validated['company'],
             'contact_name' => $validated['name'],
             'contact_email' => $validated['email'],
-            'contact_phone' => $validated['phone'],
-            'company_website' => $validated['website'],
-            'notes' => $validated['message'],
         ]);
 
-        $this->createAnalytics->create(
-            $request,
-            $application,
-        );
+        $this->createAnalytics->create($request, $application);
 
         return new ApplicationResource($application);
     }
