@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enum\ExperienceType;
 use App\Models\Profile;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Query\Builder;
@@ -39,7 +40,7 @@ class StoreExperienceRequest extends FormRequest
             'position' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'office' => ['nullable', 'string', 'max:255'],
-            'type' => ['nullable', 'string', 'max:255'],
+            'type' => [Rule::enum(ExperienceType::class)],
             'skills' => ['array'],
             'skills.*' => ['required', 'ulid', $skillsExistsRule],
             'description' => ['nullable', 'string'],

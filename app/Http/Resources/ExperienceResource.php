@@ -18,12 +18,12 @@ class ExperienceResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'position' => $this->position,
-            'institution' => $this->institution,
-            'location' => $this->location,
-            'type' => $this->type,
             'entry' => $this->entry,
             'exit' => $this->exit,
+            'institution' => $this->institution,
+            'position' => $this->position,
+            'location' => $this->location,
+            'office' => $this->office,
             'duration' => $this->duration,
             'description' => $this->description,
             'skills' => SkillResource::collection($skills),

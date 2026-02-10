@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\ExperienceType;
 use Illuminate\Support\Carbon;
 use App\Models\Scopes\OwnerScope;
 use App\Models\Scopes\ActiveScope;
@@ -61,6 +62,7 @@ class Experience extends Model
         return [
             'entry' => 'date',
             'exit' => 'date',
+            'type'=> ExperienceType::class,
             'active' => 'boolean',
         ];
     }

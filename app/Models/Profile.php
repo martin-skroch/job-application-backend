@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\ExperienceType;
 use Illuminate\Support\Carbon;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\ProfileObserver;
@@ -77,9 +78,25 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function experiences(): HasMany
+    public function experiences(?ExperienceType $type = null): HasMany
     {
-        return $this->hasMany(Experience::class);
+        $related = $this->hasMany(Experience::class);
+
+        if ($type instanceof ExperienceType) {
+            $related->where('type', $type->value);
+        }
+
+        return $related;
+    }
+
+    public function workExperiences(): HasMany
+    {
+        return $this->hasMany(Experience::class)->where('type', ExperienceType::Work->value);
+    }
+
+    public function educationExperiences(): HasMany
+    {
+        return $this->hasMany(Experience::class)->where('type', ExperienceType::Education->value);
     }
 
     public function skills(): HasMany

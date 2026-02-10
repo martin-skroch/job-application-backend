@@ -4,6 +4,7 @@ use App\Http\Requests\StoreExperienceRequest;
 use App\Http\Requests\UpdateExperienceRequest;
 use App\Models\Experience;
 use App\Models\Profile;
+use App\Enum\ExperienceType;
 use Flux\Flux;
 use Illuminate\Support\Str;
 use Livewire\Volt\Component;
@@ -11,16 +12,18 @@ use Illuminate\Database\Eloquent\Collection;
 
 new class extends Component {
     public Profile $profile;
+    public ?Collection $experiences = null;
 
     public bool $isEditing = false;
 
+    public string $routeName;
     public string $entry = '';
     public ?string $exit = null;
     public ?string $institution = '';
     public string $position = '';
     public ?string $location = '';
     public ?string $office;
-    public ?string $type = '';
+    public string $type = ExperienceType::Work->value;
     public array $skills = [];
     public ?string $description = '';
     public bool $active = false;
@@ -32,6 +35,13 @@ new class extends Component {
     public function mount(): void
     {
         $this->authorize('viewAny', $this->profile);
+
+        $this->routeName = Route::currentRouteName();
+
+        $this->experiences = match(true) {
+            $this->routeName === 'profiles.experiences' => $this->profile->experiences(ExperienceType::Work)->get(),
+            $this->routeName === 'profiles.educations' => $this->profile->experiences(ExperienceType::Education)->get(),
+        };
     }
 
     public function open(?string $id = null): void
@@ -41,7 +51,10 @@ new class extends Component {
         $this->isEditing = Str::isUlid($id);
 
         if ($this->isEditing) {
-            $experience = Experience::findOrFail($id);
+            $experience = match(true) {
+                $this->routeName === 'profiles.experiences' => $this->profile->experiences(ExperienceType::Work)->findOrFail($id),
+                $this->routeName === 'profiles.educations'=> $this->profile->experiences(ExperienceType::Education)->findOrFail($id),
+            };
 
             $this->entry = $experience->entry?->format('Y-m-d');
             $this->exit = $experience->exit?->format('Y-m-d');
@@ -49,7 +62,6 @@ new class extends Component {
             $this->position = $experience->position;
             $this->location = $experience->location;
             $this->office = $experience->office;
-            $this->type = $experience->type;
             $this->skills = $experience->skills->pluck('id')->all();
             $this->description = $experience->description;
             $this->active = $experience->active;
@@ -125,7 +137,6 @@ new class extends Component {
             'position',
             'location',
             'office',
-            'type',
             'skills',
             'description',
             'active',
@@ -182,7 +193,7 @@ new class extends Component {
         </x-slot>
 
         <div class="space-y-6">
-            @foreach ($profile->experiences as $experience)
+            @foreach ($experiences as $experience)
             <flux:callout class="group{{ !$experience->active ? ' opacity-60 inactive' : '' }}" inline>
 
                 <div class="text-2xl font-medium font-mono">{{ $experience->from_to }}</div>
@@ -292,8 +303,6 @@ new class extends Component {
                 <flux:input wire:model="location" :label="__('Location')" type="text" />
                 <flux:input wire:model="office" :label="__('Office')" type="text" />
             </div>
-
-            <flux:input wire:model="type" :label="__('Type')" type="text" />
 
             <flux:checkbox.group wire:model.live="skills" class="grid grid-cols-3" :label="__('Skills')" >
                 @foreach ($profile->skills as $skill)

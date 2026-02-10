@@ -81,7 +81,7 @@ new class extends Component {
         $this->profile->fill($validated);
         $this->profile->save();
 
-        $this->close();
+        Flux::modal('profile-modal')->close();
 
         $this->dispatch('profile-saved');
     }
@@ -92,7 +92,7 @@ new class extends Component {
 
         $this->profile->delete();
 
-        $this->close();
+        Flux::modal('profile-modal')->close();
 
         $this->redirectRoute('profiles.index', navigate: true);
     }
@@ -102,11 +102,6 @@ new class extends Component {
         $this->deleteImage = $this->profile->image;
         $this->profile->image = null;
         $this->image = null;
-    }
-
-    public function close(): void
-    {
-        Flux::modal('profile-modal')->close();
     }
 }; ?>
 <section class="space-y-6">
