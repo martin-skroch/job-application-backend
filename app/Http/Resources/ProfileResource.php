@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
+use function is_string;
 
 class ProfileResource extends JsonResource
 {
@@ -17,11 +18,22 @@ class ProfileResource extends JsonResource
     public function toArray(Request $request): array
     {
         $image = $this->image;
+        $phone = $this->phone;
+        $email = $this->email;
+
         $birthdate = null;
         $age = null;
 
         if ($image !== null && Storage::exists($image)) {
             $image = Storage::url($image);
+        }
+
+        if (is_string($phone) && $phone !== '') {
+            $phone = base64_encode('tel:' . $phone);
+        }
+
+        if (is_string($email) && $email !== '') {
+            $email = base64_encode('mailto:' . $email);
         }
 
         if ($this->birthdate instanceof Carbon) {
@@ -30,7 +42,6 @@ class ProfileResource extends JsonResource
         }
 
         return [
-            'id' => $this->id,
             'image' => $image,
             'name' => $this->name,
             'address' => $this->address,
@@ -39,8 +50,8 @@ class ProfileResource extends JsonResource
             'birthdate' => $birthdate,
             'birthplace' => $this->birthplace,
             'age' => $age,
-            'phone' => base64_encode('tel:' . $this->phone),
-            'email' => base64_encode('mailto:' . $this->email),
+            'phone' => $phone,
+            'email' => $email,
             'website' => $this->website,
         ];
     }
