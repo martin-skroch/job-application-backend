@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use App\Policies\ApplicationPolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\AsUri;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -54,8 +56,16 @@ class Application extends Model
             'company_name' => 'string',
             'company_address' => 'string',
             'company_website' => AsUri::class,
-            'sent_at' => 'datetime',
+            'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if the application is public
+     */
+    public function isPublic(): bool
+    {
+        return !Str::of($this->public_id)->isEmpty() && $this->published_at instanceof Carbon;
     }
 
     /**

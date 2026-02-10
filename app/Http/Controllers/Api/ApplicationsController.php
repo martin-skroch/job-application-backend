@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use App\Models\Application;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Actions\CreateAnalytics;
+use App\Actions\PublishApplication;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
@@ -20,7 +22,7 @@ class ApplicationsController extends Controller
 
     public function fetch(Request $request, Application $application): JsonResource|JsonResponse
     {
-        if (!$application->sent_at instanceof Carbon) {
+        if (!$application->isPublic()) {
             return new JsonResponse('Not found', 404);
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Actions\PublishApplication;
+use App\Actions\UnpublishApplication;
 use App\Models\Application;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
@@ -25,6 +27,18 @@ new class extends Component {
     public ?string $company_address = null;
     public ?string $company_website = null;
     public ?string $profile_id = null;
+    public ?string $public_id = null;
+
+    private PublishApplication $publishApplication;
+    private UnpublishApplication $unpublishApplication;
+
+    public function boot(
+        PublishApplication $publishApplication,
+        UnpublishApplication $unpublishApplication
+    ) {
+        $this->publishApplication = $publishApplication;
+        $this->unpublishApplication = $unpublishApplication;
+    }
 
     public function with(): array
     {
@@ -57,6 +71,7 @@ new class extends Component {
             $this->company_address = $application->company_address;
             $this->company_website = $application->company_website;
 
+            $this->public_id = $application->public_id;
             $this->profile_id = $application->profile?->id;
 
         }
@@ -81,7 +96,7 @@ new class extends Component {
         $this->resetForm();
     }
 
-    public function send(?string $id = null): void
+    public function publish(?string $id = null): void
     {
         if (!Str::isUlid($id)) {
             return;
@@ -93,7 +108,22 @@ new class extends Component {
             return;
         }
 
-        $application->forceFill(['sent_at' => now()])->save();
+        $this->publishApplication->handle($application);
+    }
+
+    public function unpublish(?string $id = null): void
+    {
+        if (!Str::isUlid($id)) {
+            return;
+        }
+
+        $application = Auth::user()->applications()->find($id);
+
+        if (!$application instanceof Application) {
+            return;
+        }
+
+        $this->unpublishApplication->handle($application);
     }
 
     public function delete(string $id): void
@@ -109,10 +139,6 @@ new class extends Component {
         }
 
         $application->delete();
-
-        Flux::modal('application-modal')->close();
-
-        $this->resetForm();
     }
 
     public function resetForm(): void
@@ -141,15 +167,17 @@ new class extends Component {
 
         @foreach ($applications as $application)
         <x-card>
-            <div class="grid grid-cols-8 gap-8 items-center">
+            <div class="grid grid-cols-7 gap-8 items-center">
                 <div class="col-span-2 text-lg font-medium">
                     <flux:button variant="ghost" class="w-full block text-xl justify-start" :href="route('applications.show', $application)">
                         {{ $application->company_name }}
                     </flux:button>
                 </div>
 
-                <div class="col-span-2">
-                    <flux:input size="sm" :value="$application->id" disabled readonly copyable />
+                <div class="col-span-1">
+                    @if ($application->isPublic())
+                    <flux:input size="sm" :value="$application->public_id" disabled readonly copyable />
+                    @endif
                 </div>
 
                 <div class="col-span-2">
@@ -172,10 +200,10 @@ new class extends Component {
                 </div>
 
                 <div>
-                    @if ($application->sent_at instanceof Carbon)
-                        <x-badge class="bg-emerald-400 text-emerald-950">{{ __('Sent :date', ['date' => $application->sent_at->diffForHumans()]) }}</x-badge>
+                    @if ($application->isPublic())
+                        <x-badge class="bg-emerald-400 text-emerald-950">{{ __('Published :date', ['date' => $application->published_at?->diffForHumans()]) }}</x-badge>
                     @else
-                        <x-badge class="bg-zinc-400 text-zinc-950">{{ __('Not sent') }}</x-badge>
+                        <x-badge class="bg-zinc-400 text-zinc-950">{{ __('Not published') }}</x-badge>
                     @endif
                 </div>
 
@@ -188,11 +216,19 @@ new class extends Component {
                                 {{ __('Edit') }}
                             </flux:menu.item>
 
-                            @if (!$application->sent_at instanceof Carbon)
-                            <flux:menu.item icon="paper-airplane" wire:click="send('{{ $application->id }}')">
-                                {{ __('Send') }}
+                            @if ($application->isPublic())
+                            <flux:menu.item icon="eye" wire:click="unpublish('{{ $application->id }}')">
+                                {{ __('Unpublish') }}
+                            </flux:menu.item>
+                            @else
+                            <flux:menu.item icon="eye-slash" wire:click="publish('{{ $application->id }}')">
+                                {{ __('Publish') }}
                             </flux:menu.item>
                             @endif
+
+                            <flux:menu.item variant="danger" icon="trash" wire:click="delete('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}">
+                                {{ __('Delete') }}
+                            </flux:menu.item>
                         </flux:menu>
                     </flux:dropdown>
                 </div>
@@ -269,10 +305,6 @@ new class extends Component {
             <div class="flex items-center justify-start gap-4">
                 <flux:button variant="primary" type="submit">{{ __($isEditing ? 'Save' : 'Create') }}</flux:button>
                 <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
-
-                @if (Str::isUlid($applicationId))
-                <flux:button variant="danger" wire:click="delete('{{ $applicationId }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}" class="ms-auto not-hover:">{{ __('Delete') }}</flux:button>
-                @endif
             </div>
         </form>
 

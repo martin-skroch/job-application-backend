@@ -39,8 +39,8 @@ class ProfileResource extends JsonResource
             'birthdate' => $birthdate,
             'birthplace' => $this->birthplace,
             'age' => $age,
-            'phone' => $this->phone,
-            'email' => $this->email,
+            'phone' => base64_encode('tel:' . $this->phone),
+            'email' => base64_encode('mailto:' . $this->email),
             'website' => $this->website,
         ];
     }
