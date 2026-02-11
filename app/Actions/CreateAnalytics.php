@@ -28,7 +28,7 @@ class CreateAnalytics
         ]);
 
         if (!$request->hasCookie($cookieName)) {
-            cookie($cookieName, $cookieValue);
+            response()->headers->setCookie(cookie()->forever($cookieName, $cookieValue));
         }
     }
 }

@@ -142,7 +142,6 @@ new class extends Component {
             $headers = [
                 __('Time'),
                 __('Method'),
-                __('Reff'),
                 __('IP'),
                 __('Session'),
                 __('User Agent'),
