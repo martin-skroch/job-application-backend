@@ -45,11 +45,11 @@ new class extends Component {
 
     <flux:separator variant="subtle" />
 
-    <div class="grid grid-cols-2 gap-6">
-        <flux:callout class="p-6">
+    <div class="grid lg:grid-cols-2 gap-6">
+        <flux:callout class="p-4">
             <h3 class="text-lg font-medium text-zinc-400">{{ __('Company') }}</h3>
 
-            <flux:separator variant="subtle" class="my-3" />
+            <flux:separator variant="subtle" class="my-1" />
 
             <div class="space-y-6">
                 <div class="space-y-1">
@@ -75,10 +75,10 @@ new class extends Component {
             </div>
         </flux:callout>
 
-        <flux:callout class="p-6">
+        <flux:callout class="p-4">
             <h3 class="text-lg font-medium text-zinc-400">{{ __('Contact') }}</h3>
 
-            <flux:separator variant="subtle" class="my-3" />
+            <flux:separator variant="subtle" class="my-1" />
 
             <div class="space-y-6">
                 <div class="space-y-1">
@@ -112,31 +112,31 @@ new class extends Component {
     </div>
 
     @if($application->text)
-    <flux:callout class="p-6">
+    <flux:callout class="p-4">
         <h3 class="text-lg font-medium text-zinc-400">{{ __('Text') }}</h3>
 
-        <flux:separator variant="subtle" class="my-3" />
+        <flux:separator variant="subtle" class="my-1" />
 
         {{ $application->text }}
     </flux:callout>
     @endif
 
     @if($application->notes)
-    <flux:callout class="p-6">
+    <flux:callout class="p-4">
         <h3 class="text-lg font-medium text-zinc-400">{{ __('Notes') }}</h3>
 
-        <flux:separator variant="subtle" class="my-3" />
+        <flux:separator variant="subtle" class="my-1" />
 
         {{ $application->notes }}
     </flux:callout>
     @endif
 
-    <flux:callout class="p-6">
+    <flux:callout class="p-4">
         <h3 class="text-lg font-medium text-zinc-400">
             {{ __('Analytics') }} ({{ __(':count Entries', ['count' => $analytics->total()]) }})
         </h3>
 
-        <flux:separator variant="subtle" class="my-3" />
+        <flux:separator variant="subtle" class="my-1" />
 
         @php
             $headers = [
@@ -149,42 +149,43 @@ new class extends Component {
         @endphp
 
         @if($analytics->count() > 0)
-        <table class="min-w-full border-collapse">
-            <thead class="border-b border-zinc-600">
-                <tr>
-                    @foreach ($headers as $header)
-                    <th class="text-sm text-left px-4 py-3 bg-zinc-600">{{ $header }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-600">
-                @foreach($analytics as $entry)
-                    @php
-                        $entries = [
-                            $entry->created_at->format('d.m.Y H:i:s'),
-                            $entry->method,
-                            $entry->ip,
-                            $entry->session,
-                            $entry->user_agent,
-                        ];
-                    @endphp
-
-                    <tr>
-                        @foreach ($entries as $entry)
-                        <td class="text-sm text-left whitespace-nowrap px-4 py-3 truncate">
-                            {{ $entry }}
-                        </td>
+        <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse block md:table" role="table">
+                <thead class="border-b border-zinc-600">
+                    <tr class="block md:table-row">
+                        @foreach ($headers as $header)
+                        <th class="text-sm text-left px-4 py-3 bg-zinc-600">{{ $header }}</th>
                         @endforeach
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-zinc-600">
+                    @foreach($analytics as $entry)
+                        @php
+                            $entries = [
+                                $entry->created_at->format('d.m.Y H:i:s'),
+                                $entry->method,
+                                $entry->ip,
+                                $entry->session,
+                                $entry->user_agent,
+                            ];
+                        @endphp
+                        <tr class="block md:table-row">
+                            @foreach ($entries as $entry)
+                            <td class="text-sm text-left whitespace-nowrap px-4 py-3 truncate block md:table-cell">
+                                {{ $entry }}
+                            </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
         <div class="mt-6">
             {{ $analytics->links() }}
         </div>
         @else
-            <p class="text-gray-500">Keine Analytics verfügbar</p>
+            <p>Keine Analytics verfügbar</p>
         @endif
     </flux:callout>
 </div>

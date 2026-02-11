@@ -169,9 +169,9 @@ new class extends Component {
 
         @foreach ($applications as $application)
         <x-card>
-            <div class="grid grid-cols-7 gap-8 items-center">
+            <div class="grid xl:grid-cols-7 gap-4 xl:gap-8 items-center">
                 <div class="col-span-2 text-lg font-medium">
-                    <flux:button variant="ghost" class="w-full block text-xl justify-start" :href="route('applications.show', $application)">
+                    <flux:button variant="ghost" inset class="w-full block text-xl justify-start" :href="route('applications.show', $application)">
                         {{ $application->company_name }}
                     </flux:button>
                 </div>
@@ -213,7 +213,7 @@ new class extends Component {
 
                 <div class="text-end space-x-3">
                      <flux:dropdown>
-                        <flux:button icon="ellipsis-horizontal" variant="ghost" />
+                        <flux:button icon="ellipsis-horizontal" />
 
                         <flux:menu>
                             <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
@@ -252,9 +252,9 @@ new class extends Component {
 
         <form class="space-y-16" wire:submit="save">
             <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid lg:grid-cols-2 gap-6">
                     <flux:input wire:model="title" :label="__('Title')" />
-                    <flux:input wire:model="source" :label="__('Source')" />
+                    <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
                 </div>
 
                 <flux:select wire:model="profile_id" :label="__('Profile')" required>
@@ -275,9 +275,9 @@ new class extends Component {
                     <flux:separator variant="subtle" />
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <flux:input wire:model="company_name" :label="__('Company name')" />
-                    <flux:input wire:model="company_website" :label="__('Company website')" />
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <flux:input wire:model="company_name" :label="__('Company name')" icon="building-office" />
+                    <flux:input wire:model="company_website" :label="__('Company website')" type="url" icon="link" />
                 </div>
 
                 <flux:textarea wire:model="company_address" :label="__('Company address')" />
@@ -289,11 +289,11 @@ new class extends Component {
                     <flux:separator variant="subtle" />
                 </div>
 
-                <flux:input wire:model="contact_name" :label="__('Contact name')" />
+                <flux:input wire:model="contact_name" :label="__('Contact name')" icon="user" />
 
-                <div class="grid grid-cols-2 gap-6">
-                    <flux:input wire:model="contact_email" :label="__('Contact email')" />
-                    <flux:input wire:model="contact_phone" :label="__('Contact phone')" />
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <flux:input wire:model="contact_email" :label="__('Contact email')" type="email" icon="at-symbol" />
+                    <flux:input wire:model="contact_phone" :label="__('Contact phone')" type="tel" icon="phone" />
                 </div>
             </div>
 
