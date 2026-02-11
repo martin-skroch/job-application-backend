@@ -28,6 +28,7 @@ class ApplicationResource extends JsonResource
             'id' => $this->id,
             'title' => $this->whenHas('title'),
             'text' => $this->whenHas('text'),
+            'company' => $this->whenHas('company_name'),
             'profile' => new ProfileResource($profile),
             'experiences' => ExperienceResource::collection($experiences),
             'educations' => ExperienceResource::collection($educations),
