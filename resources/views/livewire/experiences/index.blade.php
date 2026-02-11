@@ -23,7 +23,7 @@ new class extends Component {
     public string $position = '';
     public ?string $location = '';
     public ?string $office;
-    public string $type = ExperienceType::Work->value;
+    public ?ExperienceType $type;
     public array $skills = [];
     public ?string $description = '';
     public bool $active = false;
@@ -38,10 +38,17 @@ new class extends Component {
 
         $this->routeName = Route::currentRouteName();
 
-        $this->experiences = match(true) {
-            $this->routeName === 'profiles.experiences' => $this->profile->experiences(ExperienceType::Work)->get(),
-            $this->routeName === 'profiles.educations' => $this->profile->experiences(ExperienceType::Education)->get(),
-        };
+        switch(true) {
+            case $this->routeName === 'profiles.experiences':
+                $this->type = ExperienceType::Work;
+                break;
+
+            case $this->routeName === 'profiles.educations':
+                $this->type = ExperienceType::Education;
+                break;
+        }
+
+        $this->experiences = $this->profile->experiences($this->type)->get();
     }
 
     public function open(?string $id = null): void
@@ -51,10 +58,7 @@ new class extends Component {
         $this->isEditing = Str::isUlid($id);
 
         if ($this->isEditing) {
-            $experience = match(true) {
-                $this->routeName === 'profiles.experiences' => $this->profile->experiences(ExperienceType::Work)->findOrFail($id),
-                $this->routeName === 'profiles.educations'=> $this->profile->experiences(ExperienceType::Education)->findOrFail($id),
-            };
+            $experience = $this->profile->experiences($this->type)->findOrFail($id);
 
             $this->entry = $experience->entry?->format('Y-m-d');
             $this->exit = $experience->exit?->format('Y-m-d');
@@ -303,6 +307,12 @@ new class extends Component {
                 <flux:input wire:model="location" :label="__('Location')" type="text" />
                 <flux:input wire:model="office" :label="__('Office')" type="text" />
             </div>
+
+            <flux:radio.group wire:model="type" :label="__('Type')" variant="segmented">
+                @foreach (ExperienceType::names() as $value => $label)
+                <flux:radio :value="$value" :label="$label" />
+                @endforeach
+            </flux:radio.group>
 
             <flux:checkbox.group wire:model.live="skills" class="grid grid-cols-3" :label="__('Skills')" >
                 @foreach ($profile->skills as $skill)
