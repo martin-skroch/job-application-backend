@@ -140,10 +140,9 @@ new class extends Component {
 
         @php
             $headers = [
+                __('Session'),
                 __('Time'),
                 __('Method'),
-                __('IP'),
-                __('Session'),
                 __('User Agent'),
             ];
         @endphp
@@ -162,17 +161,16 @@ new class extends Component {
                     @foreach($analytics as $entry)
                         @php
                             $entries = [
-                                $entry->created_at->format('d.m.Y H:i:s'),
-                                $entry->method,
-                                $entry->ip,
-                                $entry->session,
-                                $entry->user_agent,
+                                $entry->session => Str::of($entry->session)->limit(20),
+                                $entry->created_at->format('d.m.Y H:i:s') => $entry->created_at->diffForHumans(),
+                                $entry->method => $entry->method,
+                                $entry->user_agent => Str::of($entry->user_agent)->limit(30),
                             ];
                         @endphp
                         <tr class="block md:table-row">
-                            @foreach ($entries as $entry)
-                            <td class="text-sm text-left whitespace-nowrap px-4 py-3 truncate block md:table-cell">
-                                {{ $entry }}
+                            @foreach ($entries as $long => $short)
+                            <td class="text-sm text-left whitespace-nowrap px-4 py-3 truncate block md:table-cell" title="{{ $long }}">
+                                {{ $short }}
                             </td>
                             @endforeach
                         </tr>

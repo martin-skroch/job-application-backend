@@ -44,7 +44,10 @@ class ApplicationsController extends Controller
             'contact_email' => $validated['email'],
         ]);
 
-        $this->createAnalytics->create($request, $application);
+        $this->createAnalytics->create(
+            $request,
+            $application
+        );
 
         return new ApplicationResource($application);
     }
