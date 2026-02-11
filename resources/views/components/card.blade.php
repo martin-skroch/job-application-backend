@@ -7,7 +7,7 @@
 <flux:callout {{ $attributes->class('relative p-4')->only('class') }}>
 
     @isset ($heading)
-    <h3 {{ $heading->attributes->class('text-lg font-medium border-b border-dotted border-zinc-500 pb-3 mb-3') }}>
+    <h3 {{ $heading->attributes->class('text-lg font-medium pb-3 mb-3') }}>
         {{ $heading }}
     </h3>
     @endisset
