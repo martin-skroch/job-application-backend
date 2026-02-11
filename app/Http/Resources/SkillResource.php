@@ -18,7 +18,7 @@ class SkillResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'info' => $this->info ?: null,
-            'rating' => intval($this->ratingInPercent),
+            'rating' => $this->rating,
         ];
     }
 }
