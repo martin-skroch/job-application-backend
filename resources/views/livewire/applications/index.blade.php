@@ -176,9 +176,11 @@ new class extends Component {
                     </flux:button>
                 </div>
 
-                <div class="col-span-1">
+                <div class="col-span-1 whitespace-nowrap">
                     @if ($application->isPublic())
-                    <flux:input size="sm" :value="$application->public_id" disabled readonly copyable />
+                    <flux:button icon="globe-europe-africa" size="sm" :href="config('app.frontend_url') . '/' . $application->public_id" target="_blank" rel="noopener">
+                        {{ $application->public_id  }}
+                    </flux:button>
                     @endif
                 </div>
 
