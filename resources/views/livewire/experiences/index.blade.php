@@ -307,6 +307,10 @@ new class extends Component {
                 </div>
                 @endif
 
+                <div>
+                    {{ __('Files') }}: {{ $experience->files()->count() }}
+                </div>
+
                 <x-slot name="actions">
                     <flux:dropdown>
                         <flux:button icon="ellipsis-horizontal" variant="ghost" />
