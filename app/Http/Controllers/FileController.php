@@ -17,7 +17,8 @@ class FileController extends Controller
         try {
             $path = Storage::path($file->path);
 
-            return response()->download($path, $file->title, [
+            return response()->file($path, [
+                'Content-Disposition' => 'filename="' . $file->title . '"',
                 'Content-Type' => $file->mime,
             ]);
         } catch (Throwable $e) {
