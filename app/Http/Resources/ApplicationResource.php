@@ -36,6 +36,7 @@ class ApplicationResource extends JsonResource
             'title' => $this->whenHas('title'),
             'text' => $this->whenHas('text'),
             'company' => $this->whenHas('company_name'),
+            'contact' => $this->whenHas('contact_name'),
             'profile' => new ProfileResource($profile),
             'experiences' => ExperienceResource::collection($experiences),
             'educations' => ExperienceResource::collection($educations),
