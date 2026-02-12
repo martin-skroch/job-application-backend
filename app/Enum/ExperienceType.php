@@ -6,6 +6,8 @@ enum ExperienceType: string
 {
     case Work = 'work';
     case Education = 'education';
+    case Training = 'training';
+    case School = 'school';
 
     public static function values(): array
     {

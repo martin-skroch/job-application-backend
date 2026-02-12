@@ -29,7 +29,7 @@ new class extends Component {
     public string $position = '';
     public ?string $location = '';
     public ?string $office;
-    public ?ExperienceType $type;
+    public ?ExperienceType $type = null;
     public array $skills = [];
     public ?string $description = '';
     public bool $active = false;
@@ -50,17 +50,18 @@ new class extends Component {
 
         $this->routeName = Route::currentRouteName();
 
-        switch(true) {
-            case $this->routeName === 'profiles.experiences':
-                $this->type = ExperienceType::Work;
-                break;
+        $this->type = match(true) {
+            $this->routeName === 'profiles.experiences' => ExperienceType::Work,
+            $this->routeName === 'profiles.educations' => ExperienceType::Education,
+            $this->routeName === 'profiles.training' => ExperienceType::Training,
+            $this->routeName === 'profiles.school' => ExperienceType::School,
+        };
 
-            case $this->routeName === 'profiles.educations':
-                $this->type = ExperienceType::Education;
-                break;
+        if ($this->type instanceof ExperienceType) {
+            $this->experiences = $this->profile->experiences($this->type)->get();
+        } else {
+            $this->experiences = new Collection();
         }
-
-        $this->experiences = $this->profile->experiences($this->type)->get();
     }
 
     public function open(?string $id = null): void

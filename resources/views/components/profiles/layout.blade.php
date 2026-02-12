@@ -19,6 +19,14 @@
                 {{ __('Educations') }}
             </flux:navlist.item>
 
+            <flux:navlist.item :href="route('profiles.training', $profile)" :current="request()->routeIs('profiles.training')" wire:navigate>
+                {{ __('Training') }}
+            </flux:navlist.item>
+
+            <flux:navlist.item :href="route('profiles.school', $profile)" :current="request()->routeIs('profiles.school')" wire:navigate>
+                {{ __('School') }}
+            </flux:navlist.item>
+
             <flux:navlist.item :href="route('profiles.skills', $profile)" :current="request()->routeIs('profiles.skills')" wire:navigate>
                 {{ __('Skills') }}
             </flux:navlist.item>

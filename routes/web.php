@@ -26,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('profiles/{profile}', 'profiles.show')->name('profiles.show');
     Volt::route('profiles/{profile}/experiences', 'experiences.index')->name('profiles.experiences');
     Volt::route('profiles/{profile}/educations', 'experiences.index')->name('profiles.educations');
+    Volt::route('profiles/{profile}/training', 'experiences.index')->name('profiles.training');
+    Volt::route('profiles/{profile}/school', 'experiences.index')->name('profiles.school');
     Volt::route('profiles/{profile}/skills', 'skills.index')->name('profiles.skills');
     Volt::route('profiles/{profile}/impressions', 'impressions.index')->name('profiles.impressions');
 });
