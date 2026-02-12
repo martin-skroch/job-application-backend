@@ -1,16 +1,22 @@
 <?php
 
+use App\Enum\ExperienceType;
 use App\Http\Requests\StoreExperienceRequest;
 use App\Http\Requests\UpdateExperienceRequest;
 use App\Models\Experience;
 use App\Models\Profile;
-use App\Enum\ExperienceType;
+use App\Models\File;
 use Flux\Flux;
-use Illuminate\Support\Str;
-use Livewire\Volt\Component;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Validate;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 new class extends Component {
+    use WithFileUploads;
+
     public Profile $profile;
     public ?Collection $experiences = null;
 
@@ -27,6 +33,12 @@ new class extends Component {
     public array $skills = [];
     public ?string $description = '';
     public bool $active = false;
+
+    #[Validate('nullable|string|max:255')]
+    public $fileTitle = null;
+
+    #[Validate('file|mimetypes:application/pdf|max:5120')]
+    public $fileObject = null;
 
     public ?string $experienceId = null;
     public ?Collection $profileSkills = null;
@@ -111,11 +123,11 @@ new class extends Component {
             return;
         }
 
-        $experience = $this->profile->experiences()->find($id);
-
-        if (!$experience instanceof Experience) {
-            return;
-        }
+        $experience = Experience::where([
+            'id' => $id,
+            'user_id' => Auth::user()->id,
+            'profile_id' => $this->profile->id,
+        ]);
 
         $experience->delete();
     }
@@ -127,7 +139,15 @@ new class extends Component {
 
     public function toggleActive(string $id, bool $active = false): void
     {
-        $experience = Experience::where('id', $id);
+        if (!Str::isUlid($id)) {
+            return;
+        }
+
+        $experience = Experience::where([
+            'id' => $id,
+            'profile_id' => $this->profile->id,
+        ]);
+
         $experience->update(['active' => !$active]);
     }
 
@@ -160,6 +180,46 @@ new class extends Component {
     public function addSkill(): void
     {
 
+    }
+
+    public function addFile(string $id): void
+    {
+        $this->reset([
+            'experienceId',
+            'fileTitle',
+            'fileObject',
+        ]);
+
+        if (!Str::isUlid($id)) {
+            return;
+        }
+
+        $this->experienceId = $id;
+
+        Flux::modal('experience-file-modal')->show();
+    }
+
+    public function saveFile(): void
+    {
+        if (!$this->fileObject instanceof TemporaryUploadedFile) {
+            return;
+        }
+
+        File::forceCreate([
+            'title' => $this->fileTitle ?? $this->fileObject?->getClientOriginalName(),
+            'path' => $this->fileObject->store(path: 'files'),
+            'mime' => $this->fileObject->getMimeType(),
+            'size' => $this->fileObject->getSize(),
+            'experience_id' => $this->experienceId,
+        ]);
+
+        Flux::modal('experience-file-modal')->close();
+
+        $this->reset([
+            'experienceId',
+            'fileTitle',
+            'fileObject',
+        ]);
     }
 
     public function removeSkill(string $experienceId, string $skillId): void
@@ -253,7 +313,11 @@ new class extends Component {
 
                         <flux:menu>
                             <flux:menu.item icon="pencil-square" wire:click="open('{{ $experience->id }}')">
-                                {{ __('Edit') }}
+                                {{ __('Edit Experience') }}
+                            </flux:menu.item>
+
+                            <flux:menu.item icon="paper-clip" wire:click="addFile('{{ $experience->id }}')">
+                                {{ __('Attach File') }}
                             </flux:menu.item>
 
                             <flux:menu.separator />
@@ -349,5 +413,20 @@ new class extends Component {
         <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">
             {{ __('Cancel') }}
         </flux:button>
+    </x-flyout>
+
+    <x-flyout name="experience-file-modal">
+        <flux:heading size="xl" level="1">{{ __('Attach a file') }}</flux:heading>
+        <flux:separator variant="subtle" />
+
+        <form class="space-y-6" wire:submit="saveFile">
+            <flux:input type="text" wire:model="fileTitle" :label="__('Title')" />
+            <flux:input type="file" wire:model="fileObject" :label="__('File')" />
+
+            <div class="inline-flex items-center gap-4">
+                <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
+                <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
+            </div>
+        </form>
     </x-flyout>
 </section>

@@ -15,6 +15,7 @@ class ExperienceResource extends JsonResource
     public function toArray(Request $request): array
     {
         $skills = $this->whenNotNull($this->skills);
+        $files = $this->whenNotNull($this->files);
 
         return [
             'id' => $this->id,
@@ -27,6 +28,7 @@ class ExperienceResource extends JsonResource
             'duration' => $this->duration,
             'description' => $this->description,
             'skills' => SkillResource::collection($skills),
+            'files' => FileResource::collection($files)
         ];
     }
 }

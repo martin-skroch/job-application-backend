@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\RedirectController;
-use Livewire\Volt\Volt;
-use Laravel\Fortify\Features;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Features;
+use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -12,6 +13,8 @@ Route::get('/', function () {
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('file/{file}', FileController::class)->name('file');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
