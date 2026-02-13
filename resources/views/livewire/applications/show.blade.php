@@ -20,7 +20,7 @@ new class extends Component {
         ];
     }
 
-    #[\Livewire\Attributes\On('deleteAnalytics')]
+    // #[\Livewire\Attributes\On('deleteAnalytics')]
     // public function deleteAnalytics(string $id): void
     // {
     //     $this->authorize('view', $this->application);
@@ -29,8 +29,7 @@ new class extends Component {
 
     //     $this->dispatch('notify', message: 'Analytics-Eintrag gelöscht');
     // }
-};
-?>
+}; ?>
 
 <section class="space-y-6">
     <div class="flex items-center">
