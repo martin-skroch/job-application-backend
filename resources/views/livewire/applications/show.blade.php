@@ -13,20 +13,22 @@ new class extends Component {
     public function with(): array
     {
         return [
-            'analytics' => $this->application->analytics()
+            'analytics' => $this->application
+                ->analytics()
                 ->latest('created_at')
                 ->paginate(50),
         ];
     }
 
     #[\Livewire\Attributes\On('deleteAnalytics')]
-    public function deleteAnalytics(string $id): void
-    {
-        $this->authorize('view', $this->application);
+    // public function deleteAnalytics(string $id): void
+    // {
+    //     $this->authorize('view', $this->application);
 
-        Analytics::findOrFail($id)->delete();
-        $this->dispatch('notify', message: 'Analytics-Eintrag gelöscht');
-    }
+    //     Analytics::findOrFail($id)->delete();
+
+    //     $this->dispatch('notify', message: 'Analytics-Eintrag gelöscht');
+    // }
 };
 ?>
 
@@ -34,7 +36,14 @@ new class extends Component {
     <div class="flex items-center">
         <div class="grow">
             <flux:heading size="xl" level="1">{{ $application->title }}</flux:heading>
-            <flux:subheading size="lg">{{ $application->company_name }}</flux:subheading>
+            @if ($application->source)
+            <flux:subheading class="flex items-center gap-1.5 text-base!">
+                <flux:icon class="size-3.5" name="link" /> {{ __('Source') }}:
+                <a href="{{ route('redirect', ['url' => (string) $application->source]) }}" target="_blank" rel="noopener" class="hover:text-accent hover:underline inline-flex items-center gap-1">
+                    {{ $application->source }}
+                </a>
+            </flux:subheading>
+            @endif
         </div>
         <div>
             <flux:button variant="ghost" :loading="false" :href="route('applications.index')" wire:navigate>
@@ -44,6 +53,14 @@ new class extends Component {
     </div>
 
     <flux:separator variant="subtle" />
+
+    <flux:callout class="p-4">
+        <h3 class="text-lg font-medium text-zinc-400">{{ __('Text') }}</h3>
+
+        <flux:separator variant="subtle" class="my-1" />
+
+        {{ $application->text }}
+    </flux:callout>
 
     <div class="grid lg:grid-cols-2 gap-6">
         <flux:callout class="p-4">
@@ -57,21 +74,28 @@ new class extends Component {
                     <div class="text-lg">{{ $application->company_name }}</div>
                 </div>
 
+                @if ($application->company_name && $application->company_address)
                 <div class="space-y-1">
                     <div class="text-sm font-medium text-zinc-400">{{ __('Address') }}</div>
-                    <div class="text-lg">{!! nl2br($application->company_address) !!}</div>
+                    <div class="text-lg">
+                        @php  $mapLink = $application->company_name . '+' . str_replace("\n", ",", $application->company_address); @endphp
+                        <a href="https://www.google.de/maps/search/{{ $mapLink }}/" target="_blank" rel="noopener" class="inline-flex text-accent hover:underline">
+                            {!! nl2br($application->company_address) !!}
+                        </a>
+                    </div>
                 </div>
+                @endif
 
+                @if($application->company_website)
                 <div class="space-y-1">
                     <div class="text-sm font-medium text-zinc-400">{{ __('Website') }}</div>
                     <div class="text-lg">
-                        @if($application->company_website)
                         <a href="{{ route('redirect', ['url' => (string) $application->company_website]) }}" target="_blank" rel="noopener" class="text-accent hover:underline">
                             {{ $application->company_website }}
                         </a>
-                        @endif
                     </div>
                 </div>
+                @endif
             </div>
         </flux:callout>
 
@@ -81,13 +105,16 @@ new class extends Component {
             <flux:separator variant="subtle" class="my-1" />
 
             <div class="space-y-6">
+                @if ($application->contact_name)
                 <div class="space-y-1">
-                    <div class="text-sm font-medium text-zinc-400">{{ __('Contact name') }}</div>
+                    <div class="text-sm font-medium text-zinc-400">{{ __('Name') }}</div>
                     <div class="text-lg">{{ $application->contact_name }}</div>
                 </div>
+                @endif
 
+                @if ($application->contact_email)
                 <div class="space-y-1">
-                    <div class="text-sm font-medium text-zinc-400">{{ __('Contact email') }}</div>
+                    <div class="text-sm font-medium text-zinc-400">{{ __('Email') }}</div>
                     <div class="text-lg">
                         @if ($application->contact_email)
                         <a href="mailto:{{ $application->contact_email }}" class="text-accent hover:underline">
@@ -96,9 +123,11 @@ new class extends Component {
                         @endif
                     </div>
                 </div>
+                @endif
 
+                @if ($application->contact_phone)
                 <div class="space-y-1">
-                    <div class="text-sm font-medium text-zinc-400">{{ __('Contact phone') }}</div>
+                    <div class="text-sm font-medium text-zinc-400">{{ __('Phone') }}</div>
                     <div class="text-lg">
                         @if ($application->contact_phone)
                         <a href="tel:{{ $application->contact_phone }}" class="text-accent hover:underline">
@@ -107,19 +136,10 @@ new class extends Component {
                         @endif
                     </div>
                 </div>
+                @endif
             </div>
         </flux:callout>
     </div>
-
-    @if($application->text)
-    <flux:callout class="p-4">
-        <h3 class="text-lg font-medium text-zinc-400">{{ __('Text') }}</h3>
-
-        <flux:separator variant="subtle" class="my-1" />
-
-        {{ $application->text }}
-    </flux:callout>
-    @endif
 
     @if($application->notes)
     <flux:callout class="p-4">

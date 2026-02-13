@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 use App\Policies\ApplicationPolicy;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\AsUri;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsUri;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 #[UsePolicy(ApplicationPolicy::class)]
 class Application extends Model
@@ -61,11 +62,29 @@ class Application extends Model
     }
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('sortByEntry', function (Builder $query) {
+            $query->latest();
+        });
+    }
+
+    /**
      * Check if the application is public
      */
     public function isPublic(): bool
     {
         return !Str::of($this->public_id)->isEmpty() && $this->published_at instanceof Carbon;
+    }
+
+    /**
+     * Get the user that owns the experience.
+     */
+    public function getMapUrlAttribute(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

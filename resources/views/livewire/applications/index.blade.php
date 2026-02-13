@@ -157,8 +157,8 @@ new class extends Component {
             <flux:subheading size="lg">{{ __('Manage you applications') }}</flux:subheading>
         </div>
         <div>
-            <flux:button variant="primary" :loading="false" wire:click="open">
-                {{ __('Create Application') }}
+            <flux:button icon="plus" variant="primary" :loading="false" wire:click="open">
+                {{ __('Create') }}
             </flux:button>
         </div>
     </div>
@@ -168,76 +168,51 @@ new class extends Component {
     <div class="space-y-4">
 
         @foreach ($applications as $application)
-        <x-card>
-            <div class="grid xl:grid-cols-7 gap-4 xl:gap-8 items-center">
-                <div class="col-span-2 text-lg font-medium">
-                    <flux:button variant="ghost" inset class="w-full block text-xl justify-start" :href="route('applications.show', $application)">
-                        {{ $application->company_name }}
-                    </flux:button>
-                </div>
+        <flux:callout class="p-3" inline>
+            <flux:callout.heading class="text-base!">
+                <a href="{{ route('applications.show', $application) }}" class="hover:text-accent hover:underline" wire:navigate>
+                    {{ $application->company_name }}
+                </a>
+            </flux:callout.heading>
 
-                <div class="col-span-1 whitespace-nowrap">
-                    @if ($application->isPublic())
-                    <flux:button icon="globe-europe-africa" size="sm" :href="config('app.frontend_url') . '/' . $application->public_id" target="_blank" rel="noopener">
-                        {{ $application->public_id  }}
-                    </flux:button>
-                    @endif
-                </div>
+            <x-slot name="actions" class="me-4! self-center!">
+                @if ($application->isPublic())
+                <flux:button icon="globe-europe-africa" class="font-mono" size="sm" variant="primary" color="lime" target="_blank" rel="noopener" :href="config('app.frontend_url') . '/' . $application->public_id">
+                    {{ $application->public_id }}
+                </flux:button>
+                @else
+                <flux:button icon="eye-slash" size="sm" disabled>
+                    {{ __('Not public') }}
+                </flux:button>
+                @endif
+            </x-slot>
 
-                <div class="col-span-2">
-                    @if ($application->profile)
-                    <flux:button variant="ghost" :href="route('profiles.show', $application->profile)" :tooltip="__('Profile: :profile', ['profile' => $application->profile->name])">
-                        <x-slot:icon>
-                            <flux:avatar size="xs" class="size-5" :src="$application->profile->image ? Storage::url($application->profile->image) : null" />
-                        </x-slot:icon>
-                    </flux:button>
-                    @endif
+            <x-slot name="controls">
+                <flux:dropdown class="ms-auto">
+                    <flux:button icon="ellipsis-horizontal" variant="filled" />
 
-                    @if ($application->company_website)
-                    <flux:button icon="link" variant="ghost" :href="route('redirect', ['url' => $application->company_website->value()])" target="_blank" rel="noopener" :tooltip="$application->company_website" />
-                    @endif
+                    <flux:menu>
+                        <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
+                            {{ __('Edit') }}
+                        </flux:menu.item>
 
-                    @php  $mapLink = $application->company_name . '+' . str_replace("\n", ",", $application->company_address); @endphp
-                    @if ($application->company_name || $application->company_address)
-                    <flux:button icon="map" variant="ghost" href="https://www.google.de/maps/search/{{ $mapLink }}/" target="_blank" rel="noopener" />
-                    @endif
-                </div>
+                        @if ($application->isPublic())
+                        <flux:menu.item icon="eye" wire:click="unpublish('{{ $application->id }}')">
+                            {{ __('Unpublish') }}
+                        </flux:menu.item>
+                        @else
+                        <flux:menu.item icon="eye-slash" wire:click="publish('{{ $application->id }}')">
+                            {{ __('Publish') }}
+                        </flux:menu.item>
+                        @endif
 
-                <div>
-                    @if ($application->isPublic())
-                        <x-badge class="bg-emerald-400 text-emerald-950">{{ __('Published :date', ['date' => $application->published_at?->diffForHumans()]) }}</x-badge>
-                    @else
-                        <x-badge class="bg-zinc-400 text-zinc-950">{{ __('Not published') }}</x-badge>
-                    @endif
-                </div>
-
-                <div class="text-end space-x-3">
-                     <flux:dropdown>
-                        <flux:button icon="ellipsis-horizontal" />
-
-                        <flux:menu>
-                            <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
-                                {{ __('Edit') }}
-                            </flux:menu.item>
-
-                            @if ($application->isPublic())
-                            <flux:menu.item icon="eye" wire:click="unpublish('{{ $application->id }}')">
-                                {{ __('Unpublish') }}
-                            </flux:menu.item>
-                            @else
-                            <flux:menu.item icon="eye-slash" wire:click="publish('{{ $application->id }}')">
-                                {{ __('Publish') }}
-                            </flux:menu.item>
-                            @endif
-
-                            <flux:menu.item variant="danger" icon="trash" wire:click="delete('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}">
-                                {{ __('Delete') }}
-                            </flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
-                </div>
-            </div>
-        </x-card>
+                        <flux:menu.item variant="danger" icon="trash" wire:click="delete('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}">
+                            {{ __('Delete') }}
+                        </flux:menu.item>
+                    </flux:menu>
+                </flux:dropdown>
+            </x-slot>
+        </flux:callout>
         @endforeach
 
     </div>

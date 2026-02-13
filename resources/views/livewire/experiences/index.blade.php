@@ -19,6 +19,7 @@ new class extends Component {
 
     public Profile $profile;
     public ?Collection $experiences = null;
+    public ?Collection $files = null;
 
     public bool $isEditing = false;
 
@@ -178,6 +179,19 @@ new class extends Component {
         Flux::modal('experience-skills-modal')->show();
     }
 
+    public function manageFiles(string $id): void
+    {
+        if (!Str::isUlid($id)) {
+            return;
+        }
+
+        $this->experienceId = $id;
+
+        $this->files = File::where('experience_id', $id)->get();
+
+        Flux::modal('experience-files-modal')->show();
+    }
+
     public function addSkill(): void
     {
 
@@ -321,6 +335,10 @@ new class extends Component {
                                 {{ __('Edit Experience') }}
                             </flux:menu.item>
 
+                            <flux:menu.item icon="paper-clip" wire:click="manageFiles('{{ $experience->id }}')">
+                                {{ __('Manage files') }}
+                            </flux:menu.item>
+
                             <flux:menu.item icon="paper-clip" wire:click="addFile('{{ $experience->id }}')">
                                 {{ __('Attach File') }}
                             </flux:menu.item>
@@ -418,6 +436,59 @@ new class extends Component {
         <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">
             {{ __('Cancel') }}
         </flux:button>
+    </x-flyout>
+
+    <x-flyout name="experience-files-modal">
+        <div class="flex items-center">
+            <div class="grow">
+                <flux:heading size="xl" level="1">{{ __('Manage files') }}</flux:heading>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <flux:modal.trigger name="add-file">
+                    <flux:button>{{ __('Add file') }}</flux:button>
+                </flux:modal.trigger>
+
+                <flux:modal name="add-file" class="md:w-5xl">
+                     <form class="space-y-6" wire:submit="saveFile">
+                        <flux:input type="text" wire:model="fileTitle" :label="__('Title')" />
+
+                        <flux:field>
+                            <flux:label>{{ __('File') }}</flux:label>
+
+                            <flux:input.group class="relative">
+                                <flux:avatar icon="paper-clip" class="rounded-e-none" />
+                                <input wire:model="fileObject" class="absolute inset-0 opacity-0 z-10" type="file">
+                                <flux:input :placeholder="$fileObject?->getClientOriginalName() ?? __('Upload a file')" />
+                            </flux:input.group>
+
+                            <flux:error name="fileObject" />
+                        </flux:field>
+
+                        <div class="inline-flex items-center gap-4">
+                            <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
+                            <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
+                        </div>
+                    </form>
+                </flux:modal>
+            </div>
+        </div>
+
+        <flux:separator variant="subtle" />
+
+        @if ($files)
+        <div class="space-y-3">
+            @foreach ($files as $file)
+            <flux:callout inline>
+                <flux:callout.heading>{{ $file->title }}</flux:callout.heading>
+
+                <x-slot name="actions">
+                    <flux:button variant="ghost">Delete</flux:button>
+                </x-slot>
+            </flux:callout>
+            @endforeach
+        </div>
+        @endif
     </x-flyout>
 
     <x-flyout name="experience-file-modal">
