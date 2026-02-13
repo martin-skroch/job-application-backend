@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-APP_DIR="$HOME/jam.skroch.de/backend"
+APP_DIR="/martin.skroch.de/backend"
 REPOSITORY_DIR="$APP_DIR/repository"
 RELEASES_DIR="$APP_DIR/releases"
 SHARED_DIR="$APP_DIR/shared"
 CURRENT_LINK="$APP_DIR/current"
-KEEP_RELEASES=10
+KEEP_RELEASES=7
 BRANCH="master"
 
 SCRIPT="$0"
