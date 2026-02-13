@@ -18,7 +18,7 @@ if [ ! -f "$SHARED_DIR/.env" ]; then
     exit
 fi
 
-source .env
+source "$SHARED_DIR/.env"
 
 # if [ "$APP_ENV" == "local" ]; then
 #     echo "The deployment will only be executed if the value of APP_ENV is not 'local'."
