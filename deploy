@@ -88,13 +88,13 @@ finish_release() {
 
     $PHP_BIN artisan reload
 
-    cd "$RELEASES_DIR"
+    # cd "$RELEASES_DIR"
 
-    OLD_RELEASES=$(ls -1dt */ 2>/dev/null | grep -v current | tail -n +$((KEEP_RELEASES+1)) || true)
+    # OLD_RELEASES=$(ls -1dt */ 2>/dev/null | grep -v current | tail -n +$((KEEP_RELEASES+1)) || true)
 
-    if [ -n "$OLD_RELEASES" ]; then
-        echo "$OLD_RELEASES" | xargs rm -rf
-    fi
+    # if [ -n "$OLD_RELEASES" ]; then
+    #     echo "$OLD_RELEASES" | xargs rm -rf
+    # fi
 
     echo "Deployment complete: $CURRENT_LINK"
 }
