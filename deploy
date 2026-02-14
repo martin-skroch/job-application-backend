@@ -1,117 +1,45 @@
 #!/usr/bin/env bash
-set -e
 
-APP_DIR="/martin.skroch.de/backend"
-REPOSITORY_DIR="$APP_DIR/repository"
-RELEASES_DIR="$APP_DIR/releases"
-SHARED_DIR="$APP_DIR/shared"
-CURRENT_LINK="$APP_DIR/current"
-KEEP_RELEASES=7
-BRANCH="master"
+# Change current working directory to the directory of this script
+cd $(dirname "$0")
 
-SCRIPT="$0"
-COMMAND="$1"
-TIMESTAMP_FILE="$APP_DIR/.current"
-
-if [ ! -f "$SHARED_DIR/.env" ]; then
-    echo "The file \"$SHARED_DIR/.env\" does not exist."
+if [ ! -f .env ]; then
+    echo "The .env file required for deployment does not exist."
     exit
 fi
 
-source "$SHARED_DIR/.env"
+source .env
 
-# if [ "$APP_ENV" == "local" ]; then
-#     echo "The deployment will only be executed if the value of APP_ENV is not 'local'."
-#     exit
-# fi
+if [ "$APP_ENV" == "local" ]; then
+    echo "The deployment will only be executed if the value of APP_ENV is not 'local'."
+    exit
+fi
+
+# $PHP_BIN artisan down --refresh=15 --retry=60
+
+git reset --hard
+git clean -d -f
+git pull origin master --rebase
+
+$COMPOSER_BIN install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+npm ci --audit false
+npm run build
 
 if [ -z "${APP_KEY}" ]; then
-    echo "The APP_KEY does not exists. Please generate it."
-    exit
+    $PHP_BIN artisan key:generate --ansi
 fi
 
-prepare_release() {
-    TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
-    NEW_RELEASE="$RELEASES_DIR/$TIMESTAMP"
+if [ ! -L "./public/storage"]; then
+    $PHP_BIN artisan storage:link --relative
+fi
 
-    mkdir -p "$REPOSITORY_DIR"
-    mkdir -p "$RELEASES_DIR"
-    mkdir -p "$NEW_RELEASE"
-    mkdir -p "$SHARED_DIR"
+$PHP_BIN artisan migrate --force
+$PHP_BIN artisan optimize:clear
+# $PHP_BIN artisan optimize
+$PHP_BIN artisan event:cache
+$PHP_BIN artisan route:cache
+$PHP_BIN artisan view:cache
+# $PHP_BIN artisan icons:cache
 
-    echo "$TIMESTAMP" > "$TIMESTAMP_FILE"
-
-    cd "$REPOSITORY_DIR"
-
-    # Git aktualisieren
-    git fetch origin "$BRANCH"
-    git reset --hard FETCH_HEAD
-    git clean -d -f
-
-    # Code kopieren (alles außer .git)
-    find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec cp -a {} "$NEW_RELEASE/" \;
-
-    # Shared .env verlinken
-    ln -sf "$SHARED_DIR/.env" "$NEW_RELEASE/.env"
-
-    # Shared storage verlinken
-    rm -rf "$NEW_RELEASE/storage"
-    ln -s "$SHARED_DIR/storage" "$NEW_RELEASE/storage"
-
-    echo "Prepared release: $NEW_RELEASE"
-}
-
-finish_release() {
-    TIMESTAMP=$(cat "$TIMESTAMP_FILE")
-    NEW_RELEASE="$RELEASES_DIR/$TIMESTAMP"
-
-    cd "$NEW_RELEASE"
-
-    $(which $COMPOSER_BIN) install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-
-    npm ci --audit false
-    npm run build
-
-    if [ -z "${APP_KEY}" ]; then
-        $PHP_BIN artisan key:generate --ansi
-    fi
-
-    if [ ! -L "./public/storage" ]; then
-        $PHP_BIN artisan storage:link --relative
-    fi
-
-    $PHP_BIN artisan migrate --force || true
-    $PHP_BIN artisan optimize:clear
-    $PHP_BIN artisan optimize
-
-    # Zero-Downtime Switch
-    if [ -L "$CURRENT_LINK" ]; then
-        rm "$CURRENT_LINK"
-    fi
-
-    ln -s "$NEW_RELEASE" "$CURRENT_LINK"
-
-    $PHP_BIN artisan reload
-
-    cd "$RELEASES_DIR"
-
-    OLD_RELEASES=$(ls -1dt */ 2>/dev/null | tail -n +$((KEEP_RELEASES+1)))
-
-    if [ -n "$OLD_RELEASES" ]; then
-        echo "$OLD_RELEASES" | xargs rm -rf
-    fi
-
-    echo "Deployment complete: $CURRENT_LINK -> $NEW_RELEASE"
-}
-
-case "$COMMAND" in
-    prepare)
-        prepare_release
-        ;;
-    finish)
-        finish_release
-        ;;
-    *)
-        echo "Usage: ./deploy {prepare|finish}"
-        exit 1
-esac
+echo "🚀 Application deployed!"
