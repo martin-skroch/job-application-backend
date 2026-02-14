@@ -34,6 +34,7 @@ class ApplicationResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->whenHas('title'),
+            'greeting' => $this->whenHas('greeting'),
             'text' => $this->whenHas('text'),
             'company' => $this->whenHas('company_name'),
             'contact' => $this->whenHas('contact_name'),

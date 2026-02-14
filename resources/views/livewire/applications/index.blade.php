@@ -19,6 +19,7 @@ new class extends Component {
 
     public ?string $title = null;
     public ?string $source = null;
+    public ?string $greeting = null;
     public ?string $text = null;
     public ?string $notes = null;
     public ?string $contact_name = null;
@@ -61,7 +62,8 @@ new class extends Component {
             $application = Application::findOrFail($id);
 
             $this->title = $application->title;
-            $this->source = $application->source;
+            $this->source = $application->source->value();
+            $this->greeting = $application->greeting;
             $this->text = $application->text;
             $this->notes = $application->notes;
 
@@ -71,7 +73,7 @@ new class extends Component {
 
             $this->company_name = $application->company_name;
             $this->company_address = $application->company_address;
-            $this->company_website = $application->company_website;
+            $this->company_website = $application->company_website->value();
 
             $this->public_id = $application->public_id;
             $this->profile_id = $application->profile?->id;
@@ -239,8 +241,8 @@ new class extends Component {
                     @endforeach
                 </flux:select>
 
+                <flux:textarea wire:model="greeting" :label="__('Greeting')" />
                 <flux:textarea wire:model="text" :label="__('Text')" />
-
                 <flux:textarea wire:model="notes" :label="__('Notes')" />
             </div>
 

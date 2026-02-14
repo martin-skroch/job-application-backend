@@ -54,6 +54,14 @@ new class extends Component {
     <flux:separator variant="subtle" />
 
     <flux:callout class="p-4">
+        <h3 class="text-lg font-medium text-zinc-400">{{ __('Greeting') }}</h3>
+
+        <flux:separator variant="subtle" class="my-1" />
+
+        {{ $application->greeting }}
+    </flux:callout>
+
+    <flux:callout class="p-4">
         <h3 class="text-lg font-medium text-zinc-400">{{ __('Text') }}</h3>
 
         <flux:separator variant="subtle" class="my-1" />

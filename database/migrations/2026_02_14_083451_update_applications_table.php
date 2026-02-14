@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('applications', function (Blueprint $table) {
-            $table->tinyText('text')->nullable()->after('source');
+            $table->tinyText('greeting')->nullable()->after('source');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('applications', function (Blueprint $table) {
-            $table->dropColumn('text');
+            $table->dropColumn('greeting');
         });
     }
 };
