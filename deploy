@@ -35,21 +35,28 @@ prepare_release() {
     NEW_RELEASE="$RELEASES_DIR/$TIMESTAMP"
 
     mkdir -p "$REPOSITORY_DIR"
+    mkdir -p "$RELEASES_DIR"
     mkdir -p "$NEW_RELEASE"
     mkdir -p "$SHARED_DIR"
 
     echo "$TIMESTAMP" > "$TIMESTAMP_FILE"
 
     cd "$REPOSITORY_DIR"
+
+    # Git aktualisieren
     git fetch origin "$BRANCH"
     git reset --hard FETCH_HEAD
     git clean -d -f
 
+    # Code kopieren (alles außer .git)
     find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec cp -a {} "$NEW_RELEASE/" \;
-    cp "$SHARED_DIR/.env" "$NEW_RELEASE/.env"
 
+    # Shared .env verlinken
+    ln -sf "$SHARED_DIR/.env" "$NEW_RELEASE/.env"
+
+    # Shared storage verlinken
     rm -rf "$NEW_RELEASE/storage"
-    cp -a "$SHARED_DIR/storage" "$NEW_RELEASE/storage"
+    ln -s "$SHARED_DIR/storage" "$NEW_RELEASE/storage"
 
     echo "Prepared release: $NEW_RELEASE"
 }
@@ -78,25 +85,23 @@ finish_release() {
     $PHP_BIN artisan optimize
 
     # Zero-Downtime Switch
-    if [ -d "$CURRENT_LINK" ]; then
-        mv "$CURRENT_LINK" "${CURRENT_LINK}_old"
+    if [ -L "$CURRENT_LINK" ]; then
+        rm "$CURRENT_LINK"
     fi
 
-    mv "$NEW_RELEASE" "$CURRENT_LINK"
-
-    rm -rf "${CURRENT_LINK}_old" 2>/dev/null || true
+    ln -s "$NEW_RELEASE" "$CURRENT_LINK"
 
     $PHP_BIN artisan reload
 
-    # cd "$RELEASES_DIR"
+    cd "$RELEASES_DIR"
 
-    # OLD_RELEASES=$(ls -1dt */ 2>/dev/null | grep -v current | tail -n +$((KEEP_RELEASES+1)) || true)
+    OLD_RELEASES=$(ls -1dt */ 2>/dev/null | tail -n +$((KEEP_RELEASES+1)))
 
-    # if [ -n "$OLD_RELEASES" ]; then
-    #     echo "$OLD_RELEASES" | xargs rm -rf
-    # fi
+    if [ -n "$OLD_RELEASES" ]; then
+        echo "$OLD_RELEASES" | xargs rm -rf
+    fi
 
-    echo "Deployment complete: $CURRENT_LINK"
+    echo "Deployment complete: $CURRENT_LINK -> $NEW_RELEASE"
 }
 
 case "$COMMAND" in
