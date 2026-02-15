@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Application;
-use Illuminate\Http\Request;
 use App\Actions\CreateAnalytics;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApplicationResource;
+use App\Models\Application;
+use App\Notifications\ApplicationRequestedNotification;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\App;
 
 class ApplicationsController extends Controller
 {
@@ -49,6 +50,8 @@ class ApplicationsController extends Controller
             $request,
             $application
         );
+
+        $request->user()->notify(new ApplicationRequestedNotification($application));
 
         return new ApplicationResource($application);
     }
