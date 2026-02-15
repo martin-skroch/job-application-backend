@@ -39,6 +39,7 @@ class ApplicationsController extends Controller
         ]);
 
         $application = $request->user()->applications()->create([
+            'source' => $request->headers->get('referer'),
             'company_name' => $validated['company'],
             'contact_name' => $validated['name'],
             'contact_email' => $validated['email'],
