@@ -73,7 +73,7 @@ new class extends Component {
 
             $this->company_name = $application->company_name;
             $this->company_address = $application->company_address;
-            $this->company_website = $application->company_website->value();
+            $this->company_website = $application->company_website?->value();
 
             $this->public_id = $application->public_id;
             $this->profile_id = $application->profile?->id;
@@ -194,21 +194,25 @@ new class extends Component {
                     <flux:button icon="ellipsis-horizontal" variant="filled" />
 
                     <flux:menu>
-                        <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
+                        <flux:menu.item :href="route('applications.show', $application)" wire:navigate>
+                            {{ __('Show') }}
+                        </flux:menu.item>
+
+                        <flux:menu.item wire:click="open('{{ $application->id }}')">
                             {{ __('Edit') }}
                         </flux:menu.item>
 
                         @if ($application->isPublic())
-                        <flux:menu.item icon="eye" wire:click="unpublish('{{ $application->id }}')">
+                        <flux:menu.item wire:click="unpublish('{{ $application->id }}')">
                             {{ __('Unpublish') }}
                         </flux:menu.item>
                         @else
-                        <flux:menu.item icon="eye-slash" wire:click="publish('{{ $application->id }}')">
+                        <flux:menu.item wire:click="publish('{{ $application->id }}')">
                             {{ __('Publish') }}
                         </flux:menu.item>
                         @endif
 
-                        <flux:menu.item variant="danger" icon="trash" wire:click="delete('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}">
+                        <flux:menu.item variant="danger" wire:click="delete('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}">
                             {{ __('Delete') }}
                         </flux:menu.item>
                     </flux:menu>
