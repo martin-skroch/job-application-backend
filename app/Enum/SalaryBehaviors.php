@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum SalaryPeriod: string
+enum SalaryBehaviors: string
 {
     case Monthly = 'monthly';
     case Yearly = 'yearly';
