@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Application;
+use App\Enum\SalaryBehaviors;
 
 class UpdateApplicationRequest extends StoreApplicationRequest
 {
@@ -19,8 +19,8 @@ class UpdateApplicationRequest extends StoreApplicationRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules(?SalaryBehaviors $salaryBehavior = null): array
     {
-        return parent::rules();
+        return parent::rules($salaryBehavior);
     }
 }

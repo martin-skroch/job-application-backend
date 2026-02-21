@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use League\CommonMark\CommonMarkConverter;
@@ -18,12 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        app()->singleton('markdown', function () {
-            return new CommonMarkConverter([
-                'html_input' => 'strip',
-                'allow_unsafe_links' => false,
-            ]);
-        });
+        //
     }
 
     /**
@@ -31,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Number::useLocale(config('app.locale', config('app.fallback_locale')));
+        Number::useCurrency('EUR');
+
         Carbon::macro('withTimezone', function(): Carbon|string {
             return $this->tz(Auth::user()?->timezone ?? config('app.timezone'));
         });
@@ -43,10 +42,6 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return $application->firstOrFail();
-        });
-
-        Blade::directive('markdown', function($expression) {
-            return "<?php echo app('markdown')->convert($expression); ?>";
         });
     }
 }

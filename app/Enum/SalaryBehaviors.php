@@ -4,8 +4,9 @@ namespace App\Enum;
 
 enum SalaryBehaviors: string
 {
-    case Monthly = 'monthly';
-    case Yearly = 'yearly';
+    case Inherit = 'inherit';
+    case Override = 'override';
+    case Hidden = 'hidden';
 
     public static function values(): array
     {

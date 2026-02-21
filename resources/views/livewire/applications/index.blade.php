@@ -2,10 +2,11 @@
 
 use App\Actions\PublishApplication;
 use App\Actions\UnpublishApplication;
+use App\Enum\SalaryBehaviors;
 use App\Models\Application;
+use App\Models\Profile;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
-use Carbon\Carbon;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
@@ -17,8 +18,13 @@ new class extends Component {
     public bool $isEditing = false;
     public ?string $applicationId = null;
 
+    public Application $application;
+    public Profile $profile;
+
     public ?string $title = null;
     public ?string $source = null;
+    public ?SalaryBehaviors $salary_behavior;
+    public ?int $salary_desire = null;
     public ?string $greeting = null;
     public ?string $text = null;
     public ?string $notes = null;
@@ -61,8 +67,13 @@ new class extends Component {
 
             $application = Application::findOrFail($id);
 
+            $this->application = $application;
+            $this->profile = $application->profile;
+            $this->salary_desire = $application->salary_desire;
+            $this->salary_behavior = $application->salary_behavior;
+
             $this->title = $application->title;
-            $this->source = $application->source->value();
+            $this->source = $application->source?->value();
             $this->greeting = $application->greeting;
             $this->text = $application->text;
             $this->notes = $application->notes;
@@ -87,7 +98,7 @@ new class extends Component {
     {
         $applications = Auth::user()->applications();
         $request = Str::isUlid($this->applicationId) ? new UpdateApplicationRequest() : new StoreApplicationRequest();
-        $validated = $this->validate(rules: $request->rules());
+        $validated = $this->validate($request->rules($this->salary_behavior));
 
         if (Str::isUlid($this->applicationId)) {
             $applications->where('id', $this->applicationId)->update($validated);
@@ -149,6 +160,11 @@ new class extends Component {
     {
         parent::reset();
         parent::resetErrorBag();
+    }
+
+    public function updatedProfileId()
+    {
+        $this->profile = Profile::findOrFail($this->profile_id);
     }
 }; ?>
 
@@ -238,12 +254,35 @@ new class extends Component {
                     <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
                 </div>
 
-                <flux:select wire:model="profile_id" :label="__('Profile')" required>
+                <flux:select wire:model.change="profile_id" :label="__('Profile')" required>
                     <flux:select.option value="" selected hidden>{{ __('Choose profile...') }}</flux:select.option>
                     @foreach (Auth::user()->profiles()->pluck('name',  'id') as $id => $name)
                     <flux:select.option :value="$id">{{ $name }}</flux:select.option>
                     @endforeach
                 </flux:select>
+
+                <flux:field >
+                    <flux:label>{{ __(key: 'Salary Expectation') }}</flux:label>
+
+                    <flux:input.group>
+                        <flux:select wire:model.live="salary_behavior">
+                            @foreach (SalaryBehaviors::cases() as $behavior)
+                            <flux:select.option :value="$behavior->value">{{ __($behavior->name) }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+
+                        <flux:input
+                            type="number"
+                            wire:model.lazy="salary_desire"
+                            :disabled="$salary_behavior !== SalaryBehaviors::Override"
+                            :required="$salary_behavior === SalaryBehaviors::Override"
+                        />
+
+                        <flux:input.group.suffix>€</flux:input.group.suffix>
+                    </flux:input.group>
+
+                    <flux:error name="salary_desire" />
+                </flux:field>
 
                 <flux:textarea wire:model="greeting" :label="__('Greeting')" />
                 <flux:textarea wire:model="text" :label="__('Text')" />

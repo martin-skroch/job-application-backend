@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\SalaryBehaviors;
 use App\Policies\ApplicationPolicy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
@@ -50,6 +51,8 @@ class Application extends Model
         return [
             'title' => 'string',
             'source' => AsUri::class,
+            'salary_behavior' => SalaryBehaviors::class,
+            'salary_desire' => 'integer',
             'notes' => 'string',
             'contact_name' => 'string',
             'contact_email' => 'string',

@@ -24,6 +24,7 @@ new class extends Component {
     public ?string $phone = null;
     public ?string $email = null;
     public ?string $website = null;
+    public ?int $salary_desire = null;
 
     public ?string $deleteImage = null;
 
@@ -42,6 +43,7 @@ new class extends Component {
         $this->phone = $this->profile->phone;
         $this->email = $this->profile->email;
         $this->website = $this->profile->website;
+        $this->salary_desire = $this->profile->salary_desire;
     }
 
     public function rules(): array
@@ -195,6 +197,13 @@ new class extends Component {
                 </div>
             </div>
             @endif
+
+            @if(!empty($profile->salary_desire))
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
+                <div class="col-span-1 font-bold">{{ __('Desired Salary') }}</div>
+                <div class="col-span-4">{{ Number::currency($profile->salary_desire, precision: 0) }}</div>
+            </div>
+            @endif
         </div>
     </x-profiles.layout>
 
@@ -222,22 +231,31 @@ new class extends Component {
 
             <flux:textarea wire:model="address" rows="2" :label="__('Address')" />
 
-            <div class="grid min-2xl:grid-cols-2 items-start gap-6">
+            <div class="grid 2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="post_code" :label="__('Post code')" />
                 <flux:input wire:model="location" :label="__('Location')" />
             </div>
 
-            <div class="grid min-2xl:grid-cols-2 items-start gap-6">
+            <div class="grid 2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="birthdate" type="date" :label="__('Birthdate')" />
                 <flux:input wire:model="birthplace" :label="__('Birthplace')" />
             </div>
 
-            <div class="grid min-2xl:grid-cols-2 items-start gap-6">
+            <div class="grid 2xl:grid-cols-2 items-start gap-6">
                 <flux:input wire:model="phone" :label="__('Phone')" />
                 <flux:input wire:model="email" :label="__('Email')" />
             </div>
 
             <flux:input wire:model="website" :label="__('Website')" />
+
+            <flux:field>
+                <flux:label>{{ __('Desired Salary') }}</flux:label>
+                <flux:input.group>
+                    <flux:input wire:model="salary_desire" />
+                    <flux:input.group.suffix>€</flux:input.group.suffix>
+                </flux:input.group>
+                <flux:error name="salary_desire" />
+            </flux:field>
 
             <div class="inline-flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>

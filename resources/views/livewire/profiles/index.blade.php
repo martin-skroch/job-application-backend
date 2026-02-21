@@ -22,6 +22,7 @@ new class extends Component {
     public ?string $phone = null;
     public ?string $email = null;
     public ?string $website = null;
+    public ?int $salary_desire = null;
 
     public function mount(): void
     {
@@ -70,18 +71,7 @@ new class extends Component {
 
     public function resetForm(): void
     {
-        $this->reset([
-            'name',
-            'image',
-            'address',
-            'post_code',
-            'location',
-            'birthdate',
-            'phone',
-            'email',
-            'website',
-        ]);
-
+        $this->reset();
         $this->resetErrorBag();
     }
 }; ?>
@@ -181,6 +171,15 @@ new class extends Component {
             </div>
 
             <flux:input wire:model="website" :label="__('Website')" />
+
+            <flux:field>
+                <flux:label>{{ __('Desired Salary') }}</flux:label>
+                <flux:input.group>
+                    <flux:input wire:model="salary_desire" />
+                    <flux:input.group.suffix>€</flux:input.group.suffix>
+                </flux:input.group>
+                <flux:error name="salary_desire" />
+            </flux:field>
 
             <div class="inline-flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Create') }}</flux:button>

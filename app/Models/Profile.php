@@ -44,7 +44,7 @@ class Profile extends Model
         'phone',
         'email',
         'website',
-        'api_active'
+        'salary_desire',
     ];
 
     /**
@@ -56,7 +56,7 @@ class Profile extends Model
     {
         return [
             'birthdate' => 'date',
-            'api_active' => 'boolean',
+            'salary_desire' => 'integer',
         ];
     }
 
