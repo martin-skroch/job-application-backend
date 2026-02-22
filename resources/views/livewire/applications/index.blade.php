@@ -23,7 +23,7 @@ new class extends Component {
 
     public ?string $title = null;
     public ?string $source = null;
-    public ?SalaryBehaviors $salary_behavior;
+    public ?SalaryBehaviors $salary_behavior = SalaryBehaviors::Hidden;
     public ?int $salary_desire = null;
     public ?string $greeting = null;
     public ?string $text = null;
