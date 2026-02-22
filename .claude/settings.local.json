@@ -1,11 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__laravel-boost__database-schema",
+      "mcp__laravel-boost__search-docs",
+      "mcp__laravel-boost__list-artisan-commands",
+      "Bash(tail:*)"
+    ]
+  },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "laravel-boost"
-  ],
-  "permissions": {
-    "allow": [
-      "mcp__laravel-boost__database-schema"
-    ]
-  }
+  ]
 }

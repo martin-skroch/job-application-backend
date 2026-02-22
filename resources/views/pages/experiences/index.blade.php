@@ -5,21 +5,15 @@ use App\Http\Requests\StoreExperienceRequest;
 use App\Http\Requests\UpdateExperienceRequest;
 use App\Models\Experience;
 use App\Models\Profile;
-use App\Models\File;
+use App\Models\User;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Validate;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 new class extends Component {
-    use WithFileUploads;
-
     public Profile $profile;
     public ?Collection $experiences = null;
-    public ?Collection $files = null;
 
     public bool $isEditing = false;
 
@@ -35,15 +29,7 @@ new class extends Component {
     public ?string $description = '';
     public bool $active = false;
 
-    #[Validate('nullable|string|max:255')]
-    public $fileTitle = null;
-
-    #[Validate('file|mimetypes:application/pdf|max:5120')]
-    public $fileObject = null;
-
     public ?string $experienceId = null;
-    public ?Collection $profileSkills = null;
-    public ?Collection $experienceSkills = null;
 
     public function mount(): void
     {
@@ -172,94 +158,14 @@ new class extends Component {
         $this->resetErrorBag();
     }
 
-    public function chooseSkill(): void
-    {
-        $this->profileSkills = $this->profile->skills;
-
-        Flux::modal('experience-skills-modal')->show();
-    }
-
     public function manageFiles(string $id): void
     {
-        if (!Str::isUlid($id)) {
-            return;
-        }
-
-        $this->experienceId = $id;
-
-        $this->files = File::where('experience_id', $id)->get();
-
-        Flux::modal('experience-files-modal')->show();
+        $this->dispatch('manage-experience-files', id: $id);
     }
 
-    public function addSkill(): void
+    public function manageSkills(string $id): void
     {
-
-    }
-
-    public function addFile(string $id): void
-    {
-        $this->reset([
-            'experienceId',
-            'fileTitle',
-            'fileObject',
-        ]);
-
-        if (!Str::isUlid($id)) {
-            return;
-        }
-
-        $this->experienceId = $id;
-
-        Flux::modal('experience-file-modal')->show();
-    }
-
-    public function saveFile(): void
-    {
-        if (!$this->fileObject instanceof TemporaryUploadedFile) {
-            return;
-        }
-
-        File::forceCreate([
-            'title' => $this->fileTitle ?? $this->fileObject?->getClientOriginalName(),
-            'path' => $this->fileObject->store(path: 'files'),
-            'mime' => $this->fileObject->getMimeType(),
-            'size' => $this->fileObject->getSize(),
-            'experience_id' => $this->experienceId,
-        ]);
-
-        Flux::modal('experience-file-modal')->close();
-
-        $this->reset([
-            'experienceId',
-            'fileTitle',
-            'fileObject',
-        ]);
-    }
-
-    public function removeSkill(string $experienceId, string $skillId): void
-    {
-        $experience = Experience::where('id', $experienceId)->first();
-        $experience->skills()->detach($skillId);
-    }
-
-    public function reorderSkills(string $experienceId, array $items): void
-    {
-        $experience = Experience::findOrFail($experienceId ?? $this->experienceId);
-
-        foreach ($items as $item) {
-            $experience->skills()->updateExistingPivot($item['id'], [
-                'order' => $item['order']
-            ]);
-        }
-
-        $this->experienceSkills = $experience->skills;
-    }
-
-    public function resetSkills(): void
-    {
-        $this->experienceId = null;
-        $this->experienceSkills = null;
+        $this->dispatch('manage-experience-skills', id: $id);
     }
 }; ?>
 
@@ -306,19 +212,10 @@ new class extends Component {
                 @endif
 
                 @if ($experience->skills->count() > 0)
-                <div class="flex flex-wrap gap-2" x-sort x-on:sort.stop="$wire.reorderSkills('{{ $experience->id }}', Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
+                <div class="flex flex-wrap gap-2">
                     @foreach ($experience->skills as $skill)
-                    <flux:badge size="sm" class="gap-1" :data-id="$skill->id" x-sort:item>
-                        {{ $skill->name }}
-                        <button class="shrink-0 rounded-full hover:bg-red-800" wire:click="removeSkill('{{ $experience->id }}', '{{ $skill->id }}')">
-                            <flux:icon name="x-mark" class="size-4 p-0.5" />
-                        </button>
-                    </flux:badge>
+                    <flux:badge size="sm">{{ $skill->name }}</flux:badge>
                     @endforeach
-
-                    <flux:badge size="sm" wire:click="chooseSkill('{{ $experience->id }}')">
-                        <flux:icon name="plus" />
-                    </flux:badge>
                 </div>
                 @endif
 
@@ -339,8 +236,8 @@ new class extends Component {
                                 {{ __('Manage files') }}
                             </flux:menu.item>
 
-                            <flux:menu.item icon="paper-clip" wire:click="addFile('{{ $experience->id }}')">
-                                {{ __('Attach File') }}
+                            <flux:menu.item icon="academic-cap" wire:click="manageSkills('{{ $experience->id }}')">
+                                {{ __('Manage skills') }}
                             </flux:menu.item>
 
                             <flux:menu.separator />
@@ -418,91 +315,6 @@ new class extends Component {
         </form>
     </x-flyout>
 
-    <x-flyout name="experience-skills-modal">
-        <div class="flex flex-col gap-px">
-            @foreach ($profileSkills?->all() ?? [] as $skill)
-            <flux:callout class="border-0 not-first:rounded-t-none not-last:rounded-b-none p-0!" inline>
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="font-medium">{{ $skill->name }}</span>
-
-                    @if($skill->info)
-                        <small class="text-zinc-500">({{ $skill->info }})</small>
-                    @endif
-                </div>
-            </flux:callout>
-            @endforeach
-        </div>
-
-        <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">
-            {{ __('Cancel') }}
-        </flux:button>
-    </x-flyout>
-
-    <x-flyout name="experience-files-modal">
-        <div class="flex items-center">
-            <div class="grow">
-                <flux:heading size="xl" level="1">{{ __('Manage files') }}</flux:heading>
-            </div>
-
-            <div class="flex items-center gap-6">
-                <flux:modal.trigger name="add-file">
-                    <flux:button>{{ __('Add file') }}</flux:button>
-                </flux:modal.trigger>
-
-                <flux:modal name="add-file" class="md:w-5xl">
-                     <form class="space-y-6" wire:submit="saveFile">
-                        <flux:input type="text" wire:model="fileTitle" :label="__('Title')" />
-
-                        <flux:field>
-                            <flux:label>{{ __('File') }}</flux:label>
-
-                            <flux:input.group class="relative">
-                                <flux:avatar icon="paper-clip" class="rounded-e-none" />
-                                <input wire:model="fileObject" class="absolute inset-0 opacity-0 z-10" type="file">
-                                <flux:input :placeholder="$fileObject?->getClientOriginalName() ?? __('Upload a file')" />
-                            </flux:input.group>
-
-                            <flux:error name="fileObject" />
-                        </flux:field>
-
-                        <div class="inline-flex items-center gap-4">
-                            <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
-                            <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
-                        </div>
-                    </form>
-                </flux:modal>
-            </div>
-        </div>
-
-        <flux:separator variant="subtle" />
-
-        @if ($files)
-        <div class="space-y-3">
-            @foreach ($files as $file)
-            <flux:callout inline>
-                <flux:callout.heading>{{ $file->title }}</flux:callout.heading>
-
-                <x-slot name="actions">
-                    <flux:button variant="ghost">Delete</flux:button>
-                </x-slot>
-            </flux:callout>
-            @endforeach
-        </div>
-        @endif
-    </x-flyout>
-
-    <x-flyout name="experience-file-modal">
-        <flux:heading size="xl" level="1">{{ __('Attach a file') }}</flux:heading>
-        <flux:separator variant="subtle" />
-
-        <form class="space-y-6" wire:submit="saveFile">
-            <flux:input type="text" wire:model="fileTitle" :label="__('Title')" />
-            <flux:input type="file" wire:model="fileObject" :label="__('File')" />
-
-            <div class="inline-flex items-center gap-4">
-                <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
-                <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
-            </div>
-        </form>
-    </x-flyout>
+    <livewire:experiences.manage-files />
+    <livewire:experiences.manage-skills />
 </section>
