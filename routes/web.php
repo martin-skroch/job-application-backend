@@ -10,10 +10,6 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
 Route::get('file/{file}', FileController::class)->name('file');
 
 Route::middleware(['auth', 'verified'])->group(function () {
