@@ -4,7 +4,10 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login')->name('home');
+Route::get('/', function () {
+    return response()->redirectToRoute('login');
+    return view('welcome');
+})->name('home');
 
 Route::get('file/{file}', FileController::class)->name('file');
 

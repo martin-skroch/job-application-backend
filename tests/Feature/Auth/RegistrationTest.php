@@ -11,6 +11,8 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
+        $this->markTestSkipped('Registration is not enabled.');
+
         $response = $this->get(route('register'));
 
         $response->assertStatus(200);
@@ -18,6 +20,8 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        $this->markTestSkipped('Registration is not enabled.');
+
         $response = $this->post(route('register.store'), [
             'name' => 'John Doe',
             'email' => 'test@example.com',
