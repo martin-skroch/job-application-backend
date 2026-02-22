@@ -3,47 +3,19 @@
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
-use Livewire\Volt\Volt;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-})->name('home');
+Route::redirect('/', '/login')->name('home');
 
 Route::get('file/{file}', FileController::class)->name('file');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-
-    Volt::route('applications', 'applications.index')->name('applications.index');
-    Volt::route('applications/{application}', 'applications.show')->name('applications.show');
-
-    Volt::route('profiles', 'profiles.index')->name('profiles.index');
-    Volt::route('profiles/{profile}', 'profiles.show')->name('profiles.show');
-    Volt::route('profiles/{profile}/experiences', 'experiences.index')->name('profiles.experiences');
-    Volt::route('profiles/{profile}/educations', 'experiences.index')->name('profiles.educations');
-    Volt::route('profiles/{profile}/training', 'experiences.index')->name('profiles.training');
-    Volt::route('profiles/{profile}/school', 'experiences.index')->name('profiles.school');
-    Volt::route('profiles/{profile}/skills', 'skills.index')->name('profiles.skills');
-    Volt::route('profiles/{profile}/impressions', 'impressions.index')->name('profiles.impressions');
-});
-
 Route::middleware(['auth'])->group(function () {
     Route::get('redirect', RedirectController::class)->name('redirect');
-
-    Route::redirect('settings', 'settings/profile');
-
-    Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
-    Volt::route('settings/password', 'settings.password')->name('user-password.edit');
-    Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
-    Volt::route('settings/tokens', 'settings.tokens')->name('tokens.edit');
-
-    Volt::route('settings/two-factor', 'settings.two-factor')->middleware(
-        when(
-            Features::canManageTwoFactorAuthentication()
-                && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-            ['password.confirm'],
-            [],
-        ),
-    )->name('two-factor.show');
 });
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::view('dashboard', 'dashboard')->name('dashboard');
+});
+
+require __DIR__.'/applications.php';
+require __DIR__.'/profiles.php';
+require __DIR__.'/settings.php';
