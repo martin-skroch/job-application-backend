@@ -4,7 +4,7 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Volt\Volt;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ProfileUpdateTest extends TestCase
@@ -24,9 +24,10 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Volt::test('settings.profile')
+        $response = Livewire::test('pages::settings.profile')
             ->set('name', 'Test User')
             ->set('email', 'test@example.com')
+            ->set('timezone', 'Europe/Berlin')
             ->call('updateProfileInformation');
 
         $response->assertHasNoErrors();
@@ -35,6 +36,7 @@ class ProfileUpdateTest extends TestCase
 
         $this->assertEquals('Test User', $user->name);
         $this->assertEquals('test@example.com', $user->email);
+        $this->assertEquals('Europe/Berlin', $user->timezone);
         $this->assertNull($user->email_verified_at);
     }
 
@@ -44,9 +46,10 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Volt::test('settings.profile')
+        $response = Livewire::test('pages::settings.profile')
             ->set('name', 'Test User')
             ->set('email', $user->email)
+            ->set('timezone', $user->timezone)
             ->call('updateProfileInformation');
 
         $response->assertHasNoErrors();
@@ -60,7 +63,7 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Volt::test('settings.delete-user-form')
+         $response = Livewire::test('pages::settings.delete-user-form')
             ->set('password', 'password')
             ->call('deleteUser');
 
@@ -78,7 +81,7 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Volt::test('settings.delete-user-form')
+         $response = Livewire::test('pages::settings.delete-user-form')
             ->set('password', 'wrong-password')
             ->call('deleteUser');
 

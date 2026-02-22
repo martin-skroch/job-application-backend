@@ -5,12 +5,10 @@ namespace App\Providers;
 use App\Models\Application;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use League\CommonMark\CommonMarkConverter;
 
 class AppServiceProvider extends ServiceProvider
 {
