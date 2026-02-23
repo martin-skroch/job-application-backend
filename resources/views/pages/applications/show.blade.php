@@ -1,18 +1,18 @@
 <?php
 
 use App\Models\Application;
-use App\Models\Analytics;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 new class extends Component {
     use WithPagination;
 
     public Application $application;
 
-    public ?string $mapLink = null;
-
-    public function mount()
+    #[Computed]
+    public function mapLink(): string|null
     {
         $mapQuery = '';
 
@@ -24,26 +24,17 @@ new class extends Component {
             $mapQuery .= str_replace("\n", ",", $this->application->company_address);
         }
 
-        if (filled($mapQuery)) {
-            $this->mapLink = 'https://www.google.de/maps/search/' . urlencode($mapQuery);
+        if (blank($mapQuery)) {
+            return null;
         }
+
+        return 'https://www.google.de/maps/search/' . urlencode($mapQuery);
     }
 
-    public function with(): array
+    #[Computed]
+    public function analytics(): LengthAwarePaginator
     {
-        return [
-            'analytics' => $this->application
-                ->analytics()
-                ->latest('created_at')
-                ->paginate(50),
-        ];
-    }
-
-    public function deleteAnalytics(int $id): void
-    {
-        $this->authorize('view', $this->application);
-
-        $this->application->analytics()->findOrFail($id)->delete();
+        return $this->application->analytics()->latest('updated_at')->paginate(50);
     }
 }; ?>
 
@@ -229,12 +220,12 @@ new class extends Component {
     </div>
 
     <h3 class="text-xl font-light text-zinc-400">
-        {{ __('Analytics') }} ({{ __(':count Entries', ['count' => $analytics->total()]) }})
+        {{ __('Analytics') }} ({{ __(':count Entries', ['count' => $this->analytics->total()]) }})
     </h3>
 
-    @if($analytics->count() > 0)
-    <div class="">
-        @foreach($analytics as $entry)
+    @if($this->analytics->count() > 0)
+    <div>
+        @foreach($this->analytics as $entry)
             <flux:callout wire:key="analytics-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
                 <div class="grid grid-cols-2 lg:grid-cols-6 gap-6">
                     <div class="col-span-2 lg:col-span-4 space-y-3">
@@ -276,7 +267,7 @@ new class extends Component {
     </div>
 
     <div>
-        {{ $analytics->links() }}
+        {{ $this->analytics->links() }}
     </div>
     @else
         <p class="text-zinc-400">{{ __('Keine Analytics verfügbar') }}</p>
