@@ -18,13 +18,13 @@ class Analytics extends Model
         'payload',
         'ip',
         'user_agent',
+        'count',
     ];
 
     protected $casts = [
         'query' => 'array',
         'headers' => 'array',
         'payload' => 'array',
+        'count' => 'integer',
     ];
-
-    public const UPDATED_AT = null;
 }

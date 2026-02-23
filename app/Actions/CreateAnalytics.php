@@ -2,18 +2,27 @@
 
 namespace App\Actions;
 
+use App\Models\Analytics;
 use App\Models\Application;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class CreateAnalytics
 {
     public function create(Request $request, Application $application): void
     {
-        $data = $request->ip() . '|' . $request->userAgent();
+        $data = $request->ip().'|'.$request->userAgent();
 
         $sessionId = hash_hmac('sha256', $data, config('app.key'));
+
+        $existing = $application->analytics()
+            ->where('session', $sessionId)
+            ->first();
+
+        if ($existing instanceof Analytics) {
+            $existing->increment('count');
+
+            return;
+        }
 
         $application->analytics()->create([
             'session' => $sessionId,
@@ -23,6 +32,7 @@ class CreateAnalytics
             'headers' => $request->headers->all(),
             'payload' => $request->all(),
             'user_agent' => $request->userAgent(),
+            'count' => 1,
         ]);
     }
 }

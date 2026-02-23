@@ -39,15 +39,12 @@ new class extends Component {
         ];
     }
 
-    // #[\Livewire\Attributes\On('deleteAnalytics')]
-    // public function deleteAnalytics(string $id): void
-    // {
-    //     $this->authorize('view', $this->application);
+    public function deleteAnalytics(int $id): void
+    {
+        $this->authorize('view', $this->application);
 
-    //     Analytics::findOrFail($id)->delete();
-
-    //     $this->dispatch('notify', message: 'Analytics-Eintrag gelöscht');
-    // }
+        $this->application->analytics()->findOrFail($id)->delete();
+    }
 }; ?>
 
 <section class="space-y-6">
@@ -231,57 +228,57 @@ new class extends Component {
 
     </div>
 
-    <flux:callout class="p-4">
-        <h3 class="text-xl font-light text-zinc-400 mb-2">
-            {{ __('Analytics') }} ({{ __(':count Entries', ['count' => $analytics->total()]) }})
-        </h3>
+    <h3 class="text-xl font-light text-zinc-400">
+        {{ __('Analytics') }} ({{ __(':count Entries', ['count' => $analytics->total()]) }})
+    </h3>
 
-        @php
-            $headers = [
-                __('Session'),
-                __('Time'),
-                __('Method'),
-                __('User Agent'),
-            ];
-        @endphp
+    @if($analytics->count() > 0)
+    <div class="">
+        @foreach($analytics as $entry)
+            <flux:callout wire:key="analytics-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
+                <div class="grid grid-cols-2 lg:grid-cols-6 gap-6">
+                    <div class="col-span-2 lg:col-span-4 space-y-3">
+                        <div>
+                            <flux:heading class="text-current/50">{{ __('Session') }}</flux:heading>
+                            <p class="text-sm md:truncate break-all">{{ $entry->session }}</p>
+                        </div>
+                        <div>
+                            <flux:heading class="text-current/50">{{ __('User Agent') }}</flux:heading>
+                            <p class="text-sm md:truncate" title="{{ $entry->user_agent }}">{{ $entry->user_agent }}</p>
+                        </div>
+                    </div>
 
-        @if($analytics->count() > 0)
-        <div class="overflow-x-auto">
-            <table class="min-w-full border-collapse block md:table" role="table">
-                <thead class="border-b border-zinc-600">
-                    <tr class="block md:table-row">
-                        @foreach ($headers as $header)
-                        <th class="text-sm text-left px-4 py-3 bg-zinc-600">{{ $header }}</th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-600">
-                    @foreach($analytics as $entry)
-                        @php
-                            $entries = [
-                                $entry->session => Str::of($entry->session)->limit(20),
-                                $entry->created_at->format('d.m.Y H:i:s') => $entry->created_at->diffForHumans(),
-                                $entry->method => $entry->method,
-                                $entry->user_agent => Str::of($entry->user_agent)->limit(30),
-                            ];
-                        @endphp
-                        <tr class="block md:table-row">
-                            @foreach ($entries as $long => $short)
-                            <td class="text-sm text-left whitespace-nowrap px-4 py-3 truncate block md:table-cell" title="{{ $long }}">
-                                {{ $short }}
-                            </td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                    <div class="col-span-1 space-y-3">
+                        <div>
+                            <flux:heading class="text-current/50">{{ __('Count') }}</flux:heading>
+                            <p class="text-sm">{{ $entry->count ?? 1 }}</p>
+                        </div>
 
-        <div class="mt-6">
-            {{ $analytics->links() }}
-        </div>
-        @else
-            <p>Keine Analytics verfügbar</p>
-        @endif
-    </flux:callout>
+                        <div>
+                            <flux:heading class="text-current/50">{{ __('Method') }}</flux:heading>
+                            <p class="text-sm">{{ $entry->method }}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 space-y-3">
+                        <div>
+                            <flux:heading class="text-current/50">{{ __('Last Visit') }}</flux:heading>
+                            <p class="text-sm" title="{{ $entry->updated_at?->format('d.m.Y H:i:s') }}">{{ $entry->updated_at?->diffForHumans() ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <flux:heading class="text-current/50">{{ __('First Visit') }}</flux:heading>
+                            <p class="text-sm" title="{{ $entry->created_at->format('d.m.Y H:i:s') }}">{{ $entry->created_at->diffForHumans() }}</p>
+                        </div>
+                    </div>
+                </div>
+            </flux:callout>
+        @endforeach
+    </div>
+
+    <div>
+        {{ $analytics->links() }}
+    </div>
+    @else
+        <p class="text-zinc-400">{{ __('Keine Analytics verfügbar') }}</p>
+    @endif
 </div>
