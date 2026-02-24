@@ -7,6 +7,7 @@
       "mcp__laravel-boost__list-routes",
       "mcp__laravel-boost__browser-logs",
       "mcp__laravel-boost__search-docs",
+      "mcp__laravel-boost__last-error",
       "Bash(tail:*)",
       "Bash(vendor/bin/sail bin:*)",
       "Bash(vendor/bin/sail artisan:*)"
