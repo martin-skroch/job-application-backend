@@ -1,11 +1,15 @@
 {
   "permissions": {
     "allow": [
+      "mcp__laravel-boost__application-info",
       "mcp__laravel-boost__database-schema",
-      "mcp__laravel-boost__search-docs",
       "mcp__laravel-boost__list-artisan-commands",
+      "mcp__laravel-boost__list-routes",
+      "mcp__laravel-boost__browser-logs",
+      "mcp__laravel-boost__search-docs",
       "Bash(tail:*)",
-      "Bash(vendor/bin/sail bin:*)"
+      "Bash(vendor/bin/sail bin:*)",
+      "Bash(vendor/bin/sail artisan:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
