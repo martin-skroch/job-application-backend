@@ -15,11 +15,14 @@ class SendApplication
     {
         $this->publishApplication->handle($application);
 
-        Mail::send(new ApplicationMail($application, isTest: ! $setStatus));
+        $mail = new ApplicationMail($application, isTest: ! $setStatus);
+
+        Mail::send($mail);
 
         if ($setStatus) {
             $application->history()->create([
                 'status' => ApplicationStatus::Sent,
+                'comment' => $mail->renderText(),
             ]);
         }
     }

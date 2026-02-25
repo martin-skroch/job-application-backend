@@ -54,7 +54,16 @@ class ApplicationMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(markdown: 'mail.application');
+        return new Content(
+            markdown: 'mail.application',
+            text: 'mail.application',
+        );
+    }
+
+    public function renderText(): string
+    {
+        return app(\Illuminate\Mail\Markdown::class)
+            ->renderText('mail.application', $this->buildViewData());
     }
 
     public function attachments(): array
