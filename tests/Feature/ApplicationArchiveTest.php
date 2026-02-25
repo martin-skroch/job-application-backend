@@ -58,4 +58,43 @@ class ApplicationArchiveTest extends TestCase
 
         $this->assertSoftDeleted($application);
     }
+
+    public function test_archive_soft_deletes_application(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->call('archive', $application->id);
+
+        $this->assertSoftDeleted($application);
+        $this->assertTrue($application->fresh()->isArchived());
+    }
+
+    public function test_archive_does_nothing_for_invalid_id(): void
+    {
+        $user = User::factory()->create();
+        Application::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->call('archive', 'not-a-ulid');
+
+        $this->assertEquals(1, Application::withTrashed()->count());
+        $this->assertNull(Application::first()->deleted_at);
+    }
+
+    public function test_archive_cannot_be_called_for_another_users_application(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $application = Application::factory()->for($other)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->call('archive', $application->id);
+
+        $this->assertNotSoftDeleted($application);
+    }
 }

@@ -12,7 +12,9 @@
       "mcp__laravel-boost__tinker",
       "Bash(tail:*)",
       "Bash(vendor/bin/sail bin:*)",
-      "Bash(vendor/bin/sail artisan:*)"
+      "Bash(vendor/bin/sail artisan:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
