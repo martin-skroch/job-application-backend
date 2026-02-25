@@ -3,6 +3,7 @@
 use App\Actions\PublishApplication;
 use App\Actions\UnpublishApplication;
 use App\Enum\ApplicationStatus;
+use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
 use App\Models\Application;
 use App\Models\Profile;
@@ -28,9 +29,9 @@ new class extends Component {
 
     public ?string $title = null;
     public ?string $source = null;
+    public ?FormOfAddress $form_of_address = FormOfAddress::Formal;
     public ?SalaryBehaviors $salary_behavior = SalaryBehaviors::Hidden;
     public ?int $salary_desire = null;
-    public ?string $greeting = null;
     public ?string $text = null;
     public ?string $contact_name = null;
     public ?string $contact_email = null;
@@ -115,12 +116,12 @@ new class extends Component {
 
             $this->application = $application;
             $this->profile = $application->profile;
+            $this->form_of_address = $application->form_of_address;
             $this->salary_desire = $application->salary_desire;
             $this->salary_behavior = $application->salary_behavior;
 
             $this->title = $application->title;
             $this->source = $application->source?->value();
-            $this->greeting = $application->greeting;
             $this->text = $application->text;
 
             $this->contact_name = $application->contact_name;
@@ -366,6 +367,12 @@ new class extends Component {
                     @endforeach
                 </flux:select>
 
+                <flux:select wire:model="form_of_address" :label="__('Form of Address')">
+                    @foreach (FormOfAddress::cases() as $form)
+                    <flux:select.option :value="$form->value">{{ __($form->name) }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
                 <flux:field >
                     <flux:label>{{ __(key: 'Salary Expectation') }}</flux:label>
 
@@ -389,8 +396,7 @@ new class extends Component {
                     <flux:error name="salary_desire" />
                 </flux:field>
 
-                <flux:textarea wire:model="greeting" :label="__('Greeting')" />
-                <flux:textarea wire:model="text" :label="__('Text')" />
+                <flux:textarea wire:model="text" :label="__('Text')" rows="16" />
             </div>
 
             <div class="space-y-6">

@@ -1,13 +1,22 @@
 <x-mail::message>
-@php $recipient = $application->contact_name ?: $application->company_name; @endphp
-{{ trim(__('Hello :name', ['name' => $recipient])) }},
+@php $form = $application->form_of_address?->value ?? 'formal'; @endphp
+@if ($application->contact_name)
+{{ __("mail.application.{$form}.salutation_named", ['name' => $application->contact_name]) }}
+@else
+{{ __("mail.application.{$form}.salutation_generic") }}
+@endif
 
-{{ __('please find my application for the advertised position enclosed. You can view my complete application documents via the following link:') }}
+{{ __("mail.application.{$form}.body") }}
 
-<x-mail::button :url="config('app.frontend_url') . '/' . $application->public_id">{{ __('View Application') }}</x-mail::button>
+<x-mail::button :url="config('app.frontend_url') . '/' . $application->public_id">
+{{ __('mail.application.button') }}
+</x-mail::button>
 
-{{ __('Kind regards,') }}
-{{ $application->profile?->name ?? '' }}
+---
+
+{{ __("mail.application.{$form}.closing") }}
+
+**{{ $application->profile?->name ?? '' }}**
 @if ($application->profile?->phone)
 {{ $application->profile->phone }}
 @endif

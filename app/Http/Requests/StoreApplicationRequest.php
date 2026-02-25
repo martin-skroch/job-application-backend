@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,9 +27,9 @@ class StoreApplicationRequest extends FormRequest
         return [
             'title' => ['nullable', 'string', 'max:255'],
             'source' => ['nullable', 'url:http,https', 'max:255'],
+            'form_of_address' => ['required', Rule::enum(FormOfAddress::class)],
             'salary_behavior' => ['required', Rule::enum(SalaryBehaviors::class)],
             'salary_desire' => ['integer', $salaryBehavior === SalaryBehaviors::Override ? 'required' : 'nullable'],
-            'greeting' => ['nullable', 'string'],
             'text' => ['nullable', 'string'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],

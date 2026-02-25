@@ -2,6 +2,7 @@
 
 use App\Actions\SendApplication;
 use App\Enum\ApplicationStatus;
+use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
 use App\Models\Application;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -118,14 +119,8 @@ new class extends Component {
                 <flux:heading size="xl" level="1">
                     {{ $application->title ?: __('Untitled Application') }}
                 </flux:heading>
-                <flux:badge size="sm" color="{{ match($application->status()) {
-                    ApplicationStatus::Draft    => 'zinc',
-                    ApplicationStatus::Sent     => 'blue',
-                    ApplicationStatus::Invited  => 'yellow',
-                    ApplicationStatus::Accepted => 'green',
-                    ApplicationStatus::Rejected => 'red',
-                    default                     => 'zinc',
-                } }}">{{ __($application->status()?->name ?? 'No status') }}</flux:badge>
+
+                <livewire:application-status-modal :application="$application" :key="'status-' . $application->id" />
             </div>
             @if ($application->company_name)
                 <flux:subheading size="lg" class="mt-1">{{ $application->company_name }}</flux:subheading>
@@ -176,97 +171,139 @@ new class extends Component {
 
     {{-- Main grid --}}
     <div class="grid xl:grid-cols-3 gap-6">
-
-        {{-- Sidebar --}}
-        <div class="space-y-4">
-
-            {{-- Overview --}}
-            <flux:callout>
-                <flux:heading>{{ __('Overview') }}</flux:heading>
-                <div class="mt-4 space-y-4 text-sm">
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Source') }}</p>
-                        @if ($application->source)
-                            <a href="{{ route('redirect', ['url' => $application->source->value()]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline">
-                                {{ str($application->source)->replaceMatches('#https?://#i', '') }}
-                            </a>
-                        @else
-                            <span class="text-zinc-400">—</span>
-                        @endif
-                    </div>
-
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Public URL') }}</p>
-                        @if ($application->isPublic())
-                            <a href="{{ config('app.frontend_url') . '/' . $application->public_id }}" target="_blank" rel="noopener" class="font-mono text-accent hover:underline">
-                                {{ $application->public_id }}
-                            </a>
-                        @else
-                            <span class="text-zinc-400">{{ __('Not public') }}</span>
-                        @endif
-                    </div>
+        {{-- Overview --}}
+        <flux:callout>
+            <flux:heading>{{ __('Overview') }}</flux:heading>
+            <div class="mt-4 space-y-4 text-sm">
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Source') }}</p>
+                    @if ($application->source)
+                        <a href="{{ route('redirect', ['url' => $application->source->value()]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline">
+                            {{ str($application->source)->replaceMatches('#^https?://#i', '')->rtrim('/') }}
+                        </a>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
                 </div>
-            </flux:callout>
 
-            {{-- Company --}}
-            <flux:callout>
-                <flux:heading>{{ __('Company') }}</flux:heading>
-                <div class="mt-4 space-y-4 text-sm">
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Form of Address') }}</p>
+                    <p>{{ __($application->form_of_address->name) }}</p>
+                </div>
+
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Public URL') }}</p>
+                    @if ($application->isPublic())
+                        <a href="{{ config('app.frontend_url') . '/' . $application->public_id }}" target="_blank" rel="noopener" class="font-mono text-accent hover:underline">
+                            {{ $application->public_id }}
+                        </a>
+                    @else
+                        <span class="text-zinc-400">{{ __('Not public') }}</span>
+                    @endif
+                </div>
+            </div>
+        </flux:callout>
+
+        {{-- Company --}}
+        <flux:callout>
+            <flux:heading>{{ __('Company') }}</flux:heading>
+            <div class="mt-4 space-y-4 text-sm">
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
+                    @if ($application->company_name)
+                        <p>{{ $application->company_name }}</p>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
+                </div>
+
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Website') }}</p>
+                    @if ($application->company_website)
+                        <a href="{{ route('redirect', ['url' => (string) $application->company_website]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline truncate">
+                            {{ str($application->company_website)->replaceMatches('#^https?://#i', '$1')->rtrim('/') }}
+                        </a>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
+                </div>
+
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Address') }}</p>
+                    @if ($application->company_address)
+                        @if ($this->mapLink)
+                            <a href="{{ $this->mapLink }}" target="_blank" rel="noopener" class="leading-relaxed text-accent hover:underline">
+                                {!! nl2br(e($application->company_address)) !!}
+                            </a>
+                        @else
+                            <p class="leading-relaxed">{!! nl2br(e($application->company_address)) !!}</p>
+                        @endif
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
+                </div>
+            </div>
+        </flux:callout>
+
+        {{-- Contact --}}
+        <flux:callout>
+            <flux:heading>{{ __('Contact') }}</flux:heading>
+            <div class="mt-4 space-y-4 text-sm">
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
+                    @if ($application->contact_name)
+                        <p>{{ $application->contact_name }}</p>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
+                </div>
+
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</p>
+                    @if ($application->contact_email)
+                        <a href="mailto:{{ $application->contact_email }}" class="text-accent hover:underline">
+                            {{ $application->contact_email }}
+                        </a>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
+                </div>
+
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Phone') }}</p>
+                    @if ($application->contact_phone)
+                        <a href="tel:{{ $application->contact_phone }}" class="text-accent hover:underline">
+                            {{ $application->contact_phone }}
+                        </a>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
+                </div>
+            </div>
+        </flux:callout>
+
+        {{-- Profile & Salary --}}
+        <flux:callout class="xl:col-start-1">
+            <flux:heading>{{ __('Profile') }}</flux:heading>
+            <div class="mt-4 space-y-4 text-sm">
+                @if ($application->profile)
                     <div class="space-y-1">
                         <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
-                        @if ($application->company_name)
-                            <p>{{ $application->company_name }}</p>
-                        @else
-                            <span class="text-zinc-400">—</span>
-                        @endif
+                        <p>{{ $application->profile->name }}</p>
                     </div>
 
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Website') }}</p>
-                        @if ($application->company_website)
-                            <a href="{{ route('redirect', ['url' => (string) $application->company_website]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline truncate">
-                                {{ str($application->company_website)->replaceMatches('#https?://#i', '') }}
-                            </a>
-                        @else
-                            <span class="text-zinc-400">—</span>
-                        @endif
-                    </div>
-
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Address') }}</p>
-                        @if ($application->company_address)
-                            @if ($this->mapLink)
-                                <a href="{{ $this->mapLink }}" target="_blank" rel="noopener" class="leading-relaxed text-accent hover:underline">
-                                    {!! nl2br(e($application->company_address)) !!}
-                                </a>
-                            @else
-                                <p class="leading-relaxed">{!! nl2br(e($application->company_address)) !!}</p>
-                            @endif
-                        @else
-                            <span class="text-zinc-400">—</span>
-                        @endif
-                    </div>
-                </div>
-            </flux:callout>
-
-            {{-- Contact --}}
-            <flux:callout>
-                <flux:heading>{{ __('Contact') }}</flux:heading>
-                <div class="mt-4 space-y-4 text-sm">
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
-                        @if ($application->contact_name)
-                            <p>{{ $application->contact_name }}</p>
-                        @else
-                            <span class="text-zinc-400">—</span>
-                        @endif
-                    </div>
+                    @if ($application->profile->title)
+                        <div class="space-y-1">
+                            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Title') }}</p>
+                            <p>{{ $application->profile->title }}</p>
+                        </div>
+                    @endif
 
                     <div class="space-y-1">
                         <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</p>
-                        @if ($application->contact_email)
-                            <a href="mailto:{{ $application->contact_email }}" class="text-accent hover:underline">
-                                {{ $application->contact_email }}
+                        @if ($application->profile->email)
+                            <a href="mailto:{{ $application->profile->email }}" class="text-accent hover:underline">
+                                {{ $application->profile->email }}
                             </a>
                         @else
                             <span class="text-zinc-400">—</span>
@@ -274,105 +311,52 @@ new class extends Component {
                     </div>
 
                     <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Phone') }}</p>
-                        @if ($application->contact_phone)
-                            <a href="tel:{{ $application->contact_phone }}" class="text-accent hover:underline">
-                                {{ $application->contact_phone }}
-                            </a>
+                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Salary') }}</p>
+                        @if ($application->salary_behavior === SalaryBehaviors::Hidden)
+                            <span class="text-zinc-400">{{ __('Hidden') }}</span>
+                        @elseif ($application->salary_behavior === SalaryBehaviors::Override && $application->salary_desire)
+                            <p>{{ number_format($application->salary_desire, 0, ',', '.') }} €</p>
+                        @elseif ($application->salary_behavior === SalaryBehaviors::Inherit && $application->profile->salary_desire)
+                            <p>{{ number_format($application->profile->salary_desire, 0, ',', '.') }} € <span class="text-zinc-400">({{ __('from profile') }})</span></p>
                         @else
                             <span class="text-zinc-400">—</span>
                         @endif
                     </div>
+                @else
+                    <p class="text-zinc-400">{{ __('No profile selected.') }}</p>
+                @endif
+            </div>
+        </flux:callout>
+
+        {{-- Dates --}}
+        <flux:callout class="xl:col-start-1">
+            <flux:heading>{{ __('Dates') }}</flux:heading>
+            <div class="mt-4 space-y-4 text-sm">
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Created') }}</p>
+                    <p title="{{ $application->created_at->format('d.m.Y H:i') }}">
+                        {{ $application->created_at->format('d.m.Y') }}
+                    </p>
                 </div>
-            </flux:callout>
 
-            {{-- Profile & Salary --}}
-            <flux:callout>
-                <flux:heading>{{ __('Profile') }}</flux:heading>
-                <div class="mt-4 space-y-4 text-sm">
-                    @if ($application->profile)
-                        <div class="space-y-1">
-                            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
-                            <p>{{ $application->profile->name }}</p>
-                        </div>
-
-                        @if ($application->profile->title)
-                            <div class="space-y-1">
-                                <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Title') }}</p>
-                                <p>{{ $application->profile->title }}</p>
-                            </div>
-                        @endif
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</p>
-                            @if ($application->profile->email)
-                                <a href="mailto:{{ $application->profile->email }}" class="text-accent hover:underline">
-                                    {{ $application->profile->email }}
-                                </a>
-                            @else
-                                <span class="text-zinc-400">—</span>
-                            @endif
-                        </div>
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Salary') }}</p>
-                            @if ($application->salary_behavior === SalaryBehaviors::Hidden)
-                                <span class="text-zinc-400">{{ __('Hidden') }}</span>
-                            @elseif ($application->salary_behavior === SalaryBehaviors::Override && $application->salary_desire)
-                                <p>{{ number_format($application->salary_desire, 0, ',', '.') }} €</p>
-                            @elseif ($application->salary_behavior === SalaryBehaviors::Inherit && $application->profile->salary_desire)
-                                <p>{{ number_format($application->profile->salary_desire, 0, ',', '.') }} € <span class="text-zinc-400">({{ __('from profile') }})</span></p>
-                            @else
-                                <span class="text-zinc-400">—</span>
-                            @endif
-                        </div>
-                    @else
-                        <p class="text-zinc-400">{{ __('No profile selected.') }}</p>
-                    @endif
+                <div class="space-y-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Updated') }}</p>
+                    <p title="{{ $application->created_at->format('d.m.Y H:i') }}">
+                        {{ $application->updated_at->format('d.m.Y') }}
+                    </p>
                 </div>
-            </flux:callout>
-
-            {{-- Dates --}}
-            <flux:callout>
-                <flux:heading>{{ __('Dates') }}</flux:heading>
-                <div class="mt-4 space-y-4 text-sm">
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Created') }}</p>
-                        <p title="{{ $application->created_at->format('d.m.Y H:i') }}">
-                            {{ $application->created_at->format('d.m.Y') }}
-                        </p>
-                    </div>
-
-                    <div class="space-y-1">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Updated') }}</p>
-                        <p title="{{ $application->created_at->format('d.m.Y H:i') }}">
-                            {{ $application->updated_at->format('d.m.Y') }}
-                        </p>
-                    </div>
-                </div>
-            </flux:callout>
-
-        </div>
+            </div>
+        </flux:callout>
 
         {{-- Cover letter --}}
-        <div class="xl:col-span-2">
-            <flux:callout class="h-full">
-                <div class="space-y-6">
-                    <div class="space-y-2">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Greeting') }}</p>
-                        <x-markdown>{{ $application->greeting }}</x-markdown>
-                    </div>
-
-                    <flux:separator variant="subtle" />
-
-                    <div class="space-y-2">
-                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Cover Letter') }}</p>
-                        <x-markdown>{{ $application->text }}</x-markdown>
-                    </div>
+        <flux:callout class="xl:col-span-2 xl:row-span-2 xl:col-start-2 xl:row-start-2">
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Cover Letter') }}</p>
+                    <x-markdown>{{ $application->text }}</x-markdown>
                 </div>
-            </flux:callout>
-        </div>
-
+            </div>
+        </flux:callout>
     </div>
 
     {{-- History --}}

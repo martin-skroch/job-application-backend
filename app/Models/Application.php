@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enum\ApplicationStatus;
+use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
 use App\Policies\ApplicationPolicy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -41,6 +42,7 @@ class Application extends Model
         'company_name',
         'company_address',
         'company_website',
+        'form_of_address',
     ];
 
     /**
@@ -53,6 +55,7 @@ class Application extends Model
         return [
             'title' => 'string',
             'source' => AsUri::class,
+            'form_of_address' => FormOfAddress::class,
             'salary_behavior' => SalaryBehaviors::class,
             'salary_desire' => 'integer',
             'contact_name' => 'string',

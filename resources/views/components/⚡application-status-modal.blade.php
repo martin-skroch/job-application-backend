@@ -19,7 +19,7 @@ new class extends Component {
         $this->application = $application;
     }
 
-    public function openModal(): void
+    public function open(): void
     {
         $this->newStatus = null;
         $this->statusComment = null;
@@ -47,13 +47,25 @@ new class extends Component {
 
         Flux::modal('status-modal-' . $this->application->id)->close();
     }
+
+    public function color(): string
+    {
+        return match($this->application->status()) {
+            ApplicationStatus::Draft    => 'zinc',
+            ApplicationStatus::Sent     => 'blue',
+            ApplicationStatus::Invited  => 'yellow',
+            ApplicationStatus::Accepted => 'green',
+            ApplicationStatus::Rejected => 'red',
+            default                     => 'zinc',
+        };
+    }
 };
 ?>
 
 <div>
-    <flux:button size="sm" wire:click="openModal">
+    <flux:badge as="button" size="lg" wire:click="open" variant="primary" :color="$this->color()" icon:trailing="arrows-up-down">
         {{ $application->status()?->name ?? __('No status') }}
-    </flux:button>
+    </flux:badge>
 
     <flux:modal :name="'status-modal-' . $application->id" class="md:w-96 space-y-6">
         <flux:heading size="lg">{{ __('Change status') }}</flux:heading>

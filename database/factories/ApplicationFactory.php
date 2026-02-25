@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enum\FormOfAddress;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -35,6 +36,7 @@ class ApplicationFactory extends Factory
             'company_name' => $company,
             'company_address' => $address,
             'company_website' => $website,
+            'form_of_address' => FormOfAddress::Formal,
         ];
     }
 }
