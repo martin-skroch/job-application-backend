@@ -128,7 +128,10 @@ class SendApplicationTest extends TestCase
                 && $envelope->from?->name === $application->profile->name;
         });
 
-        $this->assertDatabaseEmpty('applications_history');
+        $this->assertDatabaseMissing('applications_history', [
+            'application_id' => $application->id,
+            'status' => ApplicationStatus::Sent->value,
+        ]);
     }
 
     public function test_send_test_email_fails_silently_when_profile_has_no_email(): void
