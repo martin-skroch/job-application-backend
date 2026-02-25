@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use Illuminate\Support\Str;
 
@@ -21,10 +20,6 @@ class PublishApplication
         }
 
         $application->forceFill($data)->save();
-
-        $application->history()->create([
-            'status' => ApplicationStatus::Published,
-        ]);
     }
 
     private function generatePublicId(): string

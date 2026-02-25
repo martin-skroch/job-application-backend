@@ -34,8 +34,8 @@ class SendApplicationTest extends TestCase
         Mail::assertSent(ApplicationMail::class, function (ApplicationMail $mail) use ($application) {
             $envelope = $mail->envelope();
 
-            return $mail->recipientEmail === 'hiring@company.com'
-                && $mail->application->is($application)
+            return $mail->application->is($application)
+                && $envelope->to[0]->address === 'hiring@company.com'
                 && $envelope->from?->address === 'applicant@example.com'
                 && $envelope->from?->name === $application->profile->name
                 && $envelope->subject === 'Bewerbung als Software Developer';
@@ -123,7 +123,7 @@ class SendApplicationTest extends TestCase
         Mail::assertSent(ApplicationMail::class, function (ApplicationMail $mail) use ($application) {
             $envelope = $mail->envelope();
 
-            return $mail->recipientEmail === 'applicant@example.com'
+            return $envelope->to[0]->address === 'applicant@example.com'
                 && $envelope->from?->address === 'applicant@example.com'
                 && $envelope->from?->name === $application->profile->name;
         });
