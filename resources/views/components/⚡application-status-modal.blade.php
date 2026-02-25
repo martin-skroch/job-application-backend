@@ -39,7 +39,7 @@ new class extends Component {
             'statusDate' => ['nullable', 'date'],
         ]);
 
-        Auth::user()->applications()->findOrFail($this->application->id)->history()->create([
+        Auth::user()->applications()->withTrashed()->findOrFail($this->application->id)->history()->create([
             'status' => $this->newStatus,
             'comment' => $this->statusComment,
             'created_at' => $this->statusDate ?? now(),
@@ -51,7 +51,7 @@ new class extends Component {
 ?>
 
 <div>
-    <flux:button size="sm" wire:click="openModal" :disabled="$application->isArchived()">
+    <flux:button size="sm" wire:click="openModal">
         {{ $application->status()?->name ?? __('No status') }}
     </flux:button>
 
