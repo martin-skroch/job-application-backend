@@ -366,27 +366,40 @@ new class extends Component {
         @if ($this->history->isNotEmpty())
             <div>
                 @foreach ($this->history as $entry)
-                    <flux:callout wire:key="history-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
-                        <div class="flex items-start justify-between gap-4">
-                            <div class="min-w-0 space-y-1">
-                                <flux:badge size="sm" color="{{ match($entry->status) {
-                                    ApplicationStatus::Draft    => 'zinc',
-                                    ApplicationStatus::Sent     => 'blue',
-                                    ApplicationStatus::Invited  => 'yellow',
-                                    ApplicationStatus::Accepted => 'green',
-                                    ApplicationStatus::Rejected => 'red',
-                                    default                     => 'zinc',
-                                } }}">{{ __($entry->status?->name ?? 'Comment') }}</flux:badge>
 
+                    @php
+                        $colors = match($entry->status) {
+                            ApplicationStatus::Draft    => 'zinc',
+                            ApplicationStatus::Sent     => 'blue',
+                            ApplicationStatus::Invited  => 'yellow',
+                            ApplicationStatus::Accepted => 'green',
+                            ApplicationStatus::Rejected => 'red',
+                            default                     => 'zinc',
+                        };
+                    @endphp
+
+                    <flux:callout x-data="{ open: false }" wire:key="history-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
+                        <div
+                            class="flex items-center justify-between gap-4{{ $entry->comment ? ' cursor-pointer select-none' : '' }}"
+                            @if ($entry->comment) x-on:click="open = !open" @endif
+                        >
+                            <flux:badge size="sm" color="{{ $colors }}">{{ __($entry->status?->name ?? 'Comment') }}</flux:badge>
+
+                            <div class="flex items-center gap-2 shrink-0">
+                                <p class="text-sm text-zinc-400" title="{{ $entry->created_at->format('d.m.Y H:i') }}">
+                                    {{ $entry->created_at?->diffForHumans() }}
+                                </p>
                                 @if ($entry->comment)
-                                    <x-markdown>{{ $entry->comment }}</x-markdown>
+                                    <flux:icon icon="chevron-down" class="size-4 text-zinc-400 transition-transform duration-200" x-bind:class="{ 'rotate-180': open }" />
                                 @endif
                             </div>
-
-                            <p class="shrink-0 text-sm text-zinc-400" title="{{ $entry->created_at->format('d.m.Y H:i') }}">
-                                {{ $entry->created_at?->diffForHumans() }}
-                            </p>
                         </div>
+
+                        @if ($entry->comment)
+                            <div x-show="open" x-transition class="mt-3">
+                                <x-markdown>{{ $entry->comment }}</x-markdown>
+                            </div>
+                        @endif
                     </flux:callout>
                 @endforeach
             </div>
