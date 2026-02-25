@@ -2,6 +2,7 @@
 
 use App\Actions\PublishApplication;
 use App\Actions\UnpublishApplication;
+use App\Enum\ApplicationStatus;
 use App\Enum\SalaryBehaviors;
 use App\Models\Application;
 use App\Models\Profile;
@@ -9,11 +10,15 @@ use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
+
+    #[Url]
+    public ?string $status = 'draft';
 
     public bool $isEditing = false;
     public ?string $applicationId = null;
@@ -27,7 +32,6 @@ new class extends Component {
     public ?int $salary_desire = null;
     public ?string $greeting = null;
     public ?string $text = null;
-    public ?string $notes = null;
     public ?string $contact_name = null;
     public ?string $contact_email = null;
     public ?string $contact_phone = null;
@@ -36,6 +40,7 @@ new class extends Component {
     public ?string $company_website = null;
     public ?string $profile_id = null;
     public ?string $public_id = null;
+
 
     private PublishApplication $publishApplication;
     private UnpublishApplication $unpublishApplication;
@@ -50,8 +55,49 @@ new class extends Component {
 
     public function with(): array
     {
+        $archivedFilter = $this->status === 'archived';
+        $statusFilter = $archivedFilter ? null : ApplicationStatus::tryFrom($this->status ?? '');
+
+        $statusItems = collect(ApplicationStatus::cases())
+            ->map(fn (ApplicationStatus $case) => [
+                'route' => route('applications.index', ['status' => $case->value]),
+                'name' => $case->name,
+                'value' => $case->value,
+                'current' => $statusFilter === $case,
+            ]);
+
+        $navigation = $statusItems->merge([[
+            'route' => route('applications.index', ['status' => 'archived']),
+            'name' => 'Archived',
+            'value' => 'archived',
+            'current' => $archivedFilter,
+        ]]);
+
+        $query = Auth::user()->applications()->with('latestStatusEntry');
+
+        if ($archivedFilter) {
+            $query->onlyTrashed();
+        } elseif ($statusFilter !== null) {
+            $query->whereHas('history', fn ($q) => $q
+                ->where('status', $statusFilter->value)
+                ->whereNotExists(
+                    fn ($sub) => $sub->from('applications_history as newer')
+                        ->whereColumn('newer.application_id', 'applications_history.application_id')
+                        ->whereNotNull('newer.status')
+                        ->where(fn ($w) => $w
+                            ->whereColumn('newer.created_at', '>', 'applications_history.created_at')
+                            ->orWhere(fn ($w2) => $w2
+                                ->whereColumn('newer.created_at', '=', 'applications_history.created_at')
+                                ->whereColumn('newer.id', '>', 'applications_history.id')
+                            )
+                        )
+                )
+            );
+        }
+
         return [
-            'applications' => Auth::user()->applications()->paginate(),
+            'navigation' => $navigation,
+            'applications' => $query->paginate(),
         ];
     }
 
@@ -76,7 +122,6 @@ new class extends Component {
             $this->source = $application->source?->value();
             $this->greeting = $application->greeting;
             $this->text = $application->text;
-            $this->notes = $application->notes;
 
             $this->contact_name = $application->contact_name;
             $this->contact_email = $application->contact_email;
@@ -103,7 +148,8 @@ new class extends Component {
         if (Str::isUlid($this->applicationId)) {
             $applications->where('id', $this->applicationId)->update($validated);
         } else {
-            $applications->forceCreate($validated);
+            $application = $applications->forceCreate($validated);
+            $application->history()->create(['status' => ApplicationStatus::Draft]);
         }
 
         Flux::modal('application-modal')->close();
@@ -141,7 +187,7 @@ new class extends Component {
         $this->unpublishApplication->handle($application);
     }
 
-    public function delete(string $id): void
+    public function archive(string $id): void
     {
         if (!Str::isUlid($id)) {
             return;
@@ -154,6 +200,25 @@ new class extends Component {
         }
 
         $application->delete();
+    }
+
+    public function restore(string $id): void
+    {
+        if (!Str::isUlid($id)) {
+            return;
+        }
+
+        $application = Auth::user()->applications()->withTrashed()->find($id);
+
+        if (!$application instanceof Application || !$application->isArchived()) {
+            return;
+        }
+
+        $application->restore();
+
+        $application->history()->create([
+            'comment' => __('Application restored from archive.'),
+        ]);
     }
 
     public function resetForm(): void
@@ -172,7 +237,7 @@ new class extends Component {
     <div class="flex items-center">
         <div class="grow">
             <flux:heading size="xl" level="1">{{ __('Applications') }}</flux:heading>
-            <flux:subheading size="lg">{{ __('Manage you applications') }}</flux:subheading>
+            <flux:subheading size="lg">{{ __('Manage your applications') }}</flux:subheading>
         </div>
         <div>
             <flux:button icon="plus" variant="primary" :loading="false" wire:click="open">
@@ -183,60 +248,100 @@ new class extends Component {
 
     <flux:separator variant="subtle" />
 
-    <div class="space-y-4">
+    <div class="flex items-start max-md:flex-col">
+        <div class="me-10 w-full pb-4 md:w-[180px] shrink-0">
+            <flux:navlist>
+                @foreach ($navigation as $item)
+                <flux:navlist.item :href="$item['route']" :current="$item['current']" wire:navigate>
+                    {{ __($item['name']) }}
+                </flux:navlist.item>
+                @endforeach
+            </flux:navlist>
+        </div>
 
-        @foreach ($applications as $application)
-        <flux:callout class="p-3" inline>
-            <flux:callout.heading class="text-base!">
-                <a href="{{ route('applications.show', $application) }}" class="hover:text-accent hover:underline" wire:navigate>
-                    {{ $application->company_name }}
-                </a>
-            </flux:callout.heading>
+        <flux:separator class="md:hidden" />
 
-            <x-slot name="actions" class="me-4! self-center!">
-                @if ($application->isPublic())
-                <flux:button icon="globe-europe-africa" class="font-mono" size="sm" variant="primary" color="lime" target="_blank" rel="noopener" :href="config('app.frontend_url') . '/' . $application->public_id">
-                    {{ $application->public_id }}
-                </flux:button>
-                @else
-                <flux:button icon="eye-slash" size="sm" disabled>
-                    {{ __('Not public') }}
-                </flux:button>
-                @endif
-            </x-slot>
+        <div class="flex-1 min-w-0 max-md:pt-6 space-y-4">
 
-            <x-slot name="controls">
-                <flux:dropdown class="ms-auto">
-                    <flux:button icon="ellipsis-horizontal" variant="filled" />
+            @foreach ($applications as $application)
+            <flux:callout class="p-3" inline>
+                <flux:callout.heading class="text-base!">
+                    @if (!$application->isArchived())
+                    <a href="{{ route('applications.show', $application) }}" class="hover:text-accent hover:underline" wire:navigate>
+                    @endif
 
-                    <flux:menu>
-                        <flux:menu.item :href="route('applications.show', $application)" wire:navigate>
+                        {{ $application->company_name }}
+
+                    @if (!$application->isArchived())
+                    </a>
+                    @endif
+                </flux:callout.heading>
+
+                <x-slot name="actions" class="flex-wrap me-1! self-center! gap-4">
+
+                    @if ($application->isArchived())
+                    <flux:button size="sm" icon="arrow-uturn-left" wire:click="restore('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to restore this application?') }}">
+                        {{ __('Restore') }}
+                    </flux:button>
+                    @else
+                    <flux:button.group>
+                        <flux:button size="sm" :href="route('applications.show', $application)" wire:navigate>
                             {{ __('Show') }}
-                        </flux:menu.item>
+                        </flux:button>
 
-                        <flux:menu.item wire:click="open('{{ $application->id }}')">
-                            {{ __('Edit') }}
-                        </flux:menu.item>
+                        <flux:dropdown>
+                            <flux:button size="sm" icon:trailing="chevron-down"></flux:button>
+                            <flux:menu>
+                                <flux:menu.item wire:click="open('{{ $application->id }}')">
+                                    {{ __('Edit') }}
+                                </flux:menu.item>
 
+                                <flux:menu.item variant="danger" wire:click="archive('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to archive this application?') }}">
+                                    {{ __('Delete') }}
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </flux:button.group>
+                    @endif
+
+                    <flux:button.group class="inline-flex">
                         @if ($application->isPublic())
-                        <flux:menu.item wire:click="unpublish('{{ $application->id }}')">
-                            {{ __('Unpublish') }}
-                        </flux:menu.item>
+                        <flux:button size="sm" icon="eye" class="font-mono" :href="config('app.frontend_url') . '/' . $application->public_id" target="_blank" rel="noopener">
+                            {{ $application->public_id }}
+                        </flux:button>
                         @else
-                        <flux:menu.item wire:click="publish('{{ $application->id }}')">
-                            {{ __('Publish') }}
-                        </flux:menu.item>
+                        <flux:button icon="eye-slash" size="sm" disabled>
+                            {{ __('Not public') }}
+                        </flux:button>
                         @endif
 
-                        <flux:menu.item variant="danger" wire:click="delete('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to delete this application?') }}">
-                            {{ __('Delete') }}
-                        </flux:menu.item>
-                    </flux:menu>
-                </flux:dropdown>
-            </x-slot>
-        </flux:callout>
-        @endforeach
+                        @if (!$application->isArchived())
+                        <flux:dropdown>
+                            <flux:button size="sm" icon:trailing="chevron-down"></flux:button>
 
+                            <flux:menu>
+                                @if ($application->isPublic())
+                                <flux:menu.item wire:click="unpublish('{{ $application->id }}')">
+                                    {{ __('Unpublish') }}
+                                </flux:menu.item>
+                                @else
+                                <flux:menu.item wire:click="publish('{{ $application->id }}')">
+                                    {{ __('Publish') }}
+                                </flux:menu.item>
+                                @endif
+                            </flux:menu>
+                        </flux:dropdown>
+                        @endif
+                    </flux:button.group>
+
+                    <livewire:application-status-modal :application="$application" :key="'status-' . $application->id" />
+                </x-slot>
+            </flux:callout>
+            @endforeach
+
+            {{ $applications->links() }}
+
+        </div>
     </div>
 
     <x-flyout name="application-modal" wire:close="resetForm">
@@ -286,7 +391,6 @@ new class extends Component {
 
                 <flux:textarea wire:model="greeting" :label="__('Greeting')" />
                 <flux:textarea wire:model="text" :label="__('Text')" />
-                <flux:textarea wire:model="notes" :label="__('Notes')" />
             </div>
 
             <div class="space-y-6">
@@ -324,4 +428,5 @@ new class extends Component {
         </form>
 
     </x-flyout>
+
 </section>

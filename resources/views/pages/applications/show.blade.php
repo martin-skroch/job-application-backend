@@ -1,15 +1,80 @@
 <?php
 
+use App\Actions\SendApplication;
+use App\Enum\ApplicationStatus;
 use App\Models\Application;
+use App\Models\ApplicationHistory;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 new class extends Component {
     use WithPagination;
 
     public Application $application;
+
+    private SendApplication $sendApplication;
+
+    public function boot(SendApplication $sendApplication): void
+    {
+        $this->sendApplication = $sendApplication;
+    }
+
+    #[Computed]
+    public function sendIssues(): array
+    {
+        $issues = [];
+
+        if ($this->application->status() === ApplicationStatus::Sent) {
+            $issues[] = __('Application has already been sent.');
+        }
+
+        if (blank($this->application->contact_email)) {
+            $issues[] = __('Contact email is missing.');
+        }
+
+        if (!$this->application->profile) {
+            $issues[] = __('No profile selected.');
+        }
+
+        return $issues;
+    }
+
+    #[Computed]
+    public function testEmailIssues(): array
+    {
+        $issues = $this->sendIssues;
+
+        if (blank($this->application->profile?->email)) {
+            $issues[] = __('Profile has no email address.');
+        }
+
+        return $issues;
+    }
+
+    public function sendApplication(): void
+    {
+        $this->authorize('update', $this->application);
+
+        if (!empty($this->sendIssues)) {
+            return;
+        }
+
+        $this->sendApplication->handle($this->application, setStatus: true);
+    }
+
+    public function sendTestEmail(): void
+    {
+        $this->authorize('update', $this->application);
+
+        if (!empty($this->testEmailIssues)) {
+            return;
+        }
+
+        $this->sendApplication->handle($this->application, setStatus: false);
+    }
 
     #[Computed]
     public function mapLink(): string|null
@@ -32,6 +97,12 @@ new class extends Component {
     }
 
     #[Computed]
+    public function history(): Collection
+    {
+        return $this->application->history()->get();
+    }
+
+    #[Computed]
     public function analytics(): LengthAwarePaginator
     {
         return $this->application->analytics()->latest('updated_at')->paginate(50);
@@ -43,7 +114,40 @@ new class extends Component {
         <div class="grow">
             <flux:heading size="xl" level="1">{{ $application->title }}</flux:heading>
         </div>
-        <div>
+        <div class="flex items-center gap-2">
+            @if ($this->sendIssues)
+                <flux:tooltip :content="implode(' ', $this->sendIssues)">
+                    <flux:button icon="paper-airplane" disabled>
+                        {{ __('Send') }}
+                    </flux:button>
+                </flux:tooltip>
+            @else
+                <flux:button
+                    icon="paper-airplane"
+                    wire:click="sendApplication"
+                    wire:confirm="{{ __('Send the application to :email now?', ['email' => $application->contact_email]) }}"
+                >
+                    {{ __('Send') }}
+                </flux:button>
+            @endif
+
+            @if ($this->testEmailIssues)
+                <flux:tooltip :content="implode(' ', $this->testEmailIssues)">
+                    <flux:button variant="ghost" icon="beaker" disabled>
+                        {{ __('Test email') }}
+                    </flux:button>
+                </flux:tooltip>
+            @else
+                <flux:button
+                    variant="ghost"
+                    icon="beaker"
+                    wire:click="sendTestEmail"
+                    wire:confirm="{{ __('Send a test email to :email?', ['email' => $application->profile->email]) }}"
+                >
+                    {{ __('Test email') }}
+                </flux:button>
+            @endif
+
             <flux:button variant="ghost" :loading="false" :href="route('applications.index')" wire:navigate>
                 {{ __('Back') }}
             </flux:button>
@@ -210,14 +314,43 @@ new class extends Component {
                 <x-markdown>{{ $application->text }}</x-markdown>
             </flux:callout>
 
-            <flux:callout>
-                <flux:heading>{{ __('Text') }}</flux:heading>
-                <x-markdown>{{ $application->notes }}</x-markdown>
-            </flux:callout>
 
         </div>
 
     </div>
+
+    <h3 class="text-xl font-light text-zinc-400">{{ __('History') }}</h3>
+
+    @if ($this->history->isNotEmpty())
+        <div>
+            @foreach ($this->history as $entry)
+            <flux:callout wire:key="history-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="space-y-1 min-w-0">
+                        <flux:badge size="sm" color="{{ match($entry->status) {
+                                ApplicationStatus::Draft            => 'zinc',
+                                ApplicationStatus::Sent             => 'blue',
+                                ApplicationStatus::Invited          => 'yellow',
+                                ApplicationStatus::Accepted         => 'green',
+                                ApplicationStatus::Rejected         => 'red',
+                                default                             => 'zinc'
+                            } }}">{{ __($entry->status?->name ?? 'Comment') }}</flux:badge>
+
+                        @if ($entry->comment)
+                            <x-markdown>{{ $entry->comment }}</x-markdown>
+                        @endif
+                    </div>
+
+                    <p class="text-sm text-zinc-400 shrink-0" title="{{ $entry->created_at->format('d.m.Y H:i') }}">
+                        {{ $entry->created_at?->diffForHumans() }}
+                    </p>
+                </div>
+            </flux:callout>
+            @endforeach
+        </div>
+    @else
+        <p class="text-zinc-400">{{ __('No history entries yet.') }}</p>
+    @endif
 
     <h3 class="text-xl font-light text-zinc-400">
         {{ __('Analytics') }} ({{ __(':count Entries', ['count' => $this->analytics->total()]) }})

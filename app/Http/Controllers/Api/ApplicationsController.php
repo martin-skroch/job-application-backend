@@ -20,8 +20,13 @@ class ApplicationsController extends Controller
 
     public function fetch(Request $request, Application $application): JsonResource|JsonResponse
     {
-        if (!$application->isPublic()) {
+
+        if (! $application->isPublic()) {
             return new JsonResponse('Not found', 404);
+        }
+
+        if ($application->isArchived()) {
+            return new JsonResponse('Gone', 410);
         }
 
         if (App::environment('local')) {
@@ -33,18 +38,29 @@ class ApplicationsController extends Controller
 
     public function request(Request $request)
     {
-        $validated = $request->validate([
-            'company' =>  ['required', 'string', 'max:255'],
-            'name' =>  ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-        ]);
+        $publicId = $request->string('id');
+        $query = Application::withTrashed()->where('public_id', $publicId);
 
-        $application = $request->user()->applications()->create([
-            'source' => $request->headers->get('referer'),
-            'company_name' => $validated['company'],
-            'contact_name' => $validated['name'],
-            'contact_email' => $validated['email'],
-        ]);
+        if ($request->filled('id') && $query->exists()) {
+
+            $application = $query->first();
+
+        } else {
+
+            $validated = $request->validate([
+                'company' => ['required', 'string', 'max:255'],
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255'],
+            ]);
+
+            $application = $request->user()->applications()->create([
+                'source' => $request->headers->get('referer'),
+                'company_name' => $validated['company'],
+                'contact_name' => $validated['name'],
+                'contact_email' => $validated['email'],
+            ]);
+
+        }
 
         $this->createAnalytics->create(
             $request,

@@ -28,15 +28,15 @@ class AppServiceProvider extends ServiceProvider
         Number::useLocale(config('app.locale', config('app.fallback_locale')));
         Number::useCurrency('EUR');
 
-        Carbon::macro('withTimezone', function(): Carbon|string {
+        Carbon::macro('withTimezone', function (): Carbon|string {
             return $this->tz(Auth::user()?->timezone ?? config('app.timezone'));
         });
 
-        Route::bind('application', function (string $value) {
+        Route::bind('application', function (string $value): Application {
             if (Str::isUlid($value)) {
                 $application = Application::where('id', $value);
             } else {
-                $application = Application::where('public_id', $value);;
+                $application = Application::withTrashed()->where('public_id', $value);
             }
 
             return $application->firstOrFail();

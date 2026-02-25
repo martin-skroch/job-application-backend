@@ -30,7 +30,6 @@ class StoreApplicationRequest extends FormRequest
             'salary_desire' => ['integer', $salaryBehavior === SalaryBehaviors::Override ? 'required' : 'nullable'],
             'greeting' => ['nullable', 'string'],
             'text' => ['nullable', 'string'],
-            'notes' => ['nullable', 'string'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string'],

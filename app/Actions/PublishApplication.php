@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use Illuminate\Support\Str;
 
@@ -10,14 +11,20 @@ class PublishApplication
     public function handle(Application $application): void
     {
         $data = [
-            'published_at' => now()
+            'published_at' => now(),
         ];
 
-        if (Str::of($application->public_id)->isEmpty()) {
+        $publicIdIsEmpty = Str::of($application->public_id)->isEmpty();
+
+        if ($publicIdIsEmpty) {
             $data['public_id'] = $this->generatePublicId();
         }
 
         $application->forceFill($data)->save();
+
+        $application->history()->create([
+            'status' => ApplicationStatus::Published,
+        ]);
     }
 
     private function generatePublicId(): string
