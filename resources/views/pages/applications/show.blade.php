@@ -2,11 +2,9 @@
 
 use App\Actions\SendApplication;
 use App\Enum\ApplicationStatus;
-use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
 use App\Models\Application;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -95,12 +93,6 @@ new class extends Component {
         }
 
         return 'https://www.google.de/maps/search/' . urlencode($mapQuery);
-    }
-
-    #[Computed]
-    public function history(): Collection
-    {
-        return $this->application->history()->get();
     }
 
     #[Computed]
@@ -380,49 +372,7 @@ new class extends Component {
     <div class="space-y-4">
         <flux:heading size="lg">{{ __('History') }}</flux:heading>
 
-        @if ($this->history->isNotEmpty())
-            <div>
-                @foreach ($this->history as $entry)
-
-                    @php
-                        $colors = match($entry->status) {
-                            ApplicationStatus::Draft    => 'zinc',
-                            ApplicationStatus::Sent     => 'blue',
-                            ApplicationStatus::Invited  => 'yellow',
-                            ApplicationStatus::Accepted => 'green',
-                            ApplicationStatus::Rejected => 'red',
-                            default                     => 'zinc',
-                        };
-                    @endphp
-
-                    <flux:callout x-data="{ open: false }" wire:key="history-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
-                        <div
-                            class="flex items-center justify-between gap-4{{ $entry->comment ? ' cursor-pointer select-none' : '' }}"
-                            @if ($entry->comment) x-on:click="open = !open" @endif
-                        >
-                            <flux:badge size="sm" color="{{ $colors }}">{{ __($entry->status?->name ?? 'Comment') }}</flux:badge>
-
-                            <div class="flex items-center gap-2 shrink-0">
-                                <p class="text-sm text-zinc-400" title="{{ $entry->created_at->format('d.m.Y H:i') }}">
-                                    {{ $entry->created_at?->diffForHumans() }}
-                                </p>
-                                @if ($entry->comment)
-                                    <flux:icon icon="chevron-down" class="size-4 text-zinc-400 transition-transform duration-200" x-bind:class="{ 'rotate-180': open }" />
-                                @endif
-                            </div>
-                        </div>
-
-                        @if ($entry->comment)
-                            <div x-show="open" x-transition class="mt-3">
-                                <x-markdown>{{ $entry->comment }}</x-markdown>
-                            </div>
-                        @endif
-                    </flux:callout>
-                @endforeach
-            </div>
-        @else
-            <p class="text-zinc-400">{{ __('No history entries yet.') }}</p>
-        @endif
+        <livewire:applications.history :application="$application" :key="'history-' . $application->id" />
     </div>
 
     {{-- Analytics --}}

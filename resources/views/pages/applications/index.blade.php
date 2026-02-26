@@ -362,8 +362,8 @@ new class extends Component {
                     <flux:separator variant="subtle" />
                 </div>
 
-                    <flux:input wire:model="title" :label="__('Title')" />
-                    <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
+                <flux:input wire:model="title" :label="__('Title')" />
+                <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
                 <flux:textarea wire:model="description" :label="__('Description')" />
             </div>
 
