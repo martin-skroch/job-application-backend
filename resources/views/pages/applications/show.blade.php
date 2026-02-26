@@ -352,12 +352,29 @@ new class extends Component {
         <flux:callout class="xl:col-span-2 xl:row-span-2 xl:col-start-2 xl:row-start-2">
             <div class="space-y-6">
                 <div class="space-y-2">
-                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Cover Letter') }}</p>
-                    <x-markdown>{{ $application->text }}</x-markdown>
+                    <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Description') }}</p>
+                    @if ($application->description)
+                        <x-markdown>{{ $application->description }}</x-markdown>
+                    @else
+                        <span class="text-zinc-400">—</span>
+                    @endif
                 </div>
             </div>
         </flux:callout>
     </div>
+
+    <flux:callout class="xl:col-span-2 xl:row-span-2 xl:col-start-2 xl:row-start-2">
+        <div class="space-y-6">
+            <div class="space-y-2">
+                <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Cover Letter') }}</p>
+                @if ($application->text)
+                    <x-markdown>{{ $application->text }}</x-markdown>
+                @else
+                    <span class="text-zinc-400">—</span>
+                @endif
+            </div>
+        </div>
+    </flux:callout>
 
     {{-- History --}}
     <div class="space-y-4">

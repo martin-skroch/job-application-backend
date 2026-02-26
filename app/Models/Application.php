@@ -36,6 +36,7 @@ class Application extends Model
     protected $fillable = [
         'title',
         'source',
+        'description',
         'contact_name',
         'contact_email',
         'contact_phone',
@@ -55,6 +56,7 @@ class Application extends Model
         return [
             'title' => 'string',
             'source' => AsUri::class,
+            'description' => 'string',
             'form_of_address' => FormOfAddress::class,
             'salary_behavior' => SalaryBehaviors::class,
             'salary_desire' => 'integer',

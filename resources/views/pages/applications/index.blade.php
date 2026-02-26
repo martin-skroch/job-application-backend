@@ -29,6 +29,7 @@ new class extends Component {
 
     public ?string $title = null;
     public ?string $source = null;
+    public ?string $description = null;
     public ?FormOfAddress $form_of_address = FormOfAddress::Formal;
     public ?SalaryBehaviors $salary_behavior = SalaryBehaviors::Hidden;
     public ?int $salary_desire = null;
@@ -122,6 +123,7 @@ new class extends Component {
 
             $this->title = $application->title;
             $this->source = $application->source?->value();
+            $this->description = $application->description;
             $this->text = $application->text;
 
             $this->contact_name = $application->contact_name;
@@ -355,9 +357,20 @@ new class extends Component {
 
         <form class="space-y-16" wire:submit="save">
             <div class="space-y-6">
-                <div class="grid lg:grid-cols-2 gap-6">
+                <div>
+                    <flux:heading size="xl" class="mb-2">{{ __('Job offer') }}</flux:heading>
+                    <flux:separator variant="subtle" />
+                </div>
+
                     <flux:input wire:model="title" :label="__('Title')" />
                     <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
+                <flux:textarea wire:model="description" :label="__('Description')" />
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="xl" class="mb-2">{{ __('Application Details') }}</flux:heading>
+                    <flux:separator variant="subtle" />
                 </div>
 
                 <flux:select wire:model.change="profile_id" :label="__('Profile')" required>

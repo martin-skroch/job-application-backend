@@ -11,7 +11,5 @@
 <div {{ $attributes->class('prose prose-neutral dark:prose-invert max-w-none') }}>
     @if ($slot->isNotEmpty())
         {!! $converter->convert($slot ?? 'Test')  !!}
-    @else
-        <div class="text-zinc-500">{!! __('-') !!}</div>
     @endif
 </div>
