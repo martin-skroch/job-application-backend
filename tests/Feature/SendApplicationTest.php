@@ -28,8 +28,8 @@ class SendApplicationTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendApplication');
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false])
+            ->call('send');
 
         Mail::assertSent(ApplicationMail::class, function (ApplicationMail $mail) use ($application) {
             $envelope = $mail->envelope();
@@ -63,8 +63,8 @@ class SendApplicationTest extends TestCase
         $application->history()->create(['status' => ApplicationStatus::Sent->value]);
 
         Livewire::actingAs($user)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendApplication');
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false])
+            ->call('send');
 
         Mail::assertNothingSent();
     }
@@ -82,8 +82,8 @@ class SendApplicationTest extends TestCase
         $application->history()->create(['status' => ApplicationStatus::Invited->value]);
 
         Livewire::actingAs($user)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendApplication');
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false])
+            ->call('send');
 
         Mail::assertSent(ApplicationMail::class);
     }
@@ -99,8 +99,8 @@ class SendApplicationTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendApplication');
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false])
+            ->call('send');
 
         Mail::assertNothingSent();
         $this->assertDatabaseEmpty('applications_history');
@@ -117,8 +117,8 @@ class SendApplicationTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendTestEmail');
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => true])
+            ->call('send');
 
         Mail::assertSent(ApplicationMail::class, function (ApplicationMail $mail) use ($application) {
             $envelope = $mail->envelope();
@@ -145,8 +145,8 @@ class SendApplicationTest extends TestCase
         ]);
 
         Livewire::actingAs($user)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendTestEmail');
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => true])
+            ->call('send');
 
         Mail::assertNothingSent();
     }
@@ -163,11 +163,77 @@ class SendApplicationTest extends TestCase
         ]);
 
         Livewire::actingAs($other)
-            ->test('pages::applications.show', ['application' => $application])
-            ->call('sendApplication')
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false])
+            ->call('send')
             ->assertForbidden();
 
         Mail::assertNothingSent();
         $this->assertDatabaseEmpty('applications_history');
+    }
+
+    public function test_send_preview_shows_correct_issues_for_real_email(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create([
+            'contact_email' => null,
+            'profile_id' => null,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false]);
+
+        $this->assertContains(__('No profile selected.'), $component->instance()->issues);
+        $this->assertContains(__('Contact email is missing.'), $component->instance()->issues);
+    }
+
+    public function test_send_preview_shows_correct_issues_for_test_email(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create(['email' => null]);
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'contact_email' => null,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => true]);
+
+        $this->assertContains(__('Profile has no email address.'), $component->instance()->issues);
+        $this->assertNotContains(__('Contact email is missing.'), $component->instance()->issues);
+    }
+
+    public function test_send_preview_shows_correct_from_and_to_for_real_email(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create([
+            'name' => 'Max Mustermann',
+            'email' => 'max@example.com',
+        ]);
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'contact_email' => 'hiring@company.com',
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false]);
+
+        $this->assertEquals('Max Mustermann <max@example.com>', $component->instance()->from);
+        $this->assertEquals('hiring@company.com', $component->instance()->to);
+    }
+
+    public function test_send_preview_shows_correct_from_and_to_for_test_email(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create([
+            'name' => 'Max Mustermann',
+            'email' => 'max@example.com',
+        ]);
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'contact_email' => 'hiring@company.com',
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => true]);
+
+        $this->assertEquals('Max Mustermann <max@example.com>', $component->instance()->from);
+        $this->assertEquals('max@example.com', $component->instance()->to);
     }
 }

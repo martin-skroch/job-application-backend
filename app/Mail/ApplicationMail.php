@@ -61,6 +61,14 @@ class ApplicationMail extends Mailable
         );
     }
 
+    public function renderHtml(): string
+    {
+        return app(Markdown::class)->render(
+            view: 'mail.application',
+            data: $this->buildViewData()
+        );
+    }
+
     public function renderText(): string
     {
         return app(Markdown::class)->renderText(

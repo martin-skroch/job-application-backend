@@ -1,7 +1,5 @@
 <?php
 
-use App\Actions\SendApplication;
-use App\Enum\ApplicationStatus;
 use App\Enum\SalaryBehaviors;
 use App\Models\Application;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -13,71 +11,6 @@ new class extends Component {
     use WithPagination;
 
     public Application $application;
-
-    private SendApplication $sendApplication;
-
-    public function boot(SendApplication $sendApplication): void
-    {
-        $this->sendApplication = $sendApplication;
-    }
-
-    #[Computed]
-    public function sendIssues(): array
-    {
-        $issues = [];
-
-        if ($this->application->status() === ApplicationStatus::Sent) {
-            $issues[] = __('Application has already been sent.');
-        }
-
-        if (blank($this->application->contact_email)) {
-            $issues[] = __('Contact email is missing.');
-        }
-
-        if (! $this->application->profile) {
-            $issues[] = __('No profile selected.');
-        }
-
-        return $issues;
-    }
-
-    #[Computed]
-    public function testEmailIssues(): array
-    {
-        $issues = [];
-
-        if (! $this->application->profile) {
-            $issues[] = __('No profile selected.');
-        }
-
-        if (blank($this->application->profile?->email)) {
-            $issues[] = __('Profile has no email address.');
-        }
-
-        return $issues;
-    }
-
-    public function sendApplication(): void
-    {
-        $this->authorize('update', $this->application);
-
-        if (! empty($this->sendIssues)) {
-            return;
-        }
-
-        $this->sendApplication->handle($this->application, setStatus: true);
-    }
-
-    public function sendTestEmail(): void
-    {
-        $this->authorize('update', $this->application);
-
-        if (! empty($this->testEmailIssues)) {
-            return;
-        }
-
-        $this->sendApplication->handle($this->application, setStatus: false);
-    }
 
     #[Computed]
     public function mapLink(): string|null
@@ -120,29 +53,8 @@ new class extends Component {
                 <flux:button icon="paper-airplane" icon:trailing="chevron-down">{{ __('Send') }}</flux:button>
 
                 <flux:menu>
-                    @if ($this->testEmailIssues)
-                    <flux:tooltip :content="implode(' ', $this->testEmailIssues)">
-                        <flux:menu.item icon="beaker" :disabled="true">
-                            {{ __('Test Application') }}
-                        </flux:menu.item>
-                    </flux:tooltip>
-                    @else
-                        <flux:menu.item icon="beaker" wire:click="sendTestEmail" wire:confirm="{{ __('Send a test email to :email?', ['email' => $application->profile->email]) }}">
-                            {{ __('Test Application') }}
-                        </flux:menu.item>
-                    @endif
-
-                    @if ($this->sendIssues)
-                    <flux:tooltip :content="implode(' ', $this->sendIssues)">
-                        <flux:menu.item icon="paper-airplane" variant="danger" :disabled="true">
-                            {{ __('Real Application') }}
-                        </flux:menu.item>
-                    </flux:tooltip>
-                    @else
-                    <flux:menu.item icon="paper-airplane" variant="danger" wire:click="sendApplication" wire:confirm="{{ __('Send the application to :email now?', ['email' => $application->contact_email]) }}">
-                        {{ __('Real Application') }}
-                    </flux:menu.item>
-                    @endif
+                    <livewire:applications.send-preview :application="$application" :is-test="true" />
+                    <livewire:applications.send-preview :application="$application" :is-test="false" />
                 </flux:menu>
             </flux:dropdown>
 
