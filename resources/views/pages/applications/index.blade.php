@@ -281,8 +281,11 @@ new class extends Component {
         @foreach ($applications as $application)
         <flux:callout class="p-3" inline>
             <div class="flex max-lg:flex-col lg:items-center gap-6">
+
                 @if (!$application->isArchived())
                 <a href="{{ route('applications.show', $application) }}" class="grow hover:bg-white/5 -my-3 py-3 -mx-3 px-3 rounded-lg" wire:navigate>
+                @else
+                <div class="grow">
                 @endif
 
                     <flux:heading class="mb-1!">{{ $application->company_name ?: __('No company specified') }}</flux:heading>
@@ -290,6 +293,8 @@ new class extends Component {
 
                 @if (!$application->isArchived())
                 </a>
+                @else
+                </div>
                 @endif
 
                 <div class="flex items-center gap-4">
@@ -305,7 +310,7 @@ new class extends Component {
                     </flux:button>
                     @else
                     <flux:dropdown class="ms-auto">
-                        <flux:button icon:trailing="ellipsis-horizontal" variant="ghost" />
+                        <flux:button icon:trailing="ellipsis-horizontal" variant="ghost"></flux:button>
 
                         <flux:menu>
                             <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
@@ -327,8 +332,8 @@ new class extends Component {
                             </flux:menu.item>
                         </flux:menu>
                     </flux:dropdown>
+                    @endif
                 </div>
-                @endif
             </div>
         </flux:callout>
         @endforeach
