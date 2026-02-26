@@ -255,7 +255,7 @@ new class extends Component {
                 <div role="none" class="border-0 bg-zinc-800/5 dark:bg-white/10 max-xl:h-px xl:w-px [print-color-adjust:exact]"></div>
 
                 {{-- Job Description --}}
-                <div class="xl:w-1/4 space-y-6">
+                <div class="xl:w-3/4 space-y-6">
                     <flux:heading>{{ __('Description') }}</flux:heading>
                     <div>
                         @if ($application->description)
