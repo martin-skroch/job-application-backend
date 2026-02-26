@@ -230,9 +230,13 @@ new class extends Component {
         parent::resetErrorBag();
     }
 
-    public function updatedProfileId()
+    public function updatedProfileId(): void
     {
+        if (! $this->isEditing) {
         $this->profile = Profile::findOrFail($this->profile_id);
+
+            $this->text = $this->profile->cover_letter;
+        }
     }
 }; ?>
 
@@ -373,7 +377,7 @@ new class extends Component {
                     <flux:separator variant="subtle" />
                 </div>
 
-                <flux:select wire:model.change="profile_id" :label="__('Profile')" required>
+                <flux:select wire:model.live="profile_id" :label="__('Profile')" required>
                     <flux:select.option value="" selected hidden>{{ __('Choose profile...') }}</flux:select.option>
                     @foreach (Auth::user()->profiles()->pluck('name',  'id') as $id => $name)
                     <flux:select.option :value="$id">{{ $name }}</flux:select.option>

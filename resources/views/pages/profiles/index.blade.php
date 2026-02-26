@@ -23,6 +23,7 @@ new class extends Component {
     public ?string $email = null;
     public ?string $website = null;
     public ?int $salary_desire = null;
+public ?string $cover_letter = null;
 
     public function mount(): void
     {
@@ -180,6 +181,8 @@ new class extends Component {
                 </flux:input.group>
                 <flux:error name="salary_desire" />
             </flux:field>
+
+            <flux:textarea wire:model="cover_letter" :label="__('Cover Letter Template')" rows="12" resize="vertical" :placeholder="__('Your default cover letter text...')" />
 
             <div class="inline-flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Create') }}</flux:button>

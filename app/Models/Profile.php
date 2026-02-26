@@ -46,6 +46,7 @@ class Profile extends Model
         'email',
         'website',
         'salary_desire',
+        'cover_letter',
     ];
 
     /**
@@ -58,6 +59,7 @@ class Profile extends Model
         return [
             'birthdate' => 'date',
             'salary_desire' => 'integer',
+            'cover_letter' => 'string',
         ];
     }
 

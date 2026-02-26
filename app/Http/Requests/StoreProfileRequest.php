@@ -36,6 +36,7 @@ class StoreProfileRequest extends FormRequest
             'email' => ['nullable', 'email'],
             'website' => ['nullable', 'url:http,https'],
             'salary_desire' => ['nullable', 'integer'],
+            'cover_letter' => ['nullable', 'string'],
         ];
     }
 

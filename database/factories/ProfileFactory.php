@@ -31,6 +31,7 @@ class ProfileFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'email' => Str::slug($name).'@'.$domain,
             'website' => 'https://'.$domain,
+            'cover_letter' => fake()->optional()->paragraphs(3, true),
         ];
     }
 }

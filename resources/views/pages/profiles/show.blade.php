@@ -25,6 +25,7 @@ new class extends Component {
     public ?string $email = null;
     public ?string $website = null;
     public ?int $salary_desire = null;
+    public ?string $cover_letter = null;
 
     public ?string $deleteImage = null;
 
@@ -44,6 +45,7 @@ new class extends Component {
         $this->email = $this->profile->email;
         $this->website = $this->profile->website;
         $this->salary_desire = $this->profile->salary_desire;
+        $this->cover_letter = $this->profile->cover_letter;
     }
 
     public function rules(): array
@@ -204,6 +206,13 @@ new class extends Component {
                 <div class="col-span-4">{{ Number::currency($profile->salary_desire, precision: 0) }}</div>
             </div>
             @endif
+
+            @if(!empty($profile->cover_letter))
+            <div class="grid xl:grid-cols-5 items-start gap-1 xl:gap-6">
+                <div class="col-span-1 font-bold">{{ __('Cover Letter Template') }}</div>
+                <div class="col-span-4"><x-markdown>{{ $profile->cover_letter }}</x-markdown></div>
+            </div>
+            @endif
         </div>
     </x-pages::profiles.layout>
 
@@ -256,6 +265,8 @@ new class extends Component {
                 </flux:input.group>
                 <flux:error name="salary_desire" />
             </flux:field>
+
+            <flux:textarea wire:model="cover_letter" :label="__('Cover Letter Template')" rows="12" resize="vertical" :placeholder="__('Your default cover letter text...')" />
 
             <div class="inline-flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
