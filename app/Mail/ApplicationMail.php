@@ -56,8 +56,7 @@ class ApplicationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.application',
-            text: 'mail.application'
+            markdown: 'mail.application'
         );
     }
 
