@@ -50,7 +50,7 @@ class ProfileCoverLetterTest extends TestCase
             ->assertSet('text', 'My default cover letter text.');
     }
 
-    public function test_cover_letter_is_not_pre_populated_when_text_already_set(): void
+    public function test_cover_letter_overwrites_existing_text_when_profile_changes(): void
     {
         $user = User::factory()->create();
         $profile = Profile::factory()->for($user)->create([
@@ -61,7 +61,7 @@ class ProfileCoverLetterTest extends TestCase
             ->test('pages::applications.index')
             ->set('text', 'Custom text already written.')
             ->set('profile_id', $profile->id)
-            ->assertSet('text', 'Custom text already written.');
+            ->assertSet('text', 'My default cover letter text.');
     }
 
     public function test_cover_letter_is_not_pre_populated_when_editing_existing_application(): void

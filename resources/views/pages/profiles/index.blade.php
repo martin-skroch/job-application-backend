@@ -23,7 +23,7 @@ new class extends Component {
     public ?string $email = null;
     public ?string $website = null;
     public ?int $salary_desire = null;
-public ?string $cover_letter = null;
+    public ?string $cover_letter = null;
 
     public function mount(): void
     {

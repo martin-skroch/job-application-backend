@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Markdown;
 use Illuminate\Queue\SerializesModels;
 
 class ApplicationMail extends Mailable
@@ -56,18 +57,15 @@ class ApplicationMail extends Mailable
     {
         return new Content(
             markdown: 'mail.application',
-            text: 'mail.application',
+            text: 'mail.application'
         );
     }
 
     public function renderText(): string
     {
-        return app(\Illuminate\Mail\Markdown::class)
-            ->renderText('mail.application', $this->buildViewData());
-    }
-
-    public function attachments(): array
-    {
-        return [];
+        return app(Markdown::class)->renderText(
+            view: 'mail.application',
+            data: $this->buildViewData()
+        );
     }
 }

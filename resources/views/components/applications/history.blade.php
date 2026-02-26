@@ -131,7 +131,7 @@ new class extends Component {
                     </div>
 
                     @if ($entry->comment)
-                    <div x-if="true" x-show="open" x-transition.opacity class="ms-8 mt-3">
+                    <div x-show="open" x-transition.opacity class="ms-8 mt-3">
                         <x-markdown>{{ $entry->comment }}</x-markdown>
                     </div>
                     @endif

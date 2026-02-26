@@ -59,13 +59,17 @@ new class extends Component {
             default                     => 'zinc',
         };
     }
+
+    public function isDraft() {
+        return $this->application->status() === ApplicationStatus::Draft;
+    }
 };
 ?>
 
 <div>
-    <flux:badge as="button" size="lg" wire:click="open" variant="primary" :color="$this->color()" icon:trailing="arrows-up-down">
+    <flux:button wire:click="open" :variant="$this->isDraft() ? null : 'primary'" :color="$this->color()" icon="arrows-right-left" icon:trailing="chevron-down">
         {{ $application->status()?->name ?? __('No status') }}
-    </flux:badge>
+    </flux:button>
 
     <flux:modal :name="'status-modal-' . $application->id" class="md:w-96 space-y-6">
         <flux:heading size="lg">{{ __('Change status') }}</flux:heading>
