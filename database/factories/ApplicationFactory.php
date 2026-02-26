@@ -30,6 +30,7 @@ class ApplicationFactory extends Factory
         return [
             'title' => $title,
             'source' => $source,
+            'description' => fake()->optional()->paragraphs(2, true),
             'contact_name' => fake()->name(),
             'contact_email' => "jobs@$domain",
             'contact_phone' => fake()->e164PhoneNumber(),
