@@ -19,7 +19,7 @@ class ApplicationStatusModalTest extends TestCase
         $application = Application::factory()->for($user)->create();
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', ApplicationStatus::Sent->value)
             ->set('statusComment', 'Sent via email.')
             ->set('statusDate', now()->toDateString())
@@ -38,7 +38,7 @@ class ApplicationStatusModalTest extends TestCase
         $application = Application::factory()->for($user)->create();
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', null)
             ->set('statusComment', 'Remember to follow up.')
             ->set('statusDate', now()->toDateString())
@@ -58,7 +58,7 @@ class ApplicationStatusModalTest extends TestCase
         $customDatetime = '2026-01-10T14:30';
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', ApplicationStatus::Sent->value)
             ->set('statusDate', $customDatetime)
             ->call('save');
@@ -74,7 +74,7 @@ class ApplicationStatusModalTest extends TestCase
         $application = Application::factory()->for($user)->create();
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', null)
             ->set('statusComment', '')
             ->call('save')
@@ -87,7 +87,7 @@ class ApplicationStatusModalTest extends TestCase
         $application = Application::factory()->for($user)->create();
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', 'invalid_status')
             ->set('statusDate', now()->toDateString())
             ->call('save')
@@ -100,7 +100,7 @@ class ApplicationStatusModalTest extends TestCase
         $application = Application::factory()->for($user)->create();
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', ApplicationStatus::Sent->value)
             ->set('statusDate', '')
             ->call('save');
@@ -123,7 +123,7 @@ class ApplicationStatusModalTest extends TestCase
         $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
 
         Livewire::actingAs($user)
-            ->test('application-status-modal', ['application' => $application])
+            ->test('applications.status', ['application' => $application])
             ->set('newStatus', ApplicationStatus::Sent->value)
             ->set('statusDate', now()->toDateString())
             ->call('save');

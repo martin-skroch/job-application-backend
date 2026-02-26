@@ -118,4 +118,24 @@ class ApplicationModelTest extends TestCase
         $this->assertDatabaseCount('applications', 2);
         $this->assertNull($second->public_id);
     }
+
+    public function test_description_is_stored_and_retrieved(): void
+    {
+        $application = Application::factory()->create([
+            'description' => 'We are looking for a senior developer.',
+        ]);
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'description' => 'We are looking for a senior developer.',
+        ]);
+        $this->assertEquals('We are looking for a senior developer.', $application->fresh()->description);
+    }
+
+    public function test_description_can_be_null(): void
+    {
+        $application = Application::factory()->create(['description' => null]);
+
+        $this->assertNull($application->fresh()->description);
+    }
 }

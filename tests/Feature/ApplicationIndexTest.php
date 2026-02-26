@@ -120,6 +120,58 @@ class ApplicationIndexTest extends TestCase
         ]);
     }
 
+    public function test_creating_application_stores_description(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('profile_id', $profile->id)
+            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
+            ->set('description', 'We are looking for a talented engineer.')
+            ->call('save');
+
+        $this->assertDatabaseHas('applications', [
+            'user_id' => $user->id,
+            'description' => 'We are looking for a talented engineer.',
+        ]);
+    }
+
+    public function test_updating_application_stores_description(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'description' => 'Old description.',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->call('open', $application->id)
+            ->set('description', 'Updated description.')
+            ->call('save');
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'description' => 'Updated description.',
+        ]);
+    }
+
+    public function test_open_loads_description_into_form(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'description' => 'Loaded from the database.',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->call('open', $application->id)
+            ->assertSet('description', 'Loaded from the database.');
+    }
+
     public function test_draft_enum_value_is_draft(): void
     {
         $this->assertEquals('draft', ApplicationStatus::Draft->value);
