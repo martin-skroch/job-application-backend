@@ -299,8 +299,6 @@ new class extends Component {
                     </flux:button>
                     @endif
 
-
-
                     @if ($application->isArchived())
                     <flux:button size="sm" icon="arrow-uturn-left" wire:click="restore('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to restore this application?') }}">
                         {{ __('Restore') }}
@@ -310,8 +308,6 @@ new class extends Component {
                         <flux:button icon:trailing="ellipsis-horizontal" variant="ghost" />
 
                         <flux:menu>
-                            <livewire:applications.status :application="$application" :key="'status-' . $application->id" class="grow" />
-
                             <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
                                 {{ __('Edit') }}
                             </flux:menu.item>
