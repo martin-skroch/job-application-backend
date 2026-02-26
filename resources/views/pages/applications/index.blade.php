@@ -307,7 +307,7 @@ new class extends Component {
                     </flux:button.group>
                     @endif
 
-                    <livewire:application-status-modal :application="$application" :key="'status-' . $application->id" />
+                    <livewire:applications.status :application="$application" :key="'status-' . $application->id" />
 
                     <flux:button.group class="inline-flex">
                         @if ($application->isPublic())

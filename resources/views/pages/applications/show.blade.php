@@ -120,7 +120,7 @@ new class extends Component {
                     {{ $application->title ?: __('Untitled Application') }}
                 </flux:heading>
 
-                <livewire:application-status-modal :application="$application" :key="'status-' . $application->id" />
+                <livewire:applications.status :application="$application" :key="'status-' . $application->id" />
             </div>
             @if ($application->company_name)
                 <flux:subheading size="lg" class="mt-1">{{ $application->company_name }}</flux:subheading>
