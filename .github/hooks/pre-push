@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if command -v php &> /dev/null; then
+    PHP="php"
+else
+    PHP="vendor/bin/sail php"
+fi
+
+FAILED=0
+
+echo -e "Running linter..."
+
+if ! ${PHP} vendor/bin/pint --test --quiet 2>&1; then
+    FAILED=1
+    echo "  ✗ Linter failed. Run '${PHP} vendor/bin/pint' for details."
+else
+    echo "  ✓ Linter passed."
+fi
+
+echo -e "\nRunning tests..."
+
+if ! ${PHP} vendor/bin/phpunit --no-output 2>&1; then
+    FAILED=1
+    echo "  ✗ Tests failed. Run '${PHP} vendor/bin/phpunit --testdox' for details."
+else
+    echo "  ✓ Tests passed."
+fi
+
+if [ $FAILED -ne 0 ]; then
+    echo -e "\nPush aborted: resolve the issues above before pushing."
+    exit 1
+fi
+
+exit 0
