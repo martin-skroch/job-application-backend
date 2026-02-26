@@ -54,6 +54,10 @@
     @apply  !mb-0 !leading-tight;
 }
 
+[data-flux-modal] > dialog::backdrop {
+    @apply bg-zinc-950/50;
+}
+
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
