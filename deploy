@@ -30,7 +30,7 @@ if [ -z "${APP_KEY}" ]; then
     $PHP_BIN artisan key:generate --ansi
 fi
 
-if [ ! -L "./public/storage"]; then
+if [ ! -L "./public/storage" ]; then
     $PHP_BIN artisan storage:link --relative
 fi
 
