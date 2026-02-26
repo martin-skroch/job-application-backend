@@ -4,10 +4,6 @@ namespace App\Http\Resources;
 
 use App\Enum\ExperienceType;
 use App\Enum\SalaryBehaviors;
-use App\Http\Resources\ExperienceResource;
-use App\Http\Resources\ImpressionResource;
-use App\Http\Resources\ProfileResource;
-use App\Http\Resources\SkillResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Number;
@@ -35,7 +31,7 @@ class ApplicationResource extends JsonResource
         $skills = $this->whenNotNull($this->profile?->skills);
         $impressions = $this->whenNotNull($this->profile?->impressions);
 
-        $salaryDesire = match($this->salary_behavior) {
+        $salaryDesire = match ($this->salary_behavior) {
             SalaryBehaviors::Inherit => is_scalar($this->profile->salary_desire) ? Number::currency($this->profile->salary_desire, precision: 0) : null,
             SalaryBehaviors::Override => is_scalar($this->salary_desire) ? Number::currency($this->salary_desire, precision: 0) : null,
             SalaryBehaviors::Hidden => null,
@@ -59,7 +55,7 @@ class ApplicationResource extends JsonResource
         ];
     }
 
-    private function markdown(?string $input = null): string|null
+    private function markdown(?string $input = null): ?string
     {
         $converter = new CommonMarkConverter([
             'html_input' => HtmlFilter::ALLOW,

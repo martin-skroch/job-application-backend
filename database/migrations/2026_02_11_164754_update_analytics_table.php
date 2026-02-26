@@ -12,8 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Analytics::each(function(Analytics $entry) {
-            $data = $entry->ip . '|' . $entry->user_agent;
+        Analytics::each(function (Analytics $entry) {
+            $data = $entry->ip.'|'.$entry->user_agent;
             $session = hash_hmac('sha256', $data, config('app.key'));
 
             $entry->update([

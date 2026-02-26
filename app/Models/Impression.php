@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveScope;
 use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
-use App\Models\Scopes\ActiveScope;
-use App\Policies\ApplicationPolicy;
 use App\Observers\ImpressionObserver;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Attributes\UsePolicy;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Policies\ApplicationPolicy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[ObservedBy([ImpressionObserver::class])]
 #[UsePolicy(ApplicationPolicy::class)]
@@ -22,6 +22,7 @@ class Impression extends Model
 {
     /** @use HasFactory<\Database\Factories\ImpressionFactory> */
     use HasFactory;
+
     use HasUlids;
 
     /**

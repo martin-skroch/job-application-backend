@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Support\Facades\File;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 
 class ProfileSeeder extends Seeder
 {
@@ -35,7 +35,7 @@ class ProfileSeeder extends Seeder
 
         $skills = collect();
 
-        foreach($data['skills'] as $order => $skill) {
+        foreach ($data['skills'] as $order => $skill) {
             $skill = $profile->skills()->create(array_merge($skill, [
                 'user_id' => $profile->user->id,
                 'order' => $order,
@@ -44,7 +44,7 @@ class ProfileSeeder extends Seeder
             $skills->push($skill->id);
         }
 
-        foreach($data['experiences'] as $experience) {
+        foreach ($data['experiences'] as $experience) {
             $experience = $profile->experiences()->create(array_merge($experience, [
                 'user_id' => $profile->user->id,
             ]));

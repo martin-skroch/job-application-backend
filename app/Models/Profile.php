@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use App\Enum\ExperienceType;
-use Illuminate\Support\Carbon;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\ProfileObserver;
 use App\Policies\ProfilePolicy;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Attributes\UsePolicy;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 #[ScopedBy([OwnerScope::class])]
 #[UsePolicy(ProfilePolicy::class)]
@@ -24,6 +24,7 @@ class Profile extends Model
 {
     /** @use HasFactory<\Database\Factories\ResumeFactory> */
     use HasFactory;
+
     use HasUlids;
     use SoftDeletes;
 
@@ -62,10 +63,8 @@ class Profile extends Model
 
     /**
      * Make the birthdate nullable
-     *
-     * @return Carbon|null
      */
-    public function getBirthdateAttribute($value): Carbon|null
+    public function getBirthdateAttribute($value): ?Carbon
     {
         return empty($value) ? null : Carbon::parse($value);
     }

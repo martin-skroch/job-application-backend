@@ -63,7 +63,7 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-         $response = Livewire::test('pages::settings.delete-user-form')
+        $response = Livewire::test('pages::settings.delete-user-form')
             ->set('password', 'password')
             ->call('deleteUser');
 
@@ -81,7 +81,7 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-         $response = Livewire::test('pages::settings.delete-user-form')
+        $response = Livewire::test('pages::settings.delete-user-form')
             ->set('password', 'wrong-password')
             ->call('deleteUser');
 

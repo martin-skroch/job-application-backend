@@ -12,7 +12,7 @@ class RedirectController extends Controller
      */
     public function __invoke(Request $request): RedirectResponse
     {
-        if (!$request->filled('url')) {
+        if (! $request->filled('url')) {
             abort(404);
         }
 

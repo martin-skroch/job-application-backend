@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Impression;
 use App\Models\Profile;
-use Illuminate\Database\Seeder;
 use App\Models\Scopes\OwnerScope;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class ImpressionSeeder extends Seeder
 {
@@ -15,7 +16,7 @@ class ImpressionSeeder extends Seeder
      */
     public function run(): void
     {
-        Profile::withoutGlobalScope(OwnerScope::class)->each(function(Profile $profile): void {
+        Profile::withoutGlobalScope(OwnerScope::class)->each(function (Profile $profile): void {
             Impression::factory(5)->create([
                 'profile_id' => $profile->id,
                 'user_id' => $profile->user_id,

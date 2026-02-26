@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->redirectToRoute('login');
+
     return view('welcome');
 })->name('home');
 

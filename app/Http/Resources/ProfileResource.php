@@ -4,8 +4,9 @@ namespace App\Http\Resources;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+
 use function is_string;
 
 class ProfileResource extends JsonResource
@@ -29,11 +30,11 @@ class ProfileResource extends JsonResource
         }
 
         if (is_string($phone) && $phone !== '') {
-            $phone = base64_encode('tel:' . $phone);
+            $phone = base64_encode('tel:'.$phone);
         }
 
         if (is_string($email) && $email !== '') {
-            $email = base64_encode('mailto:' . $email);
+            $email = base64_encode('mailto:'.$email);
         }
 
         if ($this->birthdate instanceof Carbon) {

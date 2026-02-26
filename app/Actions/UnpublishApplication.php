@@ -8,7 +8,7 @@ class UnpublishApplication
 {
     public function handle(Application $application): void
     {
-        if (!$application->isPublic()) {
+        if (! $application->isPublic()) {
             return;
         }
 

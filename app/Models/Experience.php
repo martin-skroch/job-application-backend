@@ -25,6 +25,7 @@ class Experience extends Model
 {
     /** @use HasFactory<\Database\Factories\ExperienceFactory> */
     use HasFactory;
+
     use HasUlids;
     use SoftDeletes;
 
@@ -65,24 +66,22 @@ class Experience extends Model
         return [
             'entry' => 'date',
             'exit' => 'date',
-            'type'=> ExperienceType::class,
+            'type' => ExperienceType::class,
             'active' => 'boolean',
         ];
     }
 
     /**
      * Get the duration between entry and exit
-     *
-     * @return string
      */
     public function getFromToAttribute(): string
     {
         $value = $this->entry->format('m/Y');
 
         if ($this->exit instanceof Carbon) {
-            $value .= ' - ' . $this->exit->format('m/Y');
+            $value .= ' - '.$this->exit->format('m/Y');
         } else {
-            $value .= ' - ' . __('Today');
+            $value .= ' - '.__('Today');
         }
 
         return $value;
@@ -90,8 +89,6 @@ class Experience extends Model
 
     /**
      * Get the duration between entry and exit
-     *
-     * @return string
      */
     public function getDurationAttribute(): string
     {

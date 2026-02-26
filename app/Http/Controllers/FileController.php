@@ -18,7 +18,7 @@ class FileController extends Controller
             $path = Storage::path($file->path);
 
             return response()->file($path, [
-                'Content-Disposition' => 'filename="' . $file->title . '"',
+                'Content-Disposition' => 'filename="'.$file->title.'"',
                 'Content-Type' => $file->mime,
             ]);
         } catch (Throwable $e) {

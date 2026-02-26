@@ -15,7 +15,7 @@ class ApplicationSeeder extends Seeder
      */
     public function run(): void
     {
-        Profile::withoutGlobalScope(OwnerScope::class)->each(function(Profile $profile): void {
+        Profile::withoutGlobalScope(OwnerScope::class)->each(function (Profile $profile): void {
             Application::factory(5)->create([
                 'profile_id' => $profile->id,
                 'user_id' => $profile->user_id,

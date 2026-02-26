@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('experience_skill', function (Blueprint $table) {
-            $table->after('skill_id', function(Blueprint $table) {
+            $table->after('skill_id', function (Blueprint $table) {
                 $table->smallInteger('order')->nullable();
             });
         });

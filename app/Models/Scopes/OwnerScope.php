@@ -11,7 +11,7 @@ class OwnerScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        if (!request()->routeIs('api.*')) {
+        if (! request()->routeIs('api.*')) {
             $builder->where('user_id', Auth::user()?->id);
         }
     }

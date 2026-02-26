@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use App\Observers\SkillObserver;
 use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Observers\SkillObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ScopedBy([OwnerScope::class, OrderScope::class])]
 #[ObservedBy([SkillObserver::class])]
@@ -20,6 +20,7 @@ class Skill extends Model
 {
     /** @use HasFactory<\Database\Factories\SkillFactory> */
     use HasFactory;
+
     use HasUlids;
     use SoftDeletes;
 
@@ -50,8 +51,6 @@ class Skill extends Model
 
     /**
      * Get the duration between entry and exit
-     *
-     * @return string
      */
     public function getRatingInPercentAttribute(): string
     {

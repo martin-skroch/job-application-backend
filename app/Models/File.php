@@ -31,7 +31,7 @@ class File extends Model
         return [
             'title' => 'string',
             'path' => 'string',
-            'mime'=> 'string',
+            'mime' => 'string',
             'size' => 'integer',
         ];
     }

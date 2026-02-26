@@ -28,7 +28,7 @@ class ExperienceResource extends JsonResource
             'duration' => $this->duration,
             'description' => $this->description,
             'skills' => SkillResource::collection($skills),
-            'files' => FileResource::collection($files)
+            'files' => FileResource::collection($files),
         ];
     }
 }

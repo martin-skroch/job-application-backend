@@ -4,9 +4,9 @@ namespace App\Http\Requests;
 
 use App\Enum\ExperienceType;
 use App\Models\Profile;
-use Illuminate\Validation\Rule;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreExperienceRequest extends FormRequest
 {
@@ -28,10 +28,9 @@ class StoreExperienceRequest extends FormRequest
         $date = Rule::date()->format('Y-m-d');
 
         $skillsExistsRule = Rule::exists('skills', 'id')
-            ->where(function(Builder $query) use ($profile): void {
+            ->where(function (Builder $query) use ($profile): void {
                 $query->where('profile_id', $profile->id);
-            })
-        ;
+            });
 
         return [
             'entry' => ['required', $date],

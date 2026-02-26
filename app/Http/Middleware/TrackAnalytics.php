@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use App\Models\Application;
-use Illuminate\Http\Request;
 use App\Actions\CreateAnalytics;
+use App\Models\Application;
+use Closure;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackAnalytics
@@ -22,7 +22,7 @@ class TrackAnalytics
 
         $application = $request->route('application');
 
-        if (!$application instanceof Application) {
+        if (! $application instanceof Application) {
             return $response;
         }
 

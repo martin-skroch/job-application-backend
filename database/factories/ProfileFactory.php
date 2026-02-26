@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Profile>
@@ -17,7 +17,7 @@ class ProfileFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->firstName() . ' ' . fake()->lastName();
+        $name = fake()->firstName().' '.fake()->lastName();
         $domain = fake()->domainName();
 
         return [
@@ -29,8 +29,8 @@ class ProfileFactory extends Factory
             'birthdate' => fake()->date(),
             'birthplace' => fake()->city(),
             'phone' => fake()->phoneNumber(),
-            'email' => Str::slug($name) . '@' . $domain,
-            'website' => 'https://' . $domain,
+            'email' => Str::slug($name).'@'.$domain,
+            'website' => 'https://'.$domain,
         ];
     }
 }

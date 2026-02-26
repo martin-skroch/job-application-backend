@@ -2,11 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Impression;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\Rules\ImageFile;
-use Illuminate\Foundation\Http\FormRequest;
 
 class StoreImpressionRequest extends FormRequest
 {
@@ -43,8 +42,7 @@ class StoreImpressionRequest extends FormRequest
             ->minWidth($min)
             ->minHeight($min)
             ->maxWidth($max)
-            ->maxHeight($max)
-        ;
+            ->maxHeight($max);
 
         return File::image()->max(10 * 1024)->dimensions($dimensions);
     }

@@ -48,8 +48,7 @@ class StoreProfileRequest extends FormRequest
             ->minWidth($min)
             ->minHeight($min)
             ->maxWidth($max)
-            ->maxHeight($max)
-        ;
+            ->maxHeight($max);
 
         return File::image()->max(5 * 1024)->dimensions($dimensions);
     }
