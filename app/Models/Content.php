@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Profile;
 use App\Models\Scopes\ActiveScope;
 use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;

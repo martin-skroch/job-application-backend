@@ -5,7 +5,6 @@ namespace App\Observers;
 use App\Models\Content;
 use App\Models\Impression;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class OwnerObserver
 {

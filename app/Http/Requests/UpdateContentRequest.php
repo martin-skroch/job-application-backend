@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Http\Requests\StoreContentRequest;
-
 class UpdateContentRequest extends StoreContentRequest
 {
     /**

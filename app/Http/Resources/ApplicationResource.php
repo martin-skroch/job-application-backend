@@ -4,11 +4,6 @@ namespace App\Http\Resources;
 
 use App\Enum\ExperienceType;
 use App\Enum\SalaryBehaviors;
-use App\Http\Resources\ContentResource;
-use App\Http\Resources\ExperienceResource;
-use App\Http\Resources\ImpressionResource;
-use App\Http\Resources\ProfileResource;
-use App\Http\Resources\SkillResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Number;
