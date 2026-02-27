@@ -229,7 +229,7 @@ new class extends Component {
 
                 <flux:input wire:model="title" :label="__('Title')" />
                 <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
-                <flux:textarea wire:model="description" :label="__('Description')" rows="8" resize="vertical" />
+                <flux:textarea wire:model="description" :label="__('Description')" rows="16" resize="vertical" />
             </div>
 
             <flux:separator variant="subtle" />

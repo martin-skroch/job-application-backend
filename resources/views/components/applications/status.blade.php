@@ -87,7 +87,7 @@ new class extends Component {
                 @endforeach
             </flux:select>
 
-            <flux:textarea wire:model="statusComment" :label="__('Comment')" :placeholder="__('Optional comment...')" rows="4" />
+            <flux:textarea wire:model="statusComment" :label="__('Comment')" :placeholder="__('Optional comment...')" rows="6" />
 
             <flux:input wire:model="statusDate" :label="__('Date')" type="datetime-local" />
 
