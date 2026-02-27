@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Profile;
 use App\Models\Scopes\ActiveScope;
 use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\OwnerObserver;
-use App\Policies\ApplicationPolicy;
+use App\Policies\ContentPolicy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -16,11 +17,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[ObservedBy([OwnerObserver::class])]
-#[UsePolicy(ApplicationPolicy::class)]
+#[UsePolicy(ContentPolicy::class)]
 #[ScopedBy([OwnerScope::class, OrderScope::class, ActiveScope::class])]
-class Impression extends Model
+class Content extends Model
 {
-    /** @use HasFactory<\Database\Factories\ImpressionFactory> */
+    /** @use HasFactory<\Database\Factories\ContentFactory> */
     use HasFactory;
 
     use HasUlids;
@@ -31,9 +32,10 @@ class Impression extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'name',
+        'heading',
+        'text',
         'image',
-        'title',
-        'description',
         'order',
         'active',
     ];
@@ -46,9 +48,10 @@ class Impression extends Model
     protected function casts(): array
     {
         return [
+            'name' => 'string',
+            'heading' => 'string',
+            'text' => 'string',
             'image' => 'string',
-            'title' => 'string',
-            'description' => 'string',
             'order' => 'integer',
             'active' => 'boolean',
         ];

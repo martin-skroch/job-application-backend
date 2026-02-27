@@ -4,11 +4,13 @@ use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 new class extends Component {
     public Application $application;
 
+    public ?string $size = null;
     public ?string $newStatus = null;
     public ?string $statusComment = null;
     public ?string $statusDate = null;
@@ -48,6 +50,7 @@ new class extends Component {
         Flux::modal('status-modal-' . $this->application->id)->close();
     }
 
+    #[Computed]
     public function color(): string
     {
         return match($this->application->status()) {
@@ -60,6 +63,7 @@ new class extends Component {
         };
     }
 
+    #[Computed]
     public function isDraft() {
         return $this->application->status() === ApplicationStatus::Draft;
     }
@@ -67,11 +71,11 @@ new class extends Component {
 ?>
 
 <div>
-    <flux:button wire:click="open" :variant="$this->isDraft() ? null : 'primary'" :color="$this->color()" icon="arrows-right-left" icon:trailing="chevron-down">
+    <flux:button wire:click="open" :size="$size" :variant="$this->isDraft ? null : 'primary'" :color="$this->color" icon="arrows-right-left" icon:trailing="chevron-down">
         {{ $application->status()?->name ?? __('No status') }}
     </flux:button>
 
-    <flux:modal :name="'status-modal-' . $application->id" class="md:w-96 space-y-6">
+    <flux:modal flyout position="bottom" :name="'status-modal-' . $application->id" class="md:w-96 space-y-6">
         <flux:heading size="lg">{{ __('Change status') }}</flux:heading>
 
         <form class="space-y-6" wire:submit="save" wire:key="status-form-{{ $modalKey }}">

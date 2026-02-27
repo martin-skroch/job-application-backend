@@ -4,6 +4,11 @@ namespace App\Http\Resources;
 
 use App\Enum\ExperienceType;
 use App\Enum\SalaryBehaviors;
+use App\Http\Resources\ContentResource;
+use App\Http\Resources\ExperienceResource;
+use App\Http\Resources\ImpressionResource;
+use App\Http\Resources\ProfileResource;
+use App\Http\Resources\SkillResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Number;
@@ -23,6 +28,7 @@ class ApplicationResource extends JsonResource
     {
         $profile = $this->whenNotNull($this->profile);
 
+        $contents = $this->whenNotNull($this->profile?->contents->keyBy->name);
         $experiences = $this->whenNotNull($this->profile?->experiences(ExperienceType::Work)->get());
         $educations = $this->whenNotNull($this->profile?->experiences(ExperienceType::Education)->get());
         $training = $this->whenNotNull($this->profile?->experiences(ExperienceType::Training)->get());
@@ -46,6 +52,7 @@ class ApplicationResource extends JsonResource
             'company' => $this->whenHas('company_name'),
             'contact' => $this->whenHas('contact_name'),
             'profile' => new ProfileResource($profile),
+            'contents' => ContentResource::collection($contents),
             'experiences' => ExperienceResource::collection($experiences),
             'educations' => ExperienceResource::collection($educations),
             'training' => ExperienceResource::collection($training),

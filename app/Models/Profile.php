@@ -3,7 +3,12 @@
 namespace App\Models;
 
 use App\Enum\ExperienceType;
+use App\Models\Content;
+use App\Models\Experience;
+use App\Models\Impression;
 use App\Models\Scopes\OwnerScope;
+use App\Models\Skill;
+use App\Models\User;
 use App\Observers\ProfileObserver;
 use App\Policies\ProfilePolicy;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -77,6 +82,11 @@ class Profile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function contents(): HasMany
+    {
+        return $this->hasMany(Content::class);
     }
 
     public function experiences(?ExperienceType $type = null): HasMany

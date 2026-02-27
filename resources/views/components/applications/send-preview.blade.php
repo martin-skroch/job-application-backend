@@ -119,11 +119,7 @@ new class extends Component {
 }; ?>
 
 <div>
-    <flux:menu.item
-        icon="{{ $isTest ? 'beaker' : 'paper-airplane' }}"
-        :variant="$isTest ? null : 'danger'"
-        wire:click="open"
-    >
+    <flux:menu.item icon="{{ $isTest ? 'beaker' : 'paper-airplane' }}" :variant="$isTest ? null : 'danger'" wire:click="open">
         {{ $isTest ? __('Test Application') : __('Real Application') }}
     </flux:menu.item>
 
@@ -180,19 +176,11 @@ new class extends Component {
         </div>
 
         <div class="flex items-center gap-4">
-            <flux:button
-                :variant="$isTest ? 'primary' : 'danger'"
-                :icon="$isTest ? 'beaker' : 'paper-airplane'"
-                wire:click="send"
-                :disabled="! empty($this->issues)"
-            >
+            <flux:button :variant="$isTest ? 'primary' : 'danger'" :icon="$isTest ? 'beaker' : 'paper-airplane'" wire:click="send" :disabled="! empty($this->issues)">
                 {{ $isTest ? __('Send Test Email') : __('Send Application') }}
             </flux:button>
 
-            <flux:button
-                variant="ghost"
-                x-on:click="$flux.modal('{{ $this->modalName }}').close()"
-            >
+            <flux:button variant="ghost" x-on:click="$flux.modal('{{ $this->modalName }}').close()">
                 {{ __('Cancel') }}
             </flux:button>
         </div>

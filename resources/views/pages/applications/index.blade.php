@@ -18,14 +18,14 @@ use Livewire\WithPagination;
 new class extends Component {
     use WithPagination;
 
+    public Application $application;
+    public Profile $profile;
+
     #[Url]
     public ?string $status = 'draft';
 
     public bool $isEditing = false;
     public ?string $applicationId = null;
-
-    public Application $application;
-    public Profile $profile;
 
     public ?string $title = null;
     public ?string $source = null;
@@ -297,43 +297,37 @@ new class extends Component {
                 </div>
                 @endif
 
-                <div class="flex items-center gap-4">
-                    @if ($application->isPublic())
-                    <flux:button size="sm" icon="eye" class="font-mono" :href="config('app.frontend_url') . '/' . $application->public_id" target="_blank" rel="noopener">
-                        {{ $application->public_id }}
-                    </flux:button>
-                    @endif
+                <livewire:applications.publish size="sm"  @publication-updated="$refresh" :application="$application" />
 
-                    @if ($application->isArchived())
-                    <flux:button size="sm" icon="arrow-uturn-left" wire:click="restore('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to restore this application?') }}">
-                        {{ __('Restore') }}
-                    </flux:button>
-                    @else
+                <livewire:applications.status size="sm" :application="$application" />
+
+                <x-slot name="controls" class="flex lg:items-center">
                     <flux:dropdown class="ms-auto">
                         <flux:button icon:trailing="ellipsis-horizontal" variant="ghost"></flux:button>
 
                         <flux:menu>
+                            @if (!$application->isArchived())
+                            <flux:menu.item icon="document-text" :href="route('applications.show', $application)" wire:navigate>
+                                {{ __('Details') }}
+                            </flux:menu.item>
+
                             <flux:menu.item icon="pencil-square" wire:click="open('{{ $application->id }}')">
                                 {{ __('Edit') }}
                             </flux:menu.item>
 
-                            @if ($application->isPublic())
-                            <flux:menu.item icon="eye-slash" wire:click="unpublish('{{ $application->id }}')">
-                                {{ __('Unpublish') }}
-                            </flux:menu.item>
-                            @else
-                            <flux:menu.item icon="eye" wire:click="publish('{{ $application->id }}')">
-                                {{ __('Publish') }}
-                            </flux:menu.item>
-                            @endif
-
                             <flux:menu.item icon="archive-box" wire:click="archive('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to archive this application?') }}">
                                 {{ __('Archive') }}
                             </flux:menu.item>
+
+                            @else
+
+                            <flux:menu.item icon="arrow-uturn-left" wire:click="restore('{{ $application->id }}')" wire:confirm="{{ __('Are you sure you want to restore this application?') }}">
+                                {{ __('Restore') }}
+                            </flux:menu.item>
+                            @endif
                         </flux:menu>
                     </flux:dropdown>
-                    @endif
-                </div>
+                </x-slot>
             </div>
         </flux:callout>
         @endforeach

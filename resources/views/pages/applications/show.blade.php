@@ -132,18 +132,9 @@ new class extends Component {
                         @else
                             <p class="text-zinc-400">{{ __('No profile selected.') }}</p>
                         @endif
-
-                        <div class="space-y-1">
-                            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Public URL') }}</p>
-                            @if ($application->isPublic())
-                                <a href="{{ config('app.frontend_url') . '/' . $application->public_id }}" target="_blank" rel="noopener" class="font-mono text-accent hover:underline">
-                                    {{ $application->public_id }}
-                                </a>
-                            @else
-                                <span class="text-zinc-400">{{ __('Not public') }}</span>
-                            @endif
-                        </div>
                     </div>
+
+                    <livewire:applications.publish as="switch" :application="$application" />
                 </div>
 
             </div>

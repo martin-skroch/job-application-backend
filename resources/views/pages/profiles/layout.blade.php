@@ -11,6 +11,10 @@
                 {{ __('Personal data') }}
             </flux:navlist.item>
 
+            <flux:navlist.item :href="route('profiles.contents', $profile)" :current="request()->routeIs('profiles.contents')" wire:navigate>
+                {{ __('Contents') }}
+            </flux:navlist.item>
+
             <flux:navlist.item :href="route('profiles.experiences', $profile)" :current="request()->routeIs('profiles.experiences')" wire:navigate>
                 {{ __('Experiences') }}
             </flux:navlist.item>

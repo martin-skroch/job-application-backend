@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('profiles', 'pages::profiles.index')->name('profiles.index');
     Route::livewire('profiles/{profile}', 'pages::profiles.show')->name('profiles.show');
+    Route::livewire('profiles/{profile}/contents', 'pages::profiles.contents')->name('profiles.contents');
     Route::livewire('profiles/{profile}/experiences', 'pages::experiences.index')->name('profiles.experiences');
     Route::livewire('profiles/{profile}/educations', 'pages::experiences.index')->name('profiles.educations');
     Route::livewire('profiles/{profile}/training', 'pages::experiences.index')->name('profiles.training');
