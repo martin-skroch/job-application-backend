@@ -160,8 +160,15 @@ new class extends Component {
         <div class="space-y-6" x-sort x-on:sort.stop="$wire.updateOrder(Array.from($el.children).map((el, index) => ({id: el.dataset.id, order: index + 1})))">
             @foreach ($profile->impressions as $impression)
             <flux:callout class="group{{ !$impression->active ? ' opacity-60 inactive' : '' }}" inline :data-id="$impression->id" x-sort:item>
+
                 <div class="flex max-sm:flex-col gap-2">
-                    <img src="{{ $impression->image ? Storage::url($impression->image) : null }}" class="size-20 aspect-square object-cover rounded-md me-2 group-[.inactive]:grayscale">
+                    <div class="shrink-0 relative flex items-center justify-center size-20 rounded-md text-gray-900/20 dark:text-neutral-100/20 bg-zinc-200 dark:bg-zinc-700 me-2">
+                        @if ($impression->image)
+                            <img src="{{ $impression->image ? Storage::url($impression->image) : null }}" class="absolute inset-0 size-full object-cover rounded-md group-[.inactive]:grayscale">
+                        @else
+                            <flux:icon name="photo" class="size-8" />
+                        @endif
+                    </div>
 
                     <div class="space-y-2">
                         <div class="text-lg font-medium">{{ $impression->title }}</div>
@@ -172,7 +179,7 @@ new class extends Component {
                     </div>
                 </div>
 
-                <x-slot name="actions">
+                <x-slot name="controls" class="flex flex-col-reverse md:flex-col justify-between">
                     <flux:dropdown>
                         <flux:button icon="ellipsis-horizontal" variant="ghost" />
 
@@ -191,7 +198,7 @@ new class extends Component {
                         </flux:menu>
                     </flux:dropdown>
 
-                    <flux:button icon="chevron-up-down" variant="ghost" x-sort:handle />
+                    <flux:button icon="chevron-up-down" class="cursor-move" variant="ghost" x-sort:handle />
                 </x-slot>
             </flux:callout>
             @endforeach

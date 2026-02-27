@@ -191,7 +191,7 @@ new class extends Component {
             @foreach ($profile->contents as $content)
             <flux:callout class="group{{ !$content->active ? ' opacity-60 inactive' : '' }}" inline :data-id="$content->id">
                 <div class="flex max-sm:flex-col gap-2">
-                    <div class="relative flex items-center justify-center size-20 rounded-md text-gray-900/20 dark:text-neutral-100/20 bg-zinc-200 dark:bg-zinc-700 me-2">
+                    <div class="shrink-0 relative flex items-center justify-center size-20 rounded-md text-gray-900/20 dark:text-neutral-100/20 bg-zinc-200 dark:bg-zinc-700 me-2">
                         @if ($content->image)
                             <img src="{{ $content->image ? Storage::url($content->image) : null }}" class="absolute inset-0 size-full object-cover rounded-md group-[.inactive]:grayscale">
                         @else
@@ -208,8 +208,8 @@ new class extends Component {
                     </div>
                 </div>
 
-                <x-slot name="actions">
-                    <flux:dropdown>
+                <x-slot name="controls" class="flex flex-col-reverse md:flex-col justify-between">
+                    <flux:dropdown class="ms-auto">
                         <flux:button icon="ellipsis-horizontal" variant="ghost" />
 
                         <flux:menu>
@@ -227,7 +227,7 @@ new class extends Component {
                         </flux:menu>
                     </flux:dropdown>
 
-                    <flux:button icon="chevron-up-down" variant="ghost" x-sort:handle />
+                    <flux:button icon="chevron-up-down" class="cursor-move" variant="ghost" x-sort:handle />
                 </x-slot>
             </flux:callout>
             @endforeach
