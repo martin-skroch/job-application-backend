@@ -264,8 +264,6 @@ new class extends Component {
             <flux:input type="text" wire:model.live="name" :label="__('Name')" />
             <flux:textarea wire:model="text" :label="__('Text')" resize="vertical" />
 
-            @dump($image)
-
             <flux:field>
                 <flux:label>{{ __('Image') }}</flux:label>
 
