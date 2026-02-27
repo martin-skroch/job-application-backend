@@ -105,7 +105,8 @@ new class extends Component {
 
     <flux:separator variant="subtle" />
 
-    <div class="grid lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+    <div class="grid 3xl:grid-cols-2 6xl:grid-cols-3 gap-6">
+
         @foreach ($profiles as $profile)
         <x-card :href="route('profiles.show', $profile)" wire:key="{{ $profile->id }}" wire:navigate>
             <x-slot:heading class="flex items-center gap-3">
@@ -128,6 +129,7 @@ new class extends Component {
             </div>
         </x-card>
         @endforeach
+
     </div>
 
     {{ $profiles->links() }}

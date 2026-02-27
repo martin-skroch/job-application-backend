@@ -26,6 +26,11 @@
     --color-accent: var(--color-yellow-400);
     --color-accent-content: var(--color-yellow-600);
     --color-accent-foreground: var(--color-yellow-950);
+
+    --breakpoint-3xl: 112rem;
+    --breakpoint-4xl: 128rem;
+    --breakpoint-5xl: 144rem;
+    --breakpoint-6xl: 160rem;
 }
 
 @layer theme {

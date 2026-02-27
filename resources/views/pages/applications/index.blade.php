@@ -276,25 +276,25 @@ new class extends Component {
 
     <flux:separator variant="subtle" />
 
-    <div class="space-y-4">
+    <div class="grid 3xl:grid-cols-2 6xl:grid-cols-3 gap-6">
 
         @foreach ($applications as $application)
         <flux:callout class="p-3" inline>
-            <div class="flex max-lg:flex-col lg:items-center gap-6">
+            <div class="flex max-xl:flex-col xl:items-center gap-6">
 
                 @if (!$application->isArchived())
-                <a href="{{ route('applications.show', $application) }}" class="grow hover:bg-white/5 -my-3 py-3 -mx-3 px-3 rounded-lg" wire:navigate>
+                    <a href="{{ route('applications.show', $application) }}" class="grow hover:bg-white/5 -my-3 py-3 -mx-3 px-3 rounded-lg" wire:navigate>
                 @else
-                <div class="grow">
+                    <div class="grow">
                 @endif
 
-                    <flux:heading class="mb-1!">{{ $application->company_name ?: __('No company specified') }}</flux:heading>
+                    <flux:heading size="lg" class="mb-1!">{{ $application->company_name ?: __('No company specified') }}</flux:heading>
                     <flux:subheading size="sm">{{ $application->title ?: __('Untitled Application') }}</flux:subheading>
 
                 @if (!$application->isArchived())
-                </a>
+                    </a>
                 @else
-                </div>
+                    </div>
                 @endif
 
                 <livewire:applications.publish size="sm"  @publication-updated="$refresh" :application="$application" />
@@ -328,14 +328,16 @@ new class extends Component {
                         </flux:menu>
                     </flux:dropdown>
                 </x-slot>
+
             </div>
         </flux:callout>
         @endforeach
 
-        {{ $applications->links() }}
-
     </div>
 
+    {{ $applications->links() }}
+
+    @teleport('body')
     <x-flyout name="application-modal" wire:close="resetForm">
 
         <flux:heading size="xl" level="1">
@@ -436,5 +438,5 @@ new class extends Component {
         </form>
 
     </x-flyout>
-
+    @endteleport
 </section>
