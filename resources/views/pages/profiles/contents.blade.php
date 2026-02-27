@@ -56,13 +56,7 @@ new class extends Component {
             $this->active = $content->active;
         } else {
             $lastOrderNumber = $contents->select('order')->latest('order')->first()?->order;
-
-            $this->heading = 'Wer bin ich?';
-            $this->name = $this->slugify($this->heading);
-            $this->text = 'Lorem ipsum dolor sit amet.';
-            $this->image = null;
             $this->order = $lastOrderNumber + 1;
-            $this->active = true;
         }
 
         Flux::modal('content-modal')->show();
