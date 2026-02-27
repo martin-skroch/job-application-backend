@@ -54,25 +54,26 @@ new class extends Component {
     public function color(): string
     {
         return match($this->application->status()) {
-            ApplicationStatus::Draft    => 'zinc',
-            ApplicationStatus::Sent     => 'blue',
-            ApplicationStatus::Invited  => 'yellow',
-            ApplicationStatus::Accepted => 'green',
-            ApplicationStatus::Rejected => 'red',
-            default                     => 'zinc',
+            ApplicationStatus::Bookmarked => 'orange',
+            ApplicationStatus::Sent       => 'blue',
+            ApplicationStatus::Invited    => 'yellow',
+            ApplicationStatus::Accepted   => 'green',
+            ApplicationStatus::Rejected   => 'red',
+            default                       => 'zinc',
         };
     }
 
     #[Computed]
-    public function isDraft() {
-        return $this->application->status() === ApplicationStatus::Draft;
+    public function isDraft(): bool
+    {
+        return $this->application->status() === null;
     }
 };
 ?>
 
 <div>
     <flux:button wire:click="open" :size="$size" :variant="$this->isDraft ? null : 'primary'" :color="$this->color" icon="arrows-right-left" icon:trailing="chevron-down">
-        {{ $application->status()?->name ?? __('No status') }}
+        {{ $application->status()?->name ?? __('Draft') }}
     </flux:button>
 
     <flux:modal flyout position="bottom" :name="'status-modal-' . $application->id" class="md:w-96 space-y-6">

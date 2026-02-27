@@ -9,8 +9,6 @@ use App\Models\ApplicationHistory;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -22,7 +20,6 @@ class ApplicationIndexTest extends TestCase
     {
         $user = User::factory()->create();
         $draft = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $draft->id, 'status' => ApplicationStatus::Draft]);
         $sent = Application::factory()->for($user)->create();
         ApplicationHistory::factory()->create(['application_id' => $sent->id, 'status' => ApplicationStatus::Sent]);
 
@@ -32,16 +29,14 @@ class ApplicationIndexTest extends TestCase
             ->assertDontSee($sent->company_name);
     }
 
-    public function test_draft_filter_shows_only_applications_whose_latest_status_is_draft(): void
+    public function test_draft_filter_shows_applications_with_no_status_entries(): void
     {
         $user = User::factory()->create();
 
-        $draft = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $draft->id, 'status' => ApplicationStatus::Draft]);
+        $noHistory = Application::factory()->for($user)->create();
 
-        $sentThenDraft = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $sentThenDraft->id, 'status' => ApplicationStatus::Sent, 'created_at' => now()->subDay()]);
-        ApplicationHistory::factory()->create(['application_id' => $sentThenDraft->id, 'status' => ApplicationStatus::Draft, 'created_at' => now()]);
+        $commentOnly = Application::factory()->for($user)->create();
+        ApplicationHistory::factory()->create(['application_id' => $commentOnly->id, 'status' => null, 'comment' => 'Just a note']);
 
         $sent = Application::factory()->for($user)->create();
         ApplicationHistory::factory()->create(['application_id' => $sent->id, 'status' => ApplicationStatus::Sent]);
@@ -49,23 +44,26 @@ class ApplicationIndexTest extends TestCase
         Livewire::actingAs($user)
             ->test('pages::applications.index')
             ->set('status', 'draft')
-            ->assertSee($draft->company_name)
-            ->assertSee($sentThenDraft->company_name)
+            ->assertSee($noHistory->company_name)
+            ->assertSee($commentOnly->company_name)
             ->assertDontSee($sent->company_name);
     }
 
-    public function test_draft_filter_excludes_applications_whose_latest_status_is_not_draft(): void
+    public function test_draft_filter_excludes_applications_with_any_status_entry(): void
     {
         $user = User::factory()->create();
 
-        $draftThenSent = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $draftThenSent->id, 'status' => ApplicationStatus::Draft, 'created_at' => now()->subDay()]);
-        ApplicationHistory::factory()->create(['application_id' => $draftThenSent->id, 'status' => ApplicationStatus::Sent, 'created_at' => now()]);
+        $bookmarked = Application::factory()->for($user)->create();
+        ApplicationHistory::factory()->create(['application_id' => $bookmarked->id, 'status' => ApplicationStatus::Bookmarked]);
+
+        $sent = Application::factory()->for($user)->create();
+        ApplicationHistory::factory()->create(['application_id' => $sent->id, 'status' => ApplicationStatus::Sent]);
 
         Livewire::actingAs($user)
             ->test('pages::applications.index')
             ->set('status', 'draft')
-            ->assertDontSee($draftThenSent->company_name);
+            ->assertDontSee($bookmarked->company_name)
+            ->assertDontSee($sent->company_name);
     }
 
     public function test_sent_filter_shows_only_sent_applications(): void
@@ -82,7 +80,27 @@ class ApplicationIndexTest extends TestCase
             ->assertDontSee($draft->company_name);
     }
 
-    public function test_creating_application_sets_draft_status(): void
+    public function test_bookmarked_filter_shows_only_bookmarked_applications(): void
+    {
+        $user = User::factory()->create();
+
+        $bookmarked = Application::factory()->for($user)->create();
+        ApplicationHistory::factory()->create(['application_id' => $bookmarked->id, 'status' => ApplicationStatus::Bookmarked]);
+
+        $sent = Application::factory()->for($user)->create();
+        ApplicationHistory::factory()->create(['application_id' => $sent->id, 'status' => ApplicationStatus::Sent]);
+
+        $noStatus = Application::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('status', 'bookmarked')
+            ->assertSee($bookmarked->company_name)
+            ->assertDontSee($sent->company_name)
+            ->assertDontSee($noStatus->company_name);
+    }
+
+    public function test_creating_application_does_not_create_history_entry(): void
     {
         $user = User::factory()->create();
         $profile = Profile::factory()->for($user)->create();
@@ -96,13 +114,12 @@ class ApplicationIndexTest extends TestCase
         $application = $user->applications()->first();
 
         $this->assertNotNull($application);
-        $this->assertDatabaseHas('applications_history', [
+        $this->assertDatabaseMissing('applications_history', [
             'application_id' => $application->id,
-            'status' => ApplicationStatus::Draft->value,
         ]);
     }
 
-    public function test_updating_application_does_not_set_draft_status(): void
+    public function test_updating_application_does_not_create_history_entry(): void
     {
         $user = User::factory()->create();
         $profile = Profile::factory()->for($user)->create();
@@ -114,10 +131,7 @@ class ApplicationIndexTest extends TestCase
             ->call('open', $application->id)
             ->call('save');
 
-        $this->assertDatabaseMissing('applications_history', [
-            'application_id' => $application->id,
-            'status' => ApplicationStatus::Draft->value,
-        ]);
+        $this->assertDatabaseCount('applications_history', 1);
     }
 
     public function test_creating_application_stores_description(): void
@@ -170,53 +184,5 @@ class ApplicationIndexTest extends TestCase
             ->test('pages::applications.index')
             ->call('open', $application->id)
             ->assertSet('description', 'Loaded from the database.');
-    }
-
-    public function test_draft_enum_value_is_draft(): void
-    {
-        $this->assertEquals('draft', ApplicationStatus::Draft->value);
-    }
-
-    public function test_migration_sets_draft_for_applications_without_history(): void
-    {
-        $user = User::factory()->create();
-        $withoutHistory = Application::factory()->for($user)->create();
-        $commentOnly = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $commentOnly->id, 'status' => null, 'comment' => 'A note']);
-        $withStatus = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $withStatus->id, 'status' => ApplicationStatus::Sent]);
-
-        $applicationIds = DB::table('applications')
-            ->whereNull('deleted_at')
-            ->whereNotExists(function ($query) {
-                $query->from('applications_history')
-                    ->whereColumn('applications_history.application_id', 'applications.id')
-                    ->whereNotNull('applications_history.status');
-            })
-            ->pluck('id');
-
-        foreach ($applicationIds as $applicationId) {
-            DB::table('applications_history')->insert([
-                'id' => (string) Str::ulid(),
-                'application_id' => $applicationId,
-                'status' => 'draft',
-                'comment' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        $this->assertDatabaseHas('applications_history', [
-            'application_id' => $withoutHistory->id,
-            'status' => ApplicationStatus::Draft->value,
-        ]);
-        $this->assertDatabaseHas('applications_history', [
-            'application_id' => $commentOnly->id,
-            'status' => ApplicationStatus::Draft->value,
-        ]);
-        $this->assertDatabaseMissing('applications_history', [
-            'application_id' => $withStatus->id,
-            'status' => ApplicationStatus::Draft->value,
-        ]);
     }
 }

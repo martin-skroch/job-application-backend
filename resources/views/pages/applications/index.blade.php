@@ -58,7 +58,15 @@ new class extends Component {
     public function with(): array
     {
         $archivedFilter = $this->status === 'archived';
-        $statusFilter = $archivedFilter ? null : ApplicationStatus::tryFrom($this->status ?? '');
+        $draftFilter = $this->status === 'draft';
+        $statusFilter = ($archivedFilter || $draftFilter) ? null : ApplicationStatus::tryFrom($this->status ?? '');
+
+        $draftNavItem = [[
+            'route' => route('applications.index', ['status' => 'draft']),
+            'name' => 'Draft',
+            'value' => 'draft',
+            'current' => $draftFilter,
+        ]];
 
         $statusItems = collect(ApplicationStatus::cases())
             ->map(fn (ApplicationStatus $case) => [
@@ -68,7 +76,7 @@ new class extends Component {
                 'current' => $statusFilter === $case,
             ]);
 
-        $navigation = $statusItems->merge([[
+        $navigation = collect($draftNavItem)->merge($statusItems)->merge([[
             'route' => route('applications.index', ['status' => 'archived']),
             'name' => 'Archived',
             'value' => 'archived',
@@ -79,6 +87,8 @@ new class extends Component {
 
         if ($archivedFilter) {
             $query->onlyTrashed();
+        } elseif ($draftFilter) {
+            $query->whereDoesntHave('history', fn ($q) => $q->whereNotNull('status'));
         } elseif ($statusFilter !== null) {
             $query->whereHas('history', fn ($q) => $q
                 ->where('status', $statusFilter->value)
@@ -151,8 +161,7 @@ new class extends Component {
         if (Str::isUlid($this->applicationId)) {
             $applications->where('id', $this->applicationId)->update($validated);
         } else {
-            $application = $applications->forceCreate($validated);
-            $application->history()->create(['status' => ApplicationStatus::Draft]);
+            $applications->forceCreate($validated);
         }
 
         Flux::modal('application-modal')->close();
@@ -255,7 +264,7 @@ new class extends Component {
 
                 <flux:dropdown>
                     <flux:button icon:trailing="chevron-down">
-                        {{ ApplicationStatus::tryFrom($this->status)?->name ?? 'Archived' }}
+                        {{ ApplicationStatus::tryFrom($this->status)?->name ?? ($this->status === 'archived' ? __('Archived') : __('Draft')) }}
                     </flux:button>
 
                     <flux:menu>

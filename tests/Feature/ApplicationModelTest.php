@@ -61,7 +61,7 @@ class ApplicationModelTest extends TestCase
     public function test_status_returns_latest_status(): void
     {
         $application = Application::factory()->create();
-        $application->history()->create(['status' => ApplicationStatus::Draft, 'created_at' => now()->subDay()]);
+        $application->history()->create(['status' => ApplicationStatus::Bookmarked, 'created_at' => now()->subDay()]);
         $application->history()->create(['status' => ApplicationStatus::Sent, 'created_at' => now()]);
 
         $this->assertEquals(ApplicationStatus::Sent, $application->status());
@@ -78,9 +78,9 @@ class ApplicationModelTest extends TestCase
     {
         $application = Application::factory()->create();
         $application->history()->create(['comment' => 'Just a note.', 'created_at' => now()]);
-        $application->history()->create(['status' => ApplicationStatus::Draft, 'created_at' => now()->subDay()]);
+        $application->history()->create(['status' => ApplicationStatus::Bookmarked, 'created_at' => now()->subDay()]);
 
-        $this->assertEquals(ApplicationStatus::Draft, $application->status());
+        $this->assertEquals(ApplicationStatus::Bookmarked, $application->status());
     }
 
     public function test_latest_status_entry_returns_most_recent_status_entry(): void
