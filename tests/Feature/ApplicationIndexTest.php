@@ -172,6 +172,62 @@ class ApplicationIndexTest extends TestCase
         ]);
     }
 
+    public function test_search_filters_by_company_name(): void
+    {
+        $user = User::factory()->create();
+        $matching = Application::factory()->for($user)->create(['company_name' => 'Acme Corporation']);
+        $other = Application::factory()->for($user)->create(['company_name' => 'Other GmbH']);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('status', null)
+            ->set('search', 'Acme')
+            ->assertSee($matching->company_name)
+            ->assertDontSee($other->company_name);
+    }
+
+    public function test_search_filters_by_title(): void
+    {
+        $user = User::factory()->create();
+        $matching = Application::factory()->for($user)->create(['title' => 'Senior PHP Developer']);
+        $other = Application::factory()->for($user)->create(['title' => 'Marketing Manager']);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('status', null)
+            ->set('search', 'PHP')
+            ->assertSee($matching->company_name)
+            ->assertDontSee($other->company_name);
+    }
+
+    public function test_search_filters_by_contact_name(): void
+    {
+        $user = User::factory()->create();
+        $matching = Application::factory()->for($user)->create(['contact_name' => 'Max Mustermann']);
+        $other = Application::factory()->for($user)->create(['contact_name' => 'Jane Doe']);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('status', null)
+            ->set('search', 'Mustermann')
+            ->assertSee($matching->company_name)
+            ->assertDontSee($other->company_name);
+    }
+
+    public function test_empty_search_shows_all_applications_matching_status_filter(): void
+    {
+        $user = User::factory()->create();
+        $first = Application::factory()->for($user)->create();
+        $second = Application::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('status', 'draft')
+            ->set('search', '')
+            ->assertSee($first->company_name)
+            ->assertSee($second->company_name);
+    }
+
     public function test_open_loads_description_into_form(): void
     {
         $user = User::factory()->create();

@@ -24,6 +24,9 @@ new class extends Component {
     #[Url]
     public ?string $status = 'draft';
 
+    #[Url]
+    public ?string $search = null;
+
     public bool $isEditing = false;
     public ?string $applicationId = null;
 
@@ -84,6 +87,22 @@ new class extends Component {
         ]]);
 
         $query = Auth::user()->applications()->with('latestStatusEntry');
+
+        if ($this->search) {
+            $term = '%' . $this->search . '%';
+            $query->where(function ($q) use ($term): void {
+                $q->where('title', 'like', $term)
+                    ->orWhere('company_name', 'like', $term)
+                    ->orWhere('company_website', 'like', $term)
+                    ->orWhere('company_address', 'like', $term)
+                    ->orWhere('contact_name', 'like', $term)
+                    ->orWhere('contact_email', 'like', $term)
+                    ->orWhere('contact_phone', 'like', $term)
+                    ->orWhere('source', 'like', $term)
+                    ->orWhere('description', 'like', $term)
+                    ->orWhere('text', 'like', $term);
+            });
+        }
 
         if ($archivedFilter) {
             $query->onlyTrashed();
@@ -240,6 +259,11 @@ new class extends Component {
         parent::resetErrorBag();
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function updatedProfileId(): void
     {
         if (! $this->isEditing) {
@@ -284,6 +308,8 @@ new class extends Component {
     </div>
 
     <flux:separator variant="subtle" />
+
+    <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search applications...')" icon="magnifying-glass" clearable />
 
     <div class="grid 3xl:grid-cols-2 6xl:grid-cols-3 gap-6">
 
