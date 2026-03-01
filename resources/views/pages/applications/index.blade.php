@@ -11,6 +11,7 @@ use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use League\HTMLToMarkdown\HtmlConverter;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,6 +31,7 @@ new class extends Component {
     public ?string $title = null;
     public ?string $source = null;
     public ?string $description = null;
+    public bool $descriptionFilled = false;
     public ?FormOfAddress $form_of_address = FormOfAddress::Formal;
     public ?SalaryBehaviors $salary_behavior = SalaryBehaviors::Hidden;
     public ?int $salary_desire = null;
@@ -248,6 +250,20 @@ new class extends Component {
             $this->text = $this->profile->cover_letter;
         }
     }
+
+    public function updatedDescription(): void
+    {
+        $converter = new HtmlConverter([
+            'strip_tags' => true
+        ]);
+
+        if (!$this->descriptionFilled) {
+            $this->description = $converter->convert($this->description);
+            $this->descriptionFilled = true;
+        }
+
+        return;
+    }
 }; ?>
 
 <section class="space-y-8">
@@ -366,7 +382,7 @@ new class extends Component {
 
                 <flux:input wire:model="title" :label="__('Title')" />
                 <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
-                <flux:textarea wire:model="description" :label="__('Description')" />
+                <flux:textarea wire:model.live="description" :label="__('Description')" />
             </div>
 
             <div class="space-y-6">
