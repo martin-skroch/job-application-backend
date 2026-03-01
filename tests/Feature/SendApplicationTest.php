@@ -16,6 +16,36 @@ class SendApplicationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_show_page_send_button_is_disabled_when_status_is_sent(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'contact_email' => 'hiring@company.com',
+        ]);
+        $application->history()->create(['status' => ApplicationStatus::Sent->value]);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.show', ['application' => $application])
+            ->assertSeeHtml('disabled');
+    }
+
+    public function test_already_sent_issue_persists_when_comment_follows_sent_status(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create(['email' => 'applicant@example.com']);
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'contact_email' => 'hiring@company.com',
+        ]);
+        $application->history()->create(['status' => ApplicationStatus::Sent->value]);
+        $application->history()->create(['comment' => 'Follow-up note.', 'status' => null]);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.send-preview', ['application' => $application, 'isTest' => false]);
+
+        $this->assertContains(__('Application has already been sent.'), $component->instance()->issues);
+    }
+
     public function test_send_application_publishes_sends_mail_and_sets_status(): void
     {
         Mail::fake();

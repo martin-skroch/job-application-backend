@@ -27,7 +27,6 @@ class ContentResource extends JsonResource
             'heading' => $this->heading,
             'text' => $this->text,
             'image' => $image,
-            'description' => $this->description,
         ];
     }
 }

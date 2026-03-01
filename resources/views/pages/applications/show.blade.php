@@ -1,5 +1,6 @@
 <?php
 
+use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
@@ -36,7 +37,7 @@ new class extends Component {
         <div class="flex items-center justify-between lg:justify-end gap-6">
 
             <flux:dropdown>
-                <flux:button icon="paper-airplane" icon:trailing="chevron-down">{{ __('Send') }}</flux:button>
+                <flux:button icon="paper-airplane" icon:trailing="chevron-down" :disabled="$application->status() === ApplicationStatus::Sent">{{ __('Send') }}</flux:button>
 
                 <flux:menu>
                     <livewire:applications.send-preview :application="$application" :is-test="true" />
