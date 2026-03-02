@@ -23,7 +23,10 @@ class ApplicationMail extends Mailable
     public function envelope(): Envelope
     {
         // From
-        $from = null;
+        $from = new Address(
+            config('mail.from.address'),
+            config('mail.from.name'),
+        );
 
         if (filled($this->application->profile?->email)) {
             $from = new Address(
@@ -49,6 +52,7 @@ class ApplicationMail extends Mailable
         return new Envelope(
             from: $from,
             to: [$to],
+            bcc: [$from],
             subject: $subject,
         );
     }
