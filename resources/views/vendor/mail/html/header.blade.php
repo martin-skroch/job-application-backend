@@ -1,6 +1,6 @@
 @props(['url'])
 <tr>
-<td align="center" style="padding-top:16px;padding-bottom:16px">
+<td class="header">
 @if (filled($url))
 <a href="{{ $url }}" style="display: inline-block;">
 @endif

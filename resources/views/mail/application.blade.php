@@ -3,17 +3,7 @@
 <x-mail::message>
 
 {{-- Header --}}
-<x-slot:header>
-<table cellpadding="0" cellspacing="0" role="presentation">
-<tr>
-@if ($application->profile?->image_url)
-<td><img src="{{ $application->profile?->image_url }}" alt="{{ $application->profile?->name }}" width="40" height="40" style="border-radius:20px;border: 3px solid #ddd;vertical-align:top"></td>
-<td>&nbsp;&nbsp;&nbsp;</td>
-@endif
-<th>{{ $application->profile->name }}</th>
-</tr>
-</table>
-</x-slot:header>
+<x-slot:header></x-slot:header>
 
 {{-- Content --}}
 @if ($application->contact_name)

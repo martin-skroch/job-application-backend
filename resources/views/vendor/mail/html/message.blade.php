@@ -1,14 +1,15 @@
-@props(['header' => null, 'footer' => null])
 <x-mail::layout>
 {{-- Header --}}
 <x-slot:header>
-<x-mail::header :url="blank($header) ? config('app.url') : null">
-@empty($header)
-{{ config('app.name') }}
-@else
-{!! $header !!}
-@endempty
-</x-mail::header>
+    <x-mail::header :url="!isset($header) ? config('app.url') : null">
+
+        @empty($header)
+        {{ config('app.name') }}
+        @else
+        {!! $header !!}
+        @endempty
+
+    </x-mail::header>
 </x-slot:header>
 
 {{-- Body --}}
