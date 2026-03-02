@@ -22,24 +22,25 @@ class ApplicationMail extends Mailable
 
     public function envelope(): Envelope
     {
-        // From
-        $from = new Address(
-            config('mail.from.address'),
-            config('mail.from.name'),
-        );
+        $fromAddress = config('mail.from.address');
+        $fromName = config('mail.from.name');
 
         if (filled($this->application->profile?->email)) {
-            $from = new Address(
-                $this->application->profile->email,
-                $this->application->profile->name ?? null
-            );
+            $fromAddress = $this->application->profile->email;
         }
 
-        // To
-        $to = new Address($this->application->contact_email);
+        if (filled($this->application->profile?->name)) {
+            $fromName = $this->application->profile->name;
+        }
 
+        // From
+        $from = new Address($fromAddress, $fromName);
+
+        // To
         if ($this->isTest) {
             $to = new Address($this->application->profile->email);
+        } else {
+            $to = new Address($this->application->contact_email);
         }
 
         // Subject
