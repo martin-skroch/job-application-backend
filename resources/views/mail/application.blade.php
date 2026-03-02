@@ -1,4 +1,5 @@
 @php $form = $application->form_of_address?->value ?? 'formal'; @endphp
+@php $name = $application->contact_name ?? $application->company_name; @endphp
 
 <x-mail::message>
 
@@ -6,8 +7,8 @@
 <x-slot:header></x-slot:header>
 
 {{-- Content --}}
-@if ($application->contact_name)
-{{ __("mail.application.{$form}.salutation_named", ['name' => $application->contact_name]) }}<br>
+@if ($name)
+{{ __("mail.application.{$form}.salutation_named", ['name' => $name]) }}<br>
 @else
 {{ __("mail.application.{$form}.salutation_generic") }}<br>
 @endif
