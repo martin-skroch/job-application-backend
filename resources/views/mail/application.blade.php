@@ -7,7 +7,7 @@
 <table cellpadding="0" cellspacing="0" role="presentation">
 <tr>
 @if ($application->profile?->image_url)
-<td><img src="{{ $application->profile?->image_url }}" alt="{{ $application->profile?->name }}" width="40" style="border-radius:20px;border: 3px solid #ddd;vertical-align:top"></td>
+<td><img src="{{ $application->profile?->image_url }}" alt="{{ $application->profile?->name }}" width="40" height="40" style="border-radius:20px;border: 3px solid #ddd;vertical-align:top"></td>
 <td>&nbsp;&nbsp;&nbsp;</td>
 @endif
 <th>{{ $application->profile->name }}</th>
@@ -17,9 +17,9 @@
 
 {{-- Content --}}
 @if ($application->contact_name)
-{{ __("mail.application.{$form}.salutation_named", ['name' => $application->contact_name]) }}<br><br>
+{{ __("mail.application.{$form}.salutation_named", ['name' => $application->contact_name]) }}<br>
 @else
-{{ __("mail.application.{$form}.salutation_generic") }}<br><br>
+{{ __("mail.application.{$form}.salutation_generic") }}<br>
 @endif
 
 {{ __("mail.application.{$form}.body", ['application_title' => $application->title]) }}
