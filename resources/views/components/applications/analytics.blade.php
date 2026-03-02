@@ -14,6 +14,11 @@ new class extends Component
     {
         return $this->application->analytics()->latest('updated_at')->paginate(50);
     }
+
+    public function deleteSession(string $session): void
+    {
+        $this->application->analytics()->where('session', $session)->delete();
+    }
 };
 ?>
 
@@ -22,6 +27,15 @@ new class extends Component
         <div>
             @foreach ($this->analytics as $entry)
                 <flux:callout wire:key="analytics-{{ $entry->id }}" class="not-first:rounded-t-none not-last:rounded-b-none not-last:border-b-0">
+                    <x-slot name="controls">
+                        <flux:button
+                            icon="trash"
+                            variant="ghost"
+                            size="sm"
+                            wire:click="deleteSession('{{ $entry->session }}')"
+                            wire:confirm="{{ __('Delete all entries for this session?') }}"
+                        />
+                    </x-slot>
                     <div class="grid grid-cols-2 gap-6 text-sm lg:grid-cols-6">
                         <div class="col-span-2 space-y-3 lg:col-span-4">
                             <div>

@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 #[ScopedBy([OwnerScope::class])]
 #[UsePolicy(ProfilePolicy::class)]
@@ -61,6 +63,23 @@ class Profile extends Model
             'salary_desire' => 'integer',
             'cover_letter' => 'string',
         ];
+    }
+
+    /**
+     * Make the birthdate nullable
+     */
+    public function getImageUrlAttribute($value): ?string
+    {
+        if (blank($this->image)) {
+            return null;
+        }
+
+        try {
+            return Storage::url($this->image);
+        } catch (Throwable $e) {
+            report($e);
+            abort(404);
+        }
     }
 
     /**
