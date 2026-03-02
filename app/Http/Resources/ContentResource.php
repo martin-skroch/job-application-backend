@@ -22,7 +22,6 @@ class ContentResource extends JsonResource
         }
 
         return [
-            'id' => $this->id,
             'name' => $this->name,
             'heading' => $this->heading,
             'text' => $this->text,
