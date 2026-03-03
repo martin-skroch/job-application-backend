@@ -32,7 +32,8 @@ new class extends Component {
                     ->orWhere('contact_phone', 'like', $term)
                     ->orWhere('source', 'like', $term)
                     ->orWhere('description', 'like', $term)
-                    ->orWhere('text', 'like', $term);
+                    ->orWhere('text', 'like', $term)
+                    ->orWhere('public_id', 'like', $term);
             })
             ->limit(8)
             ->get();
