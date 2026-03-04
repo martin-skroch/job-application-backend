@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
-use function is_string;
-
 class ProfileResource extends JsonResource
 {
     public static $wrap = null;

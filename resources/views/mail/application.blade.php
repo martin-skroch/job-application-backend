@@ -29,7 +29,7 @@
 @if ($application->profile?->email)
 <a href="mailto:{{ $application->profile->email }}" target="_blank" rel="noopener">{{ $application->profile->email }}</a>
 @endif
-@if ($application->profile->email && $application->profile?->phone)
+@if ($application->profile?->email && $application->profile?->phone)
 &nbsp;&nbsp;&bull;&nbsp;&nbsp;
 @endif
 @if ($application->profile?->phone)
