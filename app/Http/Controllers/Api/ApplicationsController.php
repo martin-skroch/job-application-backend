@@ -42,16 +42,15 @@ class ApplicationsController extends Controller
         $query = Application::withTrashed()->where('public_id', $publicId);
 
         if ($request->filled('id') && $query->exists()) {
-
             $application = $query->first();
-
         } else {
-
             $validated = $request->validate([
-                'company' => ['required', 'string', 'max:255'],
+                'company' => ['string', 'max:255'],
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['required', 'email', 'max:255'],
             ]);
+
+            $validated['company'] = $validated['name'];
 
             $application = $request->user()->applications()->create([
                 'source' => $request->headers->get('referer'),
@@ -59,7 +58,6 @@ class ApplicationsController extends Controller
                 'contact_name' => $validated['name'],
                 'contact_email' => $validated['email'],
             ]);
-
         }
 
         $this->createAnalytics->create(

@@ -35,7 +35,7 @@ class ApplicationResource extends JsonResource
         $salaryDesire = match ($this->salary_behavior) {
             SalaryBehaviors::Inherit => is_scalar($this->profile->salary_desire) ? Number::currency($this->profile->salary_desire, precision: 0) : null,
             SalaryBehaviors::Override => is_scalar($this->salary_desire) ? Number::currency($this->salary_desire, precision: 0) : null,
-            SalaryBehaviors::Hidden => null,
+            default => null,
         };
 
         return [

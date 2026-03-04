@@ -25,8 +25,8 @@ class ApplicationRequestedNotification extends Notification
         $message = (new MailMessage)
             ->subject('Bewerbungsanfrage von '.$this->application->company_name)
             ->greeting('Hallo!')
-            ->line('Die Firma **'.$this->application->company_name.'** hat Ihre Bewerbung angefragt.')
-            ->line('Bitte senden Sie der Firma einen individuellen Bewerbungslink an '.$this->application->contact_email.'.')
+            ->line('**'.$this->application->company_name.'** hat Ihre Bewerbung angefragt.')
+            ->line('Bitte sende einen individuellen Bewerbungslink an **'.$this->application->contact_email.'**.')
             ->action('Bewerbungslink senden', route('applications.show', $this->application));
 
         if (filled($this->application->contact_email)) {
