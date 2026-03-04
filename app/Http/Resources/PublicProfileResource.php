@@ -18,15 +18,10 @@ class PublicProfileResource extends JsonResource
     public function toArray(Request $request): array
     {
         $image = null;
-        $phone = null;
         $email = null;
 
         if (filled($this->image) && Storage::exists($this->image)) {
             $image = Storage::url($this->image);
-        }
-
-        if (filled($this->phone)) {
-            $phone = base64_encode('tel:'.$this->phone);
         }
 
         if (filled($this->email)) {
@@ -36,7 +31,6 @@ class PublicProfileResource extends JsonResource
         return [
             'image' => $image,
             'name' => $this->name,
-            'phone' => $phone,
             'email' => $email,
             'skills' => SkillResource::collection($this->whenLoaded('skills')),
         ];
