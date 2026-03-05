@@ -39,7 +39,6 @@ new class extends Component
                 'count' => $commentOnlyCount,
                 'color' => 'zinc',
                 'icon' => 'chat-bubble-left-ellipsis',
-                'filter_comment' => true,
             ],
         ]);
 
@@ -86,24 +85,15 @@ new class extends Component
 
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     @foreach ($this->statusCounts as $item)
-        <a
-            href="{{ route('applications.index', ['status' => $item['value']]) }}"
-            wire:navigate
-            class="group flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-5 transition hover:border-neutral-300 hover:shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
-        >
-            <div class="flex items-center justify-between">
-                <flux:icon
-                    :name="$item['icon']"
-                    class="size-5 text-{{ $item['color'] }}-500 dark:text-{{ $item['color'] }}-400"
-                />
-                <span class="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-                    {{ $item['count'] }}
-                </span>
-            </div>
+        <x-card :href="route('applications.index', ['status' => $item['value']])" wire:navigate>
+            <x-slot name="heading">
+                <div class="flex items-center justify-between">
+                    <flux:icon :name="$item['icon']" class="size-5 text-{{ $item['color'] }}-500 dark:text-{{ $item['color'] }}-400" />
+                    <span class="text-2xl font-bold">{{ $item['count'] }}</span>
+                </div>
+            </x-slot>
 
-            <flux:text class="text-sm font-medium text-neutral-600 group-hover:text-neutral-800 dark:text-neutral-400 dark:group-hover:text-neutral-200">
-                {{ $item['label'] }}
-            </flux:text>
-        </a>
+            {{ $item['label'] }}
+        </x-card>
     @endforeach
 </div>

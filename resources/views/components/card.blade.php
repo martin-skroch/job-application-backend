@@ -4,7 +4,7 @@
     }
 @endphp
 
-<flux:callout {{ $attributes->class('relative p-4')->only('class') }}>
+<flux:callout {{ $attributes->class('relative z-0 p-4')->only('class') }}>
 
     @isset ($heading)
     <h3 {{ $heading->attributes->class('text-lg font-medium pb-3 mb-3') }}>
@@ -19,6 +19,6 @@
     @endisset
 
     @if ($attributes->has('href'))
-    <a {{ $attributes->except('class')->class('absolute inset-0 z-0') }}></a>
+    <a {{ $attributes->except('class')->class('absolute inset-0 z-5') }}></a>
     @endif
 </flux:callout>
