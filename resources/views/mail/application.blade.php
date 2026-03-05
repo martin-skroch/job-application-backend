@@ -13,7 +13,7 @@
 {{ __("mail.application.{$form}.salutation_generic") }}<br>
 @endif
 
-{{ __("mail.application.{$form}.body", ['application_title' => $application->title]) }}
+{{ __("mail.application.{$form}.body", ['name' => $application->profile?->name, 'application_title' => $application->title]) }}
 
 <x-mail::button :url="config('app.frontend_url') . '/' . $application->public_id" align="left">
 {{ __('mail.application.button') }}
