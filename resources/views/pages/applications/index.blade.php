@@ -5,10 +5,10 @@ use App\Actions\UnpublishApplication;
 use App\Enum\ApplicationStatus;
 use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
-use App\Models\Application;
-use App\Models\Profile;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
+use App\Models\Application;
+use App\Models\Profile;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use League\HTMLToMarkdown\HtmlConverter;
@@ -16,37 +16,57 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-new class extends Component {
+new class extends Component
+{
     use WithPagination;
 
     public Application $application;
+
     public Profile $profile;
 
     #[Url]
     public ?string $status = 'draft';
 
     public bool $isEditing = false;
+
     public ?string $applicationId = null;
 
     public ?string $title = null;
+
     public ?string $source = null;
+
     public ?string $description = null;
+
     public bool $descriptionFilled = false;
+
     public ?FormOfAddress $form_of_address = FormOfAddress::Formal;
+
     public ?SalaryBehaviors $salary_behavior = SalaryBehaviors::Hidden;
+
     public ?int $salary_desire = null;
+
+    public ?string $earliest_entry_date = null;
+
     public ?string $text = null;
+
     public ?string $contact_name = null;
+
     public ?string $contact_email = null;
+
     public ?string $contact_phone = null;
+
     public ?string $company_name = null;
+
     public ?string $company_address = null;
+
     public ?string $company_website = null;
+
     public ?string $profile_id = null;
+
     public ?string $public_id = null;
 
-
     private PublishApplication $publishApplication;
+
     private UnpublishApplication $unpublishApplication;
 
     public function boot(
@@ -132,6 +152,7 @@ new class extends Component {
             $this->form_of_address = $application->form_of_address;
             $this->salary_desire = $application->salary_desire;
             $this->salary_behavior = $application->salary_behavior;
+            $this->earliest_entry_date = $application->earliest_entry_date?->format('Y-m-d');
 
             $this->title = $application->title;
             $this->source = $application->source?->value();
@@ -157,7 +178,7 @@ new class extends Component {
     public function save(): void
     {
         $applications = Auth::user()->applications();
-        $request = Str::isUlid($this->applicationId) ? new UpdateApplicationRequest() : new StoreApplicationRequest();
+        $request = Str::isUlid($this->applicationId) ? new UpdateApplicationRequest : new StoreApplicationRequest;
         $validated = $this->validate($request->rules($this->salary_behavior));
 
         if (Str::isUlid($this->applicationId)) {
@@ -173,13 +194,13 @@ new class extends Component {
 
     public function publish(?string $id = null): void
     {
-        if (!Str::isUlid($id)) {
+        if (! Str::isUlid($id)) {
             return;
         }
 
         $application = Auth::user()->applications()->find($id);
 
-        if (!$application instanceof Application) {
+        if (! $application instanceof Application) {
             return;
         }
 
@@ -188,13 +209,13 @@ new class extends Component {
 
     public function unpublish(?string $id = null): void
     {
-        if (!Str::isUlid($id)) {
+        if (! Str::isUlid($id)) {
             return;
         }
 
         $application = Auth::user()->applications()->find($id);
 
-        if (!$application instanceof Application) {
+        if (! $application instanceof Application) {
             return;
         }
 
@@ -203,13 +224,13 @@ new class extends Component {
 
     public function archive(string $id): void
     {
-        if (!Str::isUlid($id)) {
+        if (! Str::isUlid($id)) {
             return;
         }
 
         $application = Auth::user()->applications()->find($id);
 
-        if (!$application instanceof Application) {
+        if (! $application instanceof Application) {
             return;
         }
 
@@ -218,13 +239,13 @@ new class extends Component {
 
     public function restore(string $id): void
     {
-        if (!Str::isUlid($id)) {
+        if (! Str::isUlid($id)) {
             return;
         }
 
         $application = Auth::user()->applications()->withTrashed()->find($id);
 
-        if (!$application instanceof Application || !$application->isArchived()) {
+        if (! $application instanceof Application || ! $application->isArchived()) {
             return;
         }
 
@@ -254,15 +275,14 @@ new class extends Component {
     public function updatedDescription(): void
     {
         $converter = new HtmlConverter([
-            'strip_tags' => true
+            'strip_tags' => true,
         ]);
 
-        if (!$this->descriptionFilled) {
+        if (! $this->descriptionFilled) {
             $this->description = $converter->convert($this->description);
             $this->descriptionFilled = true;
         }
 
-        return;
     }
 }; ?>
 
@@ -426,6 +446,12 @@ new class extends Component {
 
                     <flux:error name="salary_desire" />
                 </flux:field>
+
+                <flux:input
+                    type="date"
+                    wire:model="earliest_entry_date"
+                    :label="__('Earliest Entry Date')"
+                />
 
                 <flux:textarea wire:model="text" :label="__('Text')" rows="16" />
             </div>

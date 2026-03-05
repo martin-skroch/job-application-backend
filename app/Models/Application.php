@@ -44,6 +44,7 @@ class Application extends Model
         'company_address',
         'company_website',
         'form_of_address',
+        'earliest_entry_date',
     ];
 
     /**
@@ -67,6 +68,7 @@ class Application extends Model
             'company_address' => 'string',
             'company_website' => AsUri::class,
             'published_at' => 'datetime',
+            'earliest_entry_date' => 'date',
         ];
     }
 

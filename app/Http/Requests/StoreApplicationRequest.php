@@ -30,6 +30,7 @@ class StoreApplicationRequest extends FormRequest
             'form_of_address' => ['required', Rule::enum(FormOfAddress::class)],
             'salary_behavior' => ['required', Rule::enum(SalaryBehaviors::class)],
             'salary_desire' => ['integer', $salaryBehavior === SalaryBehaviors::Override ? 'required' : 'nullable'],
+            'earliest_entry_date' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
             'text' => ['nullable', 'string'],
             'contact_name' => ['nullable', 'string', 'max:255'],

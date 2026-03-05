@@ -138,4 +138,24 @@ class ApplicationModelTest extends TestCase
 
         $this->assertNull($application->fresh()->description);
     }
+
+    public function test_earliest_entry_date_is_stored_and_retrieved(): void
+    {
+        $application = Application::factory()->create([
+            'earliest_entry_date' => '2026-06-01',
+        ]);
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'earliest_entry_date' => '2026-06-01 00:00:00',
+        ]);
+        $this->assertEquals('2026-06-01', $application->fresh()->earliest_entry_date->toDateString());
+    }
+
+    public function test_earliest_entry_date_can_be_null(): void
+    {
+        $application = Application::factory()->create(['earliest_entry_date' => null]);
+
+        $this->assertNull($application->fresh()->earliest_entry_date);
+    }
 }

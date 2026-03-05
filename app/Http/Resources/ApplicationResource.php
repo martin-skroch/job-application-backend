@@ -43,6 +43,7 @@ class ApplicationResource extends JsonResource
             'title' => $this->whenHas('title'),
             'source' => $this->whenHas('source'),
             'salary_desire' => $salaryDesire,
+            'earliest_entry_date' => $this->earliest_entry_date?->toDateString(),
             'text' => $this->markdown($this->text),
             'company' => $this->whenHas('company_name'),
             'contact' => $this->whenHas('contact_name'),

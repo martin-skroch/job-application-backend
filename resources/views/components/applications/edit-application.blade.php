@@ -8,13 +8,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
-new class extends Component {
+new class extends Component
+{
     public Application $application;
 
     public ?string $profile_id = null;
+
     public ?FormOfAddress $form_of_address = null;
+
     public ?SalaryBehaviors $salary_behavior = null;
+
     public ?int $salary_desire = null;
+
+    public ?string $earliest_entry_date = null;
+
     public ?string $text = null;
 
     public function mount(): void
@@ -29,6 +36,7 @@ new class extends Component {
         $this->form_of_address = $this->application->form_of_address;
         $this->salary_behavior = $this->application->salary_behavior;
         $this->salary_desire = $this->application->salary_desire;
+        $this->earliest_entry_date = $this->application->earliest_entry_date?->format('Y-m-d');
         $this->text = $this->application->text;
     }
 
@@ -49,6 +57,7 @@ new class extends Component {
             'form_of_address' => ['required', Rule::enum(FormOfAddress::class)],
             'salary_behavior' => ['required', Rule::enum(SalaryBehaviors::class)],
             'salary_desire' => ['integer', $this->salary_behavior === SalaryBehaviors::Override ? 'required' : 'nullable'],
+            'earliest_entry_date' => ['nullable', 'date'],
             'text' => ['nullable', 'string'],
         ]);
 
@@ -128,6 +137,15 @@ new class extends Component {
                         </div>
 
                         <div class="space-y-1">
+                            <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Earliest Entry Date') }}</p>
+                            @if ($application->earliest_entry_date)
+                                <p>{{ $application->earliest_entry_date->isoFormat('L') }}</p>
+                            @else
+                                <span class="text-zinc-400">—</span>
+                            @endif
+                        </div>
+
+                        <div class="space-y-1">
                             <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Form of Address') }}</p>
                             <p>{{ __($application->form_of_address->name) }}</p>
                         </div>
@@ -181,6 +199,12 @@ new class extends Component {
 
                 <flux:error name="salary_desire" />
             </flux:field>
+
+            <flux:input
+                type="date"
+                wire:model="earliest_entry_date"
+                :label="__('Earliest Entry Date')"
+            />
 
             <flux:textarea wire:model="text" :label="__('Cover Letter')" rows="16" resize="vertical" />
 

@@ -185,4 +185,53 @@ class ApplicationIndexTest extends TestCase
             ->call('open', $application->id)
             ->assertSet('description', 'Loaded from the database.');
     }
+
+    public function test_creating_application_stores_earliest_entry_date(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('profile_id', $profile->id)
+            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
+            ->set('earliest_entry_date', '2026-06-01')
+            ->call('save');
+
+        $this->assertDatabaseHas('applications', [
+            'user_id' => $user->id,
+            'earliest_entry_date' => '2026-06-01 00:00:00',
+        ]);
+    }
+
+    public function test_open_loads_earliest_entry_date_into_form(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+        $application = Application::factory()->for($user)->for($profile)->create([
+            'earliest_entry_date' => '2026-06-01',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->call('open', $application->id)
+            ->assertSet('earliest_entry_date', '2026-06-01');
+    }
+
+    public function test_earliest_entry_date_is_optional(): void
+    {
+        $user = User::factory()->create();
+        $profile = Profile::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->set('profile_id', $profile->id)
+            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
+            ->call('save');
+
+        $application = $user->applications()->first();
+
+        $this->assertNotNull($application);
+        $this->assertNull($application->earliest_entry_date);
+    }
 }
