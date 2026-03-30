@@ -61,6 +61,8 @@ new class extends Component
             'text' => ['nullable', 'string'],
         ]);
 
+        $validated['earliest_entry_date'] = filled($validated['earliest_entry_date']) ? $validated['earliest_entry_date'] : null;
+
         Auth::user()->applications()->where('id', $this->application->id)->update($validated);
 
         $this->application->refresh();
@@ -200,11 +202,20 @@ new class extends Component
                 <flux:error name="salary_desire" />
             </flux:field>
 
-            <flux:input
-                type="date"
-                wire:model="earliest_entry_date"
-                :label="__('Earliest Entry Date')"
-            />
+            <flux:field>
+                <flux:label>{{ __('Earliest Entry Date') }}</flux:label>
+                <flux:input.group>
+                    <flux:input type="date" wire:model.live="earliest_entry_date">
+                        @if ($earliest_entry_date)
+                        <x-slot name="iconTrailing">
+                            <flux:button size="sm" variant="subtle" icon="x-mark" wire:click="$set('earliest_entry_date', null)" class="-mr-1" />
+                        </x-slot>
+                        @endif
+                    </flux:input>
+
+                </flux:input.group>
+                <flux:error name="earliest_entry_date" />
+            </flux:field>
 
             <flux:textarea wire:model="text" :label="__('Cover Letter')" rows="16" resize="vertical" />
 
