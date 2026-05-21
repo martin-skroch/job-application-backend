@@ -8,8 +8,6 @@
         "opencode",
         "vscode"
     ],
-    "guidelines": [
-        "laravel/fortify"
-    ],
+    "guidelines": [],
     "sail": true
 }
