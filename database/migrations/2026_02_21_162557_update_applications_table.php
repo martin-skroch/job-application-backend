@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('applications', function (Blueprint $table) {
-            $table->integer('salary_behavior')->default(SalaryBehaviors::Hidden);
+            $table->enum('salary_behavior', SalaryBehaviors::values())->default(SalaryBehaviors::Hidden);
             $table->integer('salary_desire')->nullable();
         });
     }
