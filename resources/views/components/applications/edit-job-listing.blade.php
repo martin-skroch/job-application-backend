@@ -91,9 +91,9 @@ new class extends Component {
     }
 }; ?>
 
-<div x-data="{ open: false }">
-    <div class="flex items-center gap-3 py-4 cursor-pointer select-none" x-on:click="open = !open">
-        <flux:icon icon="chevron-down" class="size-4 text-zinc-400 transition-transform duration-200" x-bind:class="{ 'rotate-180': open }" />
+<div x-data="{ expanded: false }">
+    <div class="flex items-center gap-3 py-4 cursor-pointer select-none" x-on:click="expanded = !expanded">
+        <flux:icon icon="chevron-down" class="size-4 text-zinc-400 transition-transform duration-200" x-bind:class="{ 'rotate-180': expanded }" />
         <flux:heading size="lg">{{ __('Job Listing') }}</flux:heading>
         <flux:button
             icon="pencil-square"
@@ -107,7 +107,7 @@ new class extends Component {
         </flux:button>
     </div>
 
-    <flux:callout x-show="open" x-transition.opacity class="xl:p-6">
+    <flux:callout x-show="expanded" x-transition.opacity class="xl:p-6">
         <div class="flex max-xl:flex-col items-stretch gap-6 xl:gap-12">
 
             {{-- Company & Contact --}}
