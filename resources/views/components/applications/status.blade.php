@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\UnpublishApplication;
 use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use Flux\Flux;
@@ -31,7 +32,7 @@ new class extends Component {
         Flux::modal('status-modal-' . $this->application->id)->show();
     }
 
-    public function save(): void
+    public function save(UnpublishApplication $unpublishApplication): void
     {
         $this->newStatus = $this->newStatus ?: null;
 
@@ -41,11 +42,19 @@ new class extends Component {
             'statusDate' => ['nullable', 'date'],
         ]);
 
-        Auth::user()->applications()->withTrashed()->findOrFail($this->application->id)->history()->create([
+        $application = Auth::user()->applications()->withTrashed()->findOrFail($this->application->id);
+
+        $application->history()->create([
             'status' => $this->newStatus,
             'comment' => $this->statusComment,
             'created_at' => $this->statusDate ?? now(),
         ]);
+
+        if (in_array($application->status(), [ApplicationStatus::Bookmarked, ApplicationStatus::Rejected], true)) {
+            $unpublishApplication->handle($application);
+        }
+
+        $this->dispatch('application-status-updated.' . $application->id);
 
         Flux::modal('status-modal-' . $this->application->id)->close();
     }

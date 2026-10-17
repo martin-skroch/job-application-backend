@@ -5,8 +5,10 @@ namespace Tests\Feature\Application;
 use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ApplicationStatusModalTest extends TestCase
@@ -120,7 +122,7 @@ class ApplicationStatusModalTest extends TestCase
         $other = User::factory()->create();
         $application = Application::factory()->for($other)->create();
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         Livewire::actingAs($user)
             ->test('applications.status', ['application' => $application])
@@ -129,5 +131,112 @@ class ApplicationStatusModalTest extends TestCase
             ->call('save');
 
         $this->assertDatabaseEmpty('applications_history');
+    }
+
+    /**
+     * @return array<string, array{ApplicationStatus}>
+     */
+    public static function unpublishingStatusProvider(): array
+    {
+        return [
+            'bookmarked' => [ApplicationStatus::Bookmarked],
+            'rejected' => [ApplicationStatus::Rejected],
+        ];
+    }
+
+    #[DataProvider('unpublishingStatusProvider')]
+    public function test_save_status_unpublishes_application(ApplicationStatus $status): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create([
+            'public_id' => 'publicid01',
+            'published_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('applications.status', ['application' => $application])
+            ->set('newStatus', $status->value)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('application-status-updated.'.$application->id);
+
+        $application->refresh();
+        $this->assertNull($application->published_at);
+        $this->assertFalse($application->isPublic());
+        $this->assertSame('publicid01', $application->public_id);
+    }
+
+    public function test_save_status_keeps_application_published_for_other_statuses(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create([
+            'public_id' => 'publicid01',
+            'published_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('applications.status', ['application' => $application])
+            ->set('newStatus', ApplicationStatus::Invited->value)
+            ->call('save');
+
+        $this->assertTrue($application->refresh()->isPublic());
+    }
+
+    public function test_save_comment_keeps_application_published(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create([
+            'public_id' => 'publicid01',
+            'published_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('applications.status', ['application' => $application])
+            ->set('newStatus', null)
+            ->set('statusComment', 'Just a note.')
+            ->call('save');
+
+        $this->assertTrue($application->refresh()->isPublic());
+    }
+
+    public function test_backdated_rejected_status_does_not_unpublish_when_newer_status_exists(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create([
+            'public_id' => 'publicid01',
+            'published_at' => now(),
+        ]);
+        $application->history()->create([
+            'status' => ApplicationStatus::Invited,
+            'created_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test('applications.status', ['application' => $application])
+            ->set('newStatus', ApplicationStatus::Rejected->value)
+            ->set('statusDate', now()->subWeek()->format('Y-m-d\\TH:i'))
+            ->call('save');
+
+        $this->assertTrue($application->refresh()->isPublic());
+    }
+
+    public function test_publish_component_refreshes_on_status_update(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create([
+            'public_id' => 'publicid01',
+            'published_at' => now(),
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.publish', ['application' => $application, 'size' => 'sm'])
+            ->assertSet('public', true);
+
+        $application->forceFill(['published_at' => null])->save();
+
+        $component
+            ->dispatch('application-status-updated.'.$application->id)
+            ->assertSet('public', false)
+            ->assertSee(__('Unpublished'));
     }
 }

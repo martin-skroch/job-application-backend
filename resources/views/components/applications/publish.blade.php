@@ -3,6 +3,7 @@
 use App\Actions\PublishApplication;
 use App\Actions\UnpublishApplication;
 use App\Models\Application;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 new class extends Component {
@@ -26,6 +27,13 @@ new class extends Component {
     {
         $this->application = $application;
         $this->public = $application->isPublic();
+    }
+
+    #[On('application-status-updated.{application.id}')]
+    public function refreshPublication(): void
+    {
+        $this->application->refresh();
+        $this->public = $this->application->isPublic();
     }
 
     public function updatedPublic(): void
