@@ -9,7 +9,6 @@ use App\Models\Application;
 use App\Models\Profile;
 use App\Models\User;
 use App\Models\Vacancy;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -151,17 +150,14 @@ class CreateApplicationFromVacancyTest extends TestCase
         $foreignProfile = Profile::factory()->for(User::factory())->create();
         $vacancy = Vacancy::factory()->for($user)->create();
 
-        try {
-            Livewire::actingAs($user)
-                ->test('vacancies.create-application', ['vacancy' => $vacancy])
-                ->set('profile_id', $foreignProfile->id)
-                ->set('salary_behavior', SalaryBehaviors::Hidden->value)
-                ->call('save');
+        Livewire::actingAs($user)
+            ->test('vacancies.create-application', ['vacancy' => $vacancy])
+            ->set('profile_id', $foreignProfile->id)
+            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
+            ->call('save')
+            ->assertNotFound();
 
-            $this->fail('Expected a ModelNotFoundException for a foreign profile.');
-        } catch (ModelNotFoundException) {
-            $this->assertDatabaseCount('applications', 0);
-        }
+        $this->assertDatabaseCount('applications', 0);
     }
 
     public function test_other_users_cannot_write_application_for_vacancy(): void

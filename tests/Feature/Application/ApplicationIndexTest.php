@@ -7,7 +7,6 @@ use App\Models\Application;
 use App\Models\ApplicationHistory;
 use App\Models\Profile;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -134,11 +133,11 @@ class ApplicationIndexTest extends TestCase
     {
         $application = Application::factory()->for(User::factory())->create();
 
-        $this->expectException(ModelNotFoundException::class);
-
         Livewire::actingAs(User::factory()->create())
             ->test('pages::applications.index')
-            ->call('open', $application->id);
+            ->call('open', $application->id)
+            ->assertNotFound()
+            ->assertSet('applicationId', null);
     }
 
     public function test_index_links_to_vacancies_instead_of_creating_applications(): void

@@ -5,7 +5,6 @@ namespace Tests\Feature\Application;
 use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -121,13 +120,12 @@ class ApplicationStatusModalTest extends TestCase
         $other = User::factory()->create();
         $application = Application::factory()->for($other)->create();
 
-        $this->expectException(ModelNotFoundException::class);
-
         Livewire::actingAs($user)
             ->test('applications.status', ['application' => $application])
             ->set('newStatus', ApplicationStatus::Sent->value)
             ->set('statusDate', now()->toDateString())
-            ->call('save');
+            ->call('save')
+            ->assertNotFound();
 
         $this->assertDatabaseEmpty('applications_history');
     }
