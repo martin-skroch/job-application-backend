@@ -26,20 +26,11 @@ class StoreApplicationRequest extends FormRequest
     public function rules(?SalaryBehaviors $salaryBehavior = null): array
     {
         return [
-            'title' => ['nullable', 'string', 'max:255'],
-            'source' => ['nullable', 'url:http,https', 'max:255'],
             'form_of_address' => ['required', Rule::enum(FormOfAddress::class)],
             'salary_behavior' => ['required', Rule::enum(SalaryBehaviors::class)],
             'salary_desire' => ['integer', $salaryBehavior === SalaryBehaviors::Override ? 'required' : 'nullable'],
             'earliest_entry_date' => ['nullable', 'date'],
-            'description' => ['nullable', 'string'],
             'text' => ['nullable', 'string'],
-            'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
-            'contact_phone' => ['nullable', 'string'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'company_address' => ['nullable', 'string', 'max:255'],
-            'company_website' => ['nullable', 'url:http,https', 'max:255'],
             'profile_id' => ['required', 'string', 'ulid'],
         ];
     }

@@ -50,7 +50,7 @@ new class extends Component {
             'created_at' => $this->statusDate ?? now(),
         ]);
 
-        if (in_array($application->status(), [ApplicationStatus::Bookmarked, ApplicationStatus::Rejected], true)) {
+        if ($application->status() === ApplicationStatus::Rejected) {
             $unpublishApplication->handle($application);
         }
 
@@ -63,7 +63,6 @@ new class extends Component {
     public function color(): string
     {
         return match($this->application->status()) {
-            ApplicationStatus::Bookmarked => 'orange',
             ApplicationStatus::Sent       => 'blue',
             ApplicationStatus::Invited    => 'yellow',
             ApplicationStatus::Accepted   => 'green',

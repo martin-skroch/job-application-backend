@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             ProfileSeeder::class,
             ContentSeeder::class,
             ApplicationSeeder::class,
+            VacancySeeder::class,
         ]);
     }
 }

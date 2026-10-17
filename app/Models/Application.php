@@ -35,9 +35,6 @@ class Application extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'title',
-        'source',
-        'description',
         'contact_name',
         'contact_email',
         'contact_phone',
@@ -56,9 +53,6 @@ class Application extends Model
     protected function casts(): array
     {
         return [
-            'title' => 'string',
-            'source' => AsUri::class,
-            'description' => 'string',
             'form_of_address' => FormOfAddress::class,
             'salary_behavior' => SalaryBehaviors::class,
             'salary_desire' => 'integer',
@@ -118,6 +112,14 @@ class Application extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the vacancy this application was written for.
+     */
+    public function vacancy(): BelongsTo
+    {
+        return $this->belongsTo(Vacancy::class)->withTrashed();
     }
 
     /**

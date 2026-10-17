@@ -9,7 +9,7 @@ use Livewire\Component;
 new class extends Component
 {
     /**
-     * @return Collection<int, array{label: string, value: string, count: int, color: string, icon: string}>
+     * @return Collection<int, array{label: string, value: string, route: string, count: int, color: string, icon: string}>
      */
     #[Computed]
     public function statusCounts(): Collection
@@ -25,10 +25,21 @@ new class extends Component
             ->whereDoesntHave('history', fn ($q) => $q->whereNotNull('status'))
             ->count();
 
+        $bookmarkedCount = $user->vacancies()->doesntHave('application')->count();
+
         $statuses = collect([
+            [
+                'label' => __('Bookmarked'),
+                'value' => 'bookmarked',
+                'route' => route('vacancies.index', ['filter' => 'bookmarked']),
+                'count' => $bookmarkedCount,
+                'color' => 'orange',
+                'icon' => 'bookmark',
+            ],
             [
                 'label' => __('Draft'),
                 'value' => 'draft',
+                'route' => route('applications.index', ['status' => 'draft']),
                 'count' => $draftCount,
                 'color' => 'zinc',
                 'icon' => 'pencil',
@@ -36,6 +47,7 @@ new class extends Component
             [
                 'label' => __('With Comments'),
                 'value' => 'draft',
+                'route' => route('applications.index', ['status' => 'draft']),
                 'count' => $commentOnlyCount,
                 'color' => 'zinc',
                 'icon' => 'chat-bubble-left-ellipsis',
@@ -43,7 +55,6 @@ new class extends Component
         ]);
 
         $statusColors = [
-            ApplicationStatus::Bookmarked->value => ['color' => 'orange', 'icon' => 'bookmark'],
             ApplicationStatus::Sent->value => ['color' => 'blue', 'icon' => 'paper-airplane'],
             ApplicationStatus::Invited->value => ['color' => 'yellow', 'icon' => 'envelope-open'],
             ApplicationStatus::Accepted->value => ['color' => 'green', 'icon' => 'check-circle'],
@@ -72,6 +83,7 @@ new class extends Component
             $statuses->push([
                 'label' => __($case->name),
                 'value' => $case->value,
+                'route' => route('applications.index', ['status' => $case->value]),
                 'count' => $count,
                 'color' => $statusColors[$case->value]['color'],
                 'icon' => $statusColors[$case->value]['icon'],
@@ -85,7 +97,7 @@ new class extends Component
 
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     @foreach ($this->statusCounts as $item)
-        <x-card :href="route('applications.index', ['status' => $item['value']])" wire:navigate>
+        <x-card :href="$item['route']" wire:navigate>
             <x-slot name="heading">
                 <div class="flex items-center justify-between">
                     <flux:icon :name="$item['icon']" class="size-5 text-{{ $item['color'] }}-500 dark:text-{{ $item['color'] }}-400" />

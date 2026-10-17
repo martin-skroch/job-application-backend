@@ -5,6 +5,7 @@ namespace Tests\Feature\Application;
 use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -61,10 +62,10 @@ class ApplicationModelTest extends TestCase
     public function test_status_returns_latest_status(): void
     {
         $application = Application::factory()->create();
-        $application->history()->create(['status' => ApplicationStatus::Bookmarked, 'created_at' => now()->subDay()]);
-        $application->history()->create(['status' => ApplicationStatus::Sent, 'created_at' => now()]);
+        $application->history()->create(['status' => ApplicationStatus::Sent, 'created_at' => now()->subDay()]);
+        $application->history()->create(['status' => ApplicationStatus::Invited, 'created_at' => now()]);
 
-        $this->assertEquals(ApplicationStatus::Sent, $application->status());
+        $this->assertEquals(ApplicationStatus::Invited, $application->status());
     }
 
     public function test_status_returns_null_when_no_status_history(): void
@@ -78,9 +79,9 @@ class ApplicationModelTest extends TestCase
     {
         $application = Application::factory()->create();
         $application->history()->create(['comment' => 'Just a note.', 'created_at' => now()]);
-        $application->history()->create(['status' => ApplicationStatus::Bookmarked, 'created_at' => now()->subDay()]);
+        $application->history()->create(['status' => ApplicationStatus::Sent, 'created_at' => now()->subDay()]);
 
-        $this->assertEquals(ApplicationStatus::Bookmarked, $application->status());
+        $this->assertEquals(ApplicationStatus::Sent, $application->status());
     }
 
     public function test_latest_status_entry_returns_most_recent_status_entry(): void
@@ -119,24 +120,21 @@ class ApplicationModelTest extends TestCase
         $this->assertNull($second->public_id);
     }
 
-    public function test_description_is_stored_and_retrieved(): void
+    public function test_application_belongs_to_vacancy(): void
     {
-        $application = Application::factory()->create([
-            'description' => 'We are looking for a senior developer.',
-        ]);
+        $application = Application::factory()->create();
 
-        $this->assertDatabaseHas('applications', [
-            'id' => $application->id,
-            'description' => 'We are looking for a senior developer.',
-        ]);
-        $this->assertEquals('We are looking for a senior developer.', $application->fresh()->description);
+        $this->assertInstanceOf(Vacancy::class, $application->vacancy);
+        $this->assertTrue($application->vacancy->application->is($application));
     }
 
-    public function test_description_can_be_null(): void
+    public function test_factory_copies_company_and_contact_from_vacancy(): void
     {
-        $application = Application::factory()->create(['description' => null]);
+        $vacancy = Vacancy::factory()->create();
+        $application = Application::factory()->create(['vacancy_id' => $vacancy->id]);
 
-        $this->assertNull($application->fresh()->description);
+        $this->assertSame($vacancy->company_name, $application->company_name);
+        $this->assertSame($vacancy->contact_email, $application->contact_email);
     }
 
     public function test_earliest_entry_date_is_stored_and_retrieved(): void

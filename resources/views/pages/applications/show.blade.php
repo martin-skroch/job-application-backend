@@ -14,6 +14,7 @@ new class extends Component {
     public Application $application;
 
     #[On('application-saved')]
+    #[On('vacancy-saved')]
     public function refreshApplication(): void
     {
         $this->application->refresh();
@@ -32,7 +33,11 @@ new class extends Component {
     <div class="flex max-lg:flex-col lg:items-center gap-6">
         <div class="grow">
             <flux:heading size="xl" level="1">{{ $application->company_name ?: __('No company specified') }}</flux:heading>
-            <flux:subheading size="lg">{{ $application->title ?: __('Untitled Application') }}</flux:subheading>
+            <flux:subheading size="lg">
+                <a href="{{ route('vacancies.show', $application->vacancy) }}" class="hover:underline" wire:navigate>
+                    {{ $application->vacancy->title ?: __('Untitled Application') }}
+                </a>
+            </flux:subheading>
         </div>
         <div class="flex items-center justify-between lg:justify-end gap-6">
 
@@ -56,8 +61,8 @@ new class extends Component {
 
     <flux:separator variant="subtle" />
 
-    {{-- Job Listing --}}
-    <livewire:applications.edit-job-listing :application="$application" />
+    {{-- Vacancy --}}
+    <livewire:vacancies.edit :vacancy="$application->vacancy" />
 
     <flux:separator variant="subtle" />
 

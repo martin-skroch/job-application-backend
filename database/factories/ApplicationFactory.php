@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Actions\CreateApplicationFromVacancy;
 use App\Enum\FormOfAddress;
 use App\Models\Application;
+use App\Models\Vacancy;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Application>
@@ -20,25 +20,31 @@ class ApplicationFactory extends Factory
      */
     public function definition(): array
     {
-        $language = App::currentLocale();
-        $title = fake()->jobTitle();
-        $company = fake()->company();
-        $domain = Str::slug($company, language: $language).'.'.fake()->tld();
-        $website = "https://www.$domain";
-        $source = "$website/jobs/".Str::slug($title, language: $language);
-        $address = fake()->streetAddress()."\n".fake()->postcode().' '.fake()->city();
-
         return [
-            'title' => $title,
-            'source' => $source,
-            'description' => fake()->optional()->paragraphs(2, true),
-            'contact_name' => fake()->name(),
-            'contact_email' => "jobs@$domain",
-            'contact_phone' => fake()->e164PhoneNumber(),
-            'company_name' => $company,
-            'company_address' => $address,
-            'company_website' => $website,
+            'vacancy_id' => fn (array $attributes) => Vacancy::factory()->create([
+                'user_id' => $attributes['user_id'] ?? null,
+            ])->id,
             'form_of_address' => FormOfAddress::Formal,
         ];
+    }
+
+    /**
+     * Copy company and contact details from the vacancy.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Application $application): void {
+            $vacancy = Vacancy::withTrashed()->find($application->vacancy_id);
+
+            if (! $vacancy instanceof Vacancy) {
+                return;
+            }
+
+            foreach (CreateApplicationFromVacancy::COPIED_ATTRIBUTES as $attribute) {
+                if (! $application->isDirty($attribute)) {
+                    $application->{$attribute} = $vacancy->{$attribute};
+                }
+            }
+        });
     }
 }

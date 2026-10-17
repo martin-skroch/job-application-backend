@@ -21,19 +21,48 @@ new class extends Component {
 
         return Auth::user()->applications()
             ->withTrashed()
-            ->with('latestStatusEntry')
+            ->with(['latestStatusEntry', 'vacancy'])
             ->where(function ($q) use ($term): void {
-                $q->where('title', 'like', $term)
+                $q->whereHas('vacancy', fn ($listing) => $listing
+                    ->where('title', 'like', $term)
+                    ->orWhere('source', 'like', $term)
+                    ->orWhere('description', 'like', $term)
+                )
                     ->orWhere('company_name', 'like', $term)
                     ->orWhere('company_website', 'like', $term)
                     ->orWhere('company_address', 'like', $term)
                     ->orWhere('contact_name', 'like', $term)
                     ->orWhere('contact_email', 'like', $term)
                     ->orWhere('contact_phone', 'like', $term)
-                    ->orWhere('source', 'like', $term)
-                    ->orWhere('description', 'like', $term)
                     ->orWhere('text', 'like', $term)
                     ->orWhere('public_id', 'like', $term);
+            })
+            ->limit(8)
+            ->get();
+    }
+
+    /**
+     * Bookmarked vacancies without an application.
+     */
+    #[Computed]
+    public function vacancyResults(): Collection
+    {
+        if (strlen($this->search) < 2) {
+            return collect();
+        }
+
+        $term = '%' . $this->search . '%';
+
+        return Auth::user()->vacancies()
+            ->doesntHave('application')
+            ->where(function ($q) use ($term): void {
+                $q->where('title', 'like', $term)
+                    ->orWhere('company_name', 'like', $term)
+                    ->orWhere('company_website', 'like', $term)
+                    ->orWhere('contact_name', 'like', $term)
+                    ->orWhere('contact_email', 'like', $term)
+                    ->orWhere('source', 'like', $term)
+                    ->orWhere('description', 'like', $term);
             })
             ->limit(8)
             ->get();
@@ -47,7 +76,6 @@ new class extends Component {
     public function statusColor(Application $application): string
     {
         return match ($application->status()) {
-            ApplicationStatus::Bookmarked => 'orange',
             ApplicationStatus::Sent       => 'blue',
             ApplicationStatus::Invited    => 'yellow',
             ApplicationStatus::Accepted   => 'green',
@@ -69,7 +97,7 @@ new class extends Component {
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Search applications...')" icon="magnifying-glass" autocomplete="off" autofocus clearable />
 
             @if (strlen($this->search) >= 2)
-                @if ($this->results->isNotEmpty())
+                @if ($this->results->isNotEmpty() || $this->vacancyResults->isNotEmpty())
                     <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                         @foreach ($this->results as $application)
                             @php $color = $this->statusColor($application); @endphp
@@ -77,7 +105,7 @@ new class extends Component {
                                 <a href="{{ route('applications.show', $application) }}" wire:navigate wire:key="sr-{{ $application->id }}" class="flex items-center justify-between gap-4 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
                                     <div>
                                         <p class="font-semibold text-sm">{{ $application->company_name ?: __('No company specified') }}</p>
-                                        <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $application->title ?: __('Untitled Application') }}</p>
+                                        <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $application->vacancy->title ?: __('Untitled Application') }}</p>
                                     </div>
                                     <flux:badge size="sm" :color="$color">{{ __($application->status()?->name ?? 'Draft') }}</flux:badge>
                                 </a>
@@ -85,11 +113,21 @@ new class extends Component {
                                 <div wire:key="sr-{{ $application->id }}" class="flex items-center justify-between gap-4 py-3 px-2">
                                     <div>
                                         <p class="font-semibold text-sm text-zinc-400 dark:text-zinc-500">{{ $application->company_name ?: __('No company specified') }}</p>
-                                        <p class="text-xs text-zinc-400 dark:text-zinc-500">{{ $application->title ?: __('Untitled Application') }}</p>
+                                        <p class="text-xs text-zinc-400 dark:text-zinc-500">{{ $application->vacancy->title ?: __('Untitled Application') }}</p>
                                     </div>
                                     <flux:badge size="sm" color="zinc">{{ __('Archived') }}</flux:badge>
                                 </div>
                             @endif
+                        @endforeach
+
+                        @foreach ($this->vacancyResults as $vacancy)
+                            <a href="{{ route('vacancies.show', $vacancy) }}" wire:navigate wire:key="sr-listing-{{ $vacancy->id }}" class="flex items-center justify-between gap-4 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-700">
+                                <div>
+                                    <p class="font-semibold text-sm">{{ $vacancy->company_name ?: __('No company specified') }}</p>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ $vacancy->title ?: __('Untitled Vacancy') }}</p>
+                                </div>
+                                <flux:badge size="sm" color="orange" icon="bookmark">{{ __('Bookmarked') }}</flux:badge>
+                            </a>
                         @endforeach
                     </div>
                 @else

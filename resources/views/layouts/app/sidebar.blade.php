@@ -17,6 +17,10 @@
                         {{ __('Dashboard') }}
                     </flux:navlist.item>
 
+                    <flux:navlist.item icon="bookmark" :href="route('vacancies.index')" :current="request()->routeIs('vacancies.*')" wire:navigate>
+                        {{ __('Vacancies') }}
+                    </flux:navlist.item>
+
                     <flux:navlist.item icon="paper-airplane" :href="route('applications.index')" :current="request()->routeIs('applications.*')" wire:navigate>
                         {{ __('Applications') }}
                     </flux:navlist.item>

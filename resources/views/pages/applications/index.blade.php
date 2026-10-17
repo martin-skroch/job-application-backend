@@ -5,13 +5,10 @@ use App\Actions\UnpublishApplication;
 use App\Enum\ApplicationStatus;
 use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
-use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
 use App\Models\Application;
-use App\Models\Profile;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
-use League\HTMLToMarkdown\HtmlConverter;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,24 +17,10 @@ new class extends Component
 {
     use WithPagination;
 
-    public Application $application;
-
-    public Profile $profile;
-
     #[Url]
     public ?string $status = 'draft';
 
-    public bool $isEditing = false;
-
     public ?string $applicationId = null;
-
-    public ?string $title = null;
-
-    public ?string $source = null;
-
-    public ?string $description = null;
-
-    public bool $descriptionFilled = false;
 
     public ?FormOfAddress $form_of_address = FormOfAddress::Formal;
 
@@ -62,8 +45,6 @@ new class extends Component
     public ?string $company_website = null;
 
     public ?string $profile_id = null;
-
-    public ?string $public_id = null;
 
     private PublishApplication $publishApplication;
 
@@ -105,7 +86,7 @@ new class extends Component
             'current' => $archivedFilter,
         ]]);
 
-        $query = Auth::user()->applications()->with('latestStatusEntry');
+        $query = Auth::user()->applications()->with(['latestStatusEntry', 'vacancy']);
 
         if ($archivedFilter) {
             $query->onlyTrashed();
@@ -135,57 +116,46 @@ new class extends Component
         ];
     }
 
-    public function open(?string $id = null): void
+    public function open(string $id): void
     {
-        $this->authorize('create', Application::class);
+        if (! Str::isUlid($id)) {
+            return;
+        }
 
         $this->resetForm();
 
-        if (Str::isUlid($id)) {
-            $this->isEditing = true;
-            $this->applicationId = $id;
+        $application = Auth::user()->applications()->findOrFail($id);
 
-            $application = Application::findOrFail($id);
+        $this->authorize('update', $application);
 
-            $this->application = $application;
-            $this->profile = $application->profile;
-            $this->form_of_address = $application->form_of_address;
-            $this->salary_desire = $application->salary_desire;
-            $this->salary_behavior = $application->salary_behavior;
-            $this->earliest_entry_date = $application->earliest_entry_date?->format('Y-m-d');
+        $this->applicationId = $application->id;
+        $this->profile_id = $application->profile?->id;
+        $this->form_of_address = $application->form_of_address;
+        $this->salary_desire = $application->salary_desire;
+        $this->salary_behavior = $application->salary_behavior;
+        $this->earliest_entry_date = $application->earliest_entry_date?->format('Y-m-d');
+        $this->text = $application->text;
 
-            $this->title = $application->title;
-            $this->source = $application->source?->value();
-            $this->description = $application->description;
-            $this->text = $application->text;
+        $this->contact_name = $application->contact_name;
+        $this->contact_email = $application->contact_email;
+        $this->contact_phone = $application->contact_phone;
 
-            $this->contact_name = $application->contact_name;
-            $this->contact_email = $application->contact_email;
-            $this->contact_phone = $application->contact_phone;
-
-            $this->company_name = $application->company_name;
-            $this->company_address = $application->company_address;
-            $this->company_website = $application->company_website?->value();
-
-            $this->public_id = $application->public_id;
-            $this->profile_id = $application->profile?->id;
-
-        }
+        $this->company_name = $application->company_name;
+        $this->company_address = $application->company_address;
+        $this->company_website = $application->company_website?->value();
 
         Flux::modal('application-modal')->show();
     }
 
     public function save(): void
     {
-        $applications = Auth::user()->applications();
-        $request = Str::isUlid($this->applicationId) ? new UpdateApplicationRequest : new StoreApplicationRequest;
-        $validated = $this->validate($request->rules($this->salary_behavior));
-
-        if (Str::isUlid($this->applicationId)) {
-            $applications->where('id', $this->applicationId)->update($validated);
-        } else {
-            $applications->forceCreate($validated);
+        if (! Str::isUlid($this->applicationId)) {
+            return;
         }
+
+        $validated = $this->validate((new UpdateApplicationRequest)->rules($this->salary_behavior));
+
+        Auth::user()->applications()->where('id', $this->applicationId)->update($validated);
 
         Flux::modal('application-modal')->close();
 
@@ -262,28 +232,6 @@ new class extends Component
 
         parent::resetErrorBag();
     }
-
-    public function updatedProfileId(): void
-    {
-        if (! $this->isEditing) {
-            $this->profile = Profile::findOrFail($this->profile_id);
-
-            $this->text = $this->profile->cover_letter;
-        }
-    }
-
-    public function updatedDescription(): void
-    {
-        $converter = new HtmlConverter([
-            'strip_tags' => true,
-        ]);
-
-        if (! $this->descriptionFilled) {
-            $this->description = $converter->convert($this->description);
-            $this->descriptionFilled = true;
-        }
-
-    }
 }; ?>
 
 <section class="space-y-8">
@@ -317,8 +265,8 @@ new class extends Component
                 </flux:dropdown>
             </flux:button.group>
 
-            <flux:button icon="plus" variant="primary" :loading="false" wire:click="open">
-                {{ __('Create') }}
+            <flux:button icon="bookmark" variant="primary" :href="route('vacancies.index')" wire:navigate>
+                {{ __('Vacancies') }}
             </flux:button>
         </div>
     </div>
@@ -336,7 +284,7 @@ new class extends Component
                 @endif
 
                     <flux:heading size="lg" class="mb-1!">{{ $application->company_name ?: __('No company specified') }}</flux:heading>
-                    <flux:subheading size="sm">{{ $application->title ?: __('Untitled Application') }}</flux:subheading>
+                    <flux:subheading size="sm">{{ $application->vacancy->title ?: __('Untitled Application') }}</flux:subheading>
 
                 @if (!$application->isArchived())
                     </a>
@@ -388,7 +336,7 @@ new class extends Component
     <x-flyout name="application-modal" wire:close="resetForm">
 
         <flux:heading size="xl" level="1">
-            {{ __($isEditing ? 'Edit application' : 'Create new application') }}
+            {{ __('Edit application') }}
         </flux:heading>
 
         <flux:separator variant="subtle" />
@@ -396,22 +344,11 @@ new class extends Component
         <form class="space-y-16" wire:submit="save">
             <div class="space-y-6">
                 <div>
-                    <flux:heading size="xl" class="mb-2">{{ __('Job offer') }}</flux:heading>
-                    <flux:separator variant="subtle" />
-                </div>
-
-                <flux:input wire:model="title" :label="__('Title')" />
-                <flux:input wire:model="source" :label="__('Source')" type="url" icon="link" />
-                <flux:textarea wire:model.live="description" :label="__('Description')" />
-            </div>
-
-            <div class="space-y-6">
-                <div>
                     <flux:heading size="xl" class="mb-2">{{ __('Application Details') }}</flux:heading>
                     <flux:separator variant="subtle" />
                 </div>
 
-                <flux:select wire:model.live="profile_id" :label="__('Profile')" required>
+                <flux:select wire:model="profile_id" :label="__('Profile')" required>
                     <flux:select.option value="" selected hidden>{{ __('Choose profile...') }}</flux:select.option>
                     @foreach (Auth::user()->profiles()->pluck('name',  'id') as $id => $name)
                     <flux:select.option :value="$id">{{ $name }}</flux:select.option>
@@ -485,7 +422,7 @@ new class extends Component
             </div>
 
             <div class="flex items-center justify-start gap-4">
-                <flux:button variant="primary" type="submit">{{ __($isEditing ? 'Save' : 'Create') }}</flux:button>
+                <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
                 <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
             </div>
         </form>

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Application;
 use App\Models\Profile;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -45,8 +46,10 @@ class ProfileCoverLetterTest extends TestCase
             'cover_letter' => 'My default cover letter text.',
         ]);
 
+        $vacancy = Vacancy::factory()->for($user)->create();
+
         Livewire::actingAs($user)
-            ->test('pages::applications.index')
+            ->test('vacancies.create-application', ['vacancy' => $vacancy])
             ->set('profile_id', $profile->id)
             ->assertSet('text', 'My default cover letter text.');
     }
@@ -58,8 +61,10 @@ class ProfileCoverLetterTest extends TestCase
             'cover_letter' => 'My default cover letter text.',
         ]);
 
+        $vacancy = Vacancy::factory()->for($user)->create();
+
         Livewire::actingAs($user)
-            ->test('pages::applications.index')
+            ->test('vacancies.create-application', ['vacancy' => $vacancy])
             ->set('text', 'Custom text already written.')
             ->set('profile_id', $profile->id)
             ->assertSet('text', 'My default cover letter text.');

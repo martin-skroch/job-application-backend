@@ -44,7 +44,7 @@ class ApplicationMail extends Mailable
         }
 
         // Subject
-        $subject = __('mail.application.subject', ['title' => $this->application->title]);
+        $subject = __('mail.application.subject', ['title' => $this->application->vacancy->title]);
 
         if ($this->isTest) {
             $subject = __('mail.application.subject_test', ['subject' => $subject]);

@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ApplicationStatusModalTest extends TestCase
@@ -133,19 +132,7 @@ class ApplicationStatusModalTest extends TestCase
         $this->assertDatabaseEmpty('applications_history');
     }
 
-    /**
-     * @return array<string, array{ApplicationStatus}>
-     */
-    public static function unpublishingStatusProvider(): array
-    {
-        return [
-            'bookmarked' => [ApplicationStatus::Bookmarked],
-            'rejected' => [ApplicationStatus::Rejected],
-        ];
-    }
-
-    #[DataProvider('unpublishingStatusProvider')]
-    public function test_save_status_unpublishes_application(ApplicationStatus $status): void
+    public function test_save_rejected_status_unpublishes_application(): void
     {
         $user = User::factory()->create();
         $application = Application::factory()->for($user)->create([
@@ -155,7 +142,7 @@ class ApplicationStatusModalTest extends TestCase
 
         Livewire::actingAs($user)
             ->test('applications.status', ['application' => $application])
-            ->set('newStatus', $status->value)
+            ->set('newStatus', ApplicationStatus::Rejected->value)
             ->call('save')
             ->assertHasNoErrors()
             ->assertDispatched('application-status-updated.'.$application->id);

@@ -24,6 +24,14 @@ new class extends Component
 
     public ?string $text = null;
 
+    public ?string $company_name = null;
+
+    public ?string $contact_name = null;
+
+    public ?string $contact_email = null;
+
+    public ?string $contact_phone = null;
+
     public function mount(): void
     {
         $this->authorize('view', $this->application);
@@ -38,6 +46,10 @@ new class extends Component
         $this->salary_desire = $this->application->salary_desire;
         $this->earliest_entry_date = $this->application->earliest_entry_date?->format('Y-m-d');
         $this->text = $this->application->text;
+        $this->company_name = $this->application->company_name;
+        $this->contact_name = $this->application->contact_name;
+        $this->contact_email = $this->application->contact_email;
+        $this->contact_phone = $this->application->contact_phone;
     }
 
     public function open(): void
@@ -59,6 +71,10 @@ new class extends Component
             'salary_desire' => ['integer', $this->salary_behavior === SalaryBehaviors::Override ? 'required' : 'nullable'],
             'earliest_entry_date' => ['nullable', 'date'],
             'text' => ['nullable', 'string'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string'],
         ]);
 
         $validated['earliest_entry_date'] = filled($validated['earliest_entry_date']) ? $validated['earliest_entry_date'] : null;
@@ -156,6 +172,38 @@ new class extends Component
                     @endif
                 </div>
 
+                <flux:separator variant="subtle" />
+
+                <flux:heading>{{ __('Recipient') }}</flux:heading>
+                <div class="space-y-4">
+                    <div class="space-y-1">
+                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Company') }}</p>
+                        @if ($application->company_name)
+                            <p>{{ $application->company_name }}</p>
+                        @else
+                            <span class="text-zinc-400">—</span>
+                        @endif
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Contact') }}</p>
+                        @if ($application->contact_name)
+                            <p>{{ $application->contact_name }}</p>
+                        @else
+                            <span class="text-zinc-400">—</span>
+                        @endif
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</p>
+                        @if ($application->contact_email)
+                            <a href="mailto:{{ $application->contact_email }}" class="text-accent hover:underline">{{ $application->contact_email }}</a>
+                        @else
+                            <span class="text-zinc-400">—</span>
+                        @endif
+                    </div>
+                </div>
+
                 <livewire:applications.publish as="switch" :application="$application" />
             </div>
         </div>
@@ -218,6 +266,19 @@ new class extends Component
             </flux:field>
 
             <flux:textarea wire:model="text" :label="__('Cover Letter')" rows="16" resize="vertical" />
+
+            <flux:separator variant="subtle" />
+
+            <flux:heading size="lg">{{ __('Recipient') }}</flux:heading>
+
+            <flux:input wire:model="company_name" :label="__('Company name')" icon="building-office" />
+
+            <flux:input wire:model="contact_name" :label="__('Contact name')" icon="user" />
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <flux:input wire:model="contact_email" :label="__('Contact email')" type="email" icon="at-symbol" />
+                <flux:input wire:model="contact_phone" :label="__('Contact phone')" type="tel" icon="phone" />
+            </div>
 
             <div class="flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>

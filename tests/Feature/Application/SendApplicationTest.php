@@ -7,6 +7,7 @@ use App\Mail\ApplicationMail;
 use App\Models\Application;
 use App\Models\Profile;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -52,9 +53,10 @@ class SendApplicationTest extends TestCase
 
         $user = User::factory()->create();
         $profile = Profile::factory()->for($user)->create(['email' => 'applicant@example.com']);
+        $vacancy = Vacancy::factory()->for($user)->create(['title' => 'Software Developer']);
         $application = Application::factory()->for($user)->for($profile)->create([
+            'vacancy_id' => $vacancy->id,
             'contact_email' => 'hiring@company.com',
-            'title' => 'Software Developer',
         ]);
 
         Livewire::actingAs($user)

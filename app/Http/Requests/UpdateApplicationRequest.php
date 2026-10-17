@@ -22,6 +22,14 @@ class UpdateApplicationRequest extends StoreApplicationRequest
      */
     public function rules(?SalaryBehaviors $salaryBehavior = null): array
     {
-        return parent::rules($salaryBehavior);
+        return [
+            ...parent::rules($salaryBehavior),
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'company_address' => ['nullable', 'string', 'max:255'],
+            'company_website' => ['nullable', 'url:http,https', 'max:255'],
+        ];
     }
 }

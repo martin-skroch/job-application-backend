@@ -87,7 +87,6 @@ new class extends Component {
 
                 @php
                     $colors = match($entry->status) {
-                        ApplicationStatus::Bookmarked => 'orange',
                         ApplicationStatus::Sent       => 'blue',
                         ApplicationStatus::Invited    => 'yellow',
                         ApplicationStatus::Accepted   => 'green',

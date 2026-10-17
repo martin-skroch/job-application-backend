@@ -1,12 +1,15 @@
 <?php
 
-use App\Models\Application;
+use App\Http\Requests\StoreVacancyRequest;
+use App\Models\Vacancy;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 new class extends Component {
-    public Application $application;
+    public Vacancy $vacancy;
+
+    public bool $expanded = false;
 
     public ?string $title = null;
     public ?string $source = null;
@@ -20,21 +23,21 @@ new class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('view', $this->application);
-        $this->fillFromApplication();
+        $this->authorize('view', $this->vacancy);
+        $this->fillFromVacancy();
     }
 
-    private function fillFromApplication(): void
+    private function fillFromVacancy(): void
     {
-        $this->title = $this->application->title;
-        $this->source = $this->application->source?->value();
-        $this->description = $this->application->description;
-        $this->contact_name = $this->application->contact_name;
-        $this->contact_email = $this->application->contact_email;
-        $this->contact_phone = $this->application->contact_phone;
-        $this->company_name = $this->application->company_name;
-        $this->company_address = $this->application->company_address;
-        $this->company_website = $this->application->company_website?->value();
+        $this->title = $this->vacancy->title;
+        $this->source = $this->vacancy->source?->value();
+        $this->description = $this->vacancy->description;
+        $this->contact_name = $this->vacancy->contact_name;
+        $this->contact_email = $this->vacancy->contact_email;
+        $this->contact_phone = $this->vacancy->contact_phone;
+        $this->company_name = $this->vacancy->company_name;
+        $this->company_address = $this->vacancy->company_address;
+        $this->company_website = $this->vacancy->company_website?->value();
     }
 
     #[Computed]
@@ -42,12 +45,12 @@ new class extends Component {
     {
         $mapQuery = '';
 
-        if (filled($this->application->company_name)) {
-            $mapQuery .= $this->application->company_name . '+';
+        if (filled($this->vacancy->company_name)) {
+            $mapQuery .= $this->vacancy->company_name . '+';
         }
 
-        if (filled($this->application->company_address)) {
-            $mapQuery .= str_replace("\n", ',', $this->application->company_address);
+        if (filled($this->vacancy->company_address)) {
+            $mapQuery .= str_replace("\n", ',', $this->vacancy->company_address);
         }
 
         if (blank($mapQuery)) {
@@ -59,42 +62,48 @@ new class extends Component {
 
     public function open(): void
     {
-        $this->authorize('update', $this->application);
-        $this->fillFromApplication();
+        $this->authorize('update', $this->vacancy);
+        $this->fillFromVacancy();
 
-        Flux::modal('edit-job-listing-modal')->show();
+        Flux::modal('edit-vacancy-modal')->show();
     }
 
     public function save(): void
     {
-        $this->authorize('update', $this->application);
+        $this->authorize('update', $this->vacancy);
 
-        $validated = $this->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'source' => ['nullable', 'url:http,https', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
-            'contact_phone' => ['nullable', 'string'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'company_address' => ['nullable', 'string', 'max:255'],
-            'company_website' => ['nullable', 'url:http,https', 'max:255'],
-        ]);
+        $request = new StoreVacancyRequest;
+        $validated = $this->validate($request->rules(), $request->messages());
 
-        $this->application->fill($validated)->save();
+        $this->vacancy->fill($validated)->save();
 
-        $this->application->refresh();
+        $this->vacancy->refresh();
 
-        Flux::modal('edit-job-listing-modal')->close();
+        Flux::modal('edit-vacancy-modal')->close();
 
-        $this->dispatch('application-saved');
+        $this->dispatch('vacancy-saved');
+    }
+
+    public function delete(): void
+    {
+        $this->authorize('forceDelete', $this->vacancy);
+
+        if ($this->vacancy->application()->exists()) {
+            $this->addError('delete', __('This vacancy cannot be deleted because an application has been written for it.'));
+
+            return;
+        }
+
+        $this->vacancy->forceDelete();
+
+        $this->redirectRoute('vacancies.index', navigate: true);
     }
 }; ?>
 
-<div x-data="{ expanded: false }">
+<div x-data="{ expanded: $wire.expanded }">
     <div class="flex items-center gap-3 py-4 cursor-pointer select-none" x-on:click="expanded = !expanded">
         <flux:icon icon="chevron-down" class="size-4 text-zinc-400 transition-transform duration-200" x-bind:class="{ 'rotate-180': expanded }" />
-        <flux:heading size="lg">{{ __('Job Listing') }}</flux:heading>
+        <flux:heading size="lg">{{ __('Vacancy') }}</flux:heading>
         <flux:button
             icon="pencil-square"
             variant="ghost"
@@ -118,8 +127,8 @@ new class extends Component {
                     <div class="space-y-4">
                         <div class="space-y-1">
                             <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
-                            @if ($application->company_name)
-                                <p>{{ $application->company_name }}</p>
+                            @if ($vacancy->company_name)
+                                <p>{{ $vacancy->company_name }}</p>
                             @else
                                 <span class="text-zinc-400">—</span>
                             @endif
@@ -127,9 +136,9 @@ new class extends Component {
 
                         <div class="space-y-1">
                             <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Website') }}</p>
-                            @if ($application->company_website)
-                                <a href="{{ route('redirect', ['url' => (string) $application->company_website]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline truncate">
-                                    {{ str($application->company_website)->replaceMatches('#^https?://#i', '$1')->rtrim('/') }}
+                            @if ($vacancy->company_website)
+                                <a href="{{ route('redirect', ['url' => (string) $vacancy->company_website]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline truncate">
+                                    {{ str($vacancy->company_website)->replaceMatches('#^https?://#i', '$1')->rtrim('/') }}
                                 </a>
                             @else
                                 <span class="text-zinc-400">—</span>
@@ -138,13 +147,13 @@ new class extends Component {
 
                         <div class="space-y-1">
                             <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Address') }}</p>
-                            @if ($application->company_address)
+                            @if ($vacancy->company_address)
                                 @if ($this->mapLink)
                                     <a href="{{ $this->mapLink }}" target="_blank" rel="noopener" class="leading-relaxed text-accent hover:underline">
-                                        {!! nl2br(e($application->company_address)) !!}
+                                        {!! nl2br(e($vacancy->company_address)) !!}
                                     </a>
                                 @else
-                                    <p class="leading-relaxed">{!! nl2br(e($application->company_address)) !!}</p>
+                                    <p class="leading-relaxed">{!! nl2br(e($vacancy->company_address)) !!}</p>
                                 @endif
                             @else
                                 <span class="text-zinc-400">—</span>
@@ -160,8 +169,8 @@ new class extends Component {
 
                     <div class="space-y-1">
                         <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Name') }}</p>
-                        @if ($application->contact_name)
-                            <p>{{ $application->contact_name }}</p>
+                        @if ($vacancy->contact_name)
+                            <p>{{ $vacancy->contact_name }}</p>
                         @else
                             <span class="text-zinc-400">—</span>
                         @endif
@@ -169,9 +178,9 @@ new class extends Component {
 
                     <div class="space-y-1">
                         <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Email') }}</p>
-                        @if ($application->contact_email)
-                            <a href="mailto:{{ $application->contact_email }}" class="text-accent hover:underline">
-                                {{ $application->contact_email }}
+                        @if ($vacancy->contact_email)
+                            <a href="mailto:{{ $vacancy->contact_email }}" class="text-accent hover:underline">
+                                {{ $vacancy->contact_email }}
                             </a>
                         @else
                             <span class="text-zinc-400">—</span>
@@ -180,9 +189,9 @@ new class extends Component {
 
                     <div class="space-y-1">
                         <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Phone') }}</p>
-                        @if ($application->contact_phone)
-                            <a href="tel:{{ $application->contact_phone }}" class="text-accent hover:underline">
-                                {{ $application->contact_phone }}
+                        @if ($vacancy->contact_phone)
+                            <a href="tel:{{ $vacancy->contact_phone }}" class="text-accent hover:underline">
+                                {{ $vacancy->contact_phone }}
                             </a>
                         @else
                             <span class="text-zinc-400">—</span>
@@ -191,9 +200,9 @@ new class extends Component {
 
                     <div class="space-y-1">
                         <p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{ __('Source') }}</p>
-                        @if ($application->source)
-                            <a href="{{ route('redirect', ['url' => $application->source->value()]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline">
-                                {{ str($application->source)->replaceMatches('#^https?://#i', '')->rtrim('/') }}
+                        @if ($vacancy->source)
+                            <a href="{{ route('redirect', ['url' => $vacancy->source->value()]) }}" target="_blank" rel="noopener" class="break-all text-accent hover:underline">
+                                {{ str($vacancy->source)->replaceMatches('#^https?://#i', '')->rtrim('/') }}
                             </a>
                         @else
                             <span class="text-zinc-400">—</span>
@@ -208,8 +217,8 @@ new class extends Component {
             <div class="xl:w-3/4 space-y-6">
                 <flux:heading>{{ __('Description') }}</flux:heading>
                 <div>
-                    @if ($application->description)
-                        <x-markdown>{{ $application->description }}</x-markdown>
+                    @if ($vacancy->description)
+                        <x-markdown>{{ $vacancy->description }}</x-markdown>
                     @else
                         <span class="text-zinc-400">—</span>
                     @endif
@@ -219,8 +228,8 @@ new class extends Component {
         </div>
     </flux:callout>
 
-    <x-flyout name="edit-job-listing-modal">
-        <flux:heading size="xl" level="1">{{ __('Edit Job Listing') }}</flux:heading>
+    <x-flyout name="edit-vacancy-modal">
+        <flux:heading size="xl" level="1">{{ __('Edit Vacancy') }}</flux:heading>
         <flux:separator variant="subtle" />
 
         <form class="space-y-6" wire:submit="save">
@@ -263,5 +272,28 @@ new class extends Component {
                 <flux:button variant="ghost" type="button" x-on:click="$flux.modals().close()">{{ __('Cancel') }}</flux:button>
             </div>
         </form>
+
+        <flux:separator variant="subtle" />
+
+        <div class="space-y-4">
+            <flux:heading size="lg">{{ __('Delete vacancy') }}</flux:heading>
+
+            @if ($vacancy->application)
+                <flux:text>{{ __('This vacancy cannot be deleted because an application has been written for it.') }}</flux:text>
+            @else
+                <flux:text>{{ __('The vacancy will be permanently deleted. This cannot be undone.') }}</flux:text>
+
+                <flux:button
+                    variant="danger"
+                    icon="trash"
+                    wire:click="delete"
+                    wire:confirm="{{ __('Are you sure you want to permanently delete this vacancy?') }}"
+                >
+                    {{ __('Delete') }}
+                </flux:button>
+            @endif
+
+            <flux:error name="delete" />
+        </div>
     </x-flyout>
 </div>

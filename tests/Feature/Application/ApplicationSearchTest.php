@@ -6,6 +6,7 @@ use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use App\Models\ApplicationHistory;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -30,8 +31,14 @@ class ApplicationSearchTest extends TestCase
     public function test_search_filters_by_title(): void
     {
         $user = User::factory()->create();
-        $matching = Application::factory()->for($user)->create(['title' => 'Senior PHP Developer', 'company_name' => 'PHP Corp']);
-        $other = Application::factory()->for($user)->create(['title' => 'Marketing Manager', 'company_name' => 'Marketing Inc']);
+        $matching = Application::factory()->for($user)->create([
+            'vacancy_id' => Vacancy::factory()->for($user)->create(['title' => 'Senior PHP Developer']),
+            'company_name' => 'PHP Corp',
+        ]);
+        $other = Application::factory()->for($user)->create([
+            'vacancy_id' => Vacancy::factory()->for($user)->create(['title' => 'Marketing Manager']),
+            'company_name' => 'Marketing Inc',
+        ]);
 
         Livewire::actingAs($user)
             ->test('applications.search')
@@ -102,5 +109,32 @@ class ApplicationSearchTest extends TestCase
             ->set('search', 'Search Match');
 
         $this->assertCount(8, $component->get('results'));
+    }
+
+    public function test_search_finds_bookmarked_vacancies_without_application(): void
+    {
+        $user = User::factory()->create();
+        $bookmarked = Vacancy::factory()->for($user)->create(['company_name' => 'Bookmark AG']);
+        $applied = Application::factory()->for($user)->create(['company_name' => 'Bookmark Applied AG']);
+
+        $component = Livewire::actingAs($user)
+            ->test('applications.search')
+            ->set('search', 'Bookmark')
+            ->assertSee($bookmarked->company_name)
+            ->assertSee(route('vacancies.show', $bookmarked))
+            ->assertSee($applied->company_name);
+
+        $this->assertCount(1, $component->get('vacancyResults'));
+    }
+
+    public function test_search_does_not_find_other_users_vacancies(): void
+    {
+        $user = User::factory()->create();
+        $foreign = Vacancy::factory()->create(['company_name' => 'Foreign Corp']);
+
+        Livewire::actingAs($user)
+            ->test('applications.search')
+            ->set('search', 'Foreign')
+            ->assertDontSee($foreign->company_name);
     }
 }

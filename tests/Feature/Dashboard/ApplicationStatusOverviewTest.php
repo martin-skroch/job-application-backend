@@ -6,6 +6,7 @@ use App\Enum\ApplicationStatus;
 use App\Models\Application;
 use App\Models\ApplicationHistory;
 use App\Models\User;
+use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -150,5 +151,23 @@ class ApplicationStatusOverviewTest extends TestCase
 
         $this->assertEquals(0, $sentItem['count']);
         $this->assertEquals(1, $invitedItem['count']);
+    }
+
+    public function test_bookmarked_count_reflects_vacancies_without_application(): void
+    {
+        $user = User::factory()->create();
+
+        Vacancy::factory()->for($user)->count(2)->create();
+        Application::factory()->for($user)->create();
+        Vacancy::factory()->create();
+
+        $component = Livewire::actingAs($user)
+            ->test('dashboard.application-status-overview');
+
+        $bookmarkedItem = collect($component->get('statusCounts'))->firstWhere('value', 'bookmarked');
+
+        $this->assertNotNull($bookmarkedItem);
+        $this->assertEquals(2, $bookmarkedItem['count']);
+        $this->assertSame(route('vacancies.index', ['filter' => 'bookmarked']), $bookmarkedItem['route']);
     }
 }

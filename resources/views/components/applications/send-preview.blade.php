@@ -49,7 +49,7 @@ new class extends Component {
     #[Computed]
     public function subject(): string
     {
-        $subject = __('mail.application.subject', ['title' => $this->application->title]);
+        $subject = __('mail.application.subject', ['title' => $this->application->vacancy->title]);
 
         if ($this->isTest) {
             $subject = __('mail.application.subject_test', ['subject' => $subject]);

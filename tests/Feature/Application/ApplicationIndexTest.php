@@ -3,11 +3,11 @@
 namespace Tests\Feature\Application;
 
 use App\Enum\ApplicationStatus;
-use App\Enum\SalaryBehaviors;
 use App\Models\Application;
 use App\Models\ApplicationHistory;
 use App\Models\Profile;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -53,8 +53,8 @@ class ApplicationIndexTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $bookmarked = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $bookmarked->id, 'status' => ApplicationStatus::Bookmarked]);
+        $invited = Application::factory()->for($user)->create();
+        ApplicationHistory::factory()->create(['application_id' => $invited->id, 'status' => ApplicationStatus::Invited]);
 
         $sent = Application::factory()->for($user)->create();
         ApplicationHistory::factory()->create(['application_id' => $sent->id, 'status' => ApplicationStatus::Sent]);
@@ -62,7 +62,7 @@ class ApplicationIndexTest extends TestCase
         Livewire::actingAs($user)
             ->test('pages::applications.index')
             ->set('status', 'draft')
-            ->assertDontSee($bookmarked->company_name)
+            ->assertDontSee($invited->company_name)
             ->assertDontSee($sent->company_name);
     }
 
@@ -80,45 +80,6 @@ class ApplicationIndexTest extends TestCase
             ->assertDontSee($draft->company_name);
     }
 
-    public function test_bookmarked_filter_shows_only_bookmarked_applications(): void
-    {
-        $user = User::factory()->create();
-
-        $bookmarked = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $bookmarked->id, 'status' => ApplicationStatus::Bookmarked]);
-
-        $sent = Application::factory()->for($user)->create();
-        ApplicationHistory::factory()->create(['application_id' => $sent->id, 'status' => ApplicationStatus::Sent]);
-
-        $noStatus = Application::factory()->for($user)->create();
-
-        Livewire::actingAs($user)
-            ->test('pages::applications.index')
-            ->set('status', 'bookmarked')
-            ->assertSee($bookmarked->company_name)
-            ->assertDontSee($sent->company_name)
-            ->assertDontSee($noStatus->company_name);
-    }
-
-    public function test_creating_application_does_not_create_history_entry(): void
-    {
-        $user = User::factory()->create();
-        $profile = Profile::factory()->for($user)->create();
-
-        Livewire::actingAs($user)
-            ->test('pages::applications.index')
-            ->set('profile_id', $profile->id)
-            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
-            ->call('save');
-
-        $application = $user->applications()->first();
-
-        $this->assertNotNull($application);
-        $this->assertDatabaseMissing('applications_history', [
-            'application_id' => $application->id,
-        ]);
-    }
-
     public function test_updating_application_does_not_create_history_entry(): void
     {
         $user = User::factory()->create();
@@ -132,76 +93,6 @@ class ApplicationIndexTest extends TestCase
             ->call('save');
 
         $this->assertDatabaseCount('applications_history', 1);
-    }
-
-    public function test_creating_application_stores_description(): void
-    {
-        $user = User::factory()->create();
-        $profile = Profile::factory()->for($user)->create();
-
-        Livewire::actingAs($user)
-            ->test('pages::applications.index')
-            ->set('profile_id', $profile->id)
-            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
-            ->set('description', 'We are looking for a talented engineer.')
-            ->call('save');
-
-        $this->assertDatabaseHas('applications', [
-            'user_id' => $user->id,
-            'description' => 'We are looking for a talented engineer.',
-        ]);
-    }
-
-    public function test_updating_application_stores_description(): void
-    {
-        $user = User::factory()->create();
-        $profile = Profile::factory()->for($user)->create();
-        $application = Application::factory()->for($user)->for($profile)->create([
-            'description' => 'Old description.',
-        ]);
-
-        Livewire::actingAs($user)
-            ->test('pages::applications.index')
-            ->call('open', $application->id)
-            ->set('description', 'Updated description.')
-            ->call('save');
-
-        $this->assertDatabaseHas('applications', [
-            'id' => $application->id,
-            'description' => 'Updated description.',
-        ]);
-    }
-
-    public function test_open_loads_description_into_form(): void
-    {
-        $user = User::factory()->create();
-        $profile = Profile::factory()->for($user)->create();
-        $application = Application::factory()->for($user)->for($profile)->create([
-            'description' => 'Loaded from the database.',
-        ]);
-
-        Livewire::actingAs($user)
-            ->test('pages::applications.index')
-            ->call('open', $application->id)
-            ->assertSet('description', 'Loaded from the database.');
-    }
-
-    public function test_creating_application_stores_earliest_entry_date(): void
-    {
-        $user = User::factory()->create();
-        $profile = Profile::factory()->for($user)->create();
-
-        Livewire::actingAs($user)
-            ->test('pages::applications.index')
-            ->set('profile_id', $profile->id)
-            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
-            ->set('earliest_entry_date', '2026-06-01')
-            ->call('save');
-
-        $this->assertDatabaseHas('applications', [
-            'user_id' => $user->id,
-            'earliest_entry_date' => '2026-06-01 00:00:00',
-        ]);
     }
 
     public function test_open_loads_earliest_entry_date_into_form(): void
@@ -218,20 +109,52 @@ class ApplicationIndexTest extends TestCase
             ->assertSet('earliest_entry_date', '2026-06-01');
     }
 
-    public function test_earliest_entry_date_is_optional(): void
+    public function test_updating_application_stores_recipient_details(): void
     {
         $user = User::factory()->create();
         $profile = Profile::factory()->for($user)->create();
+        $application = Application::factory()->for($user)->for($profile)->create();
 
         Livewire::actingAs($user)
             ->test('pages::applications.index')
-            ->set('profile_id', $profile->id)
-            ->set('salary_behavior', SalaryBehaviors::Hidden->value)
-            ->call('save');
+            ->call('open', $application->id)
+            ->assertSet('company_name', $application->company_name)
+            ->set('contact_name', 'Erika Mustermann')
+            ->call('save')
+            ->assertHasNoErrors();
 
-        $application = $user->applications()->first();
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'contact_name' => 'Erika Mustermann',
+        ]);
+        $this->assertNotSame('Erika Mustermann', $application->vacancy->fresh()->contact_name);
+    }
 
-        $this->assertNotNull($application);
-        $this->assertNull($application->earliest_entry_date);
+    public function test_open_cannot_load_another_users_application(): void
+    {
+        $application = Application::factory()->for(User::factory())->create();
+
+        $this->expectException(ModelNotFoundException::class);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test('pages::applications.index')
+            ->call('open', $application->id);
+    }
+
+    public function test_index_links_to_vacancies_instead_of_creating_applications(): void
+    {
+        Livewire::actingAs(User::factory()->create())
+            ->test('pages::applications.index')
+            ->assertSee(route('vacancies.index'));
+    }
+
+    public function test_index_shows_vacancy_title(): void
+    {
+        $user = User::factory()->create();
+        $application = Application::factory()->for($user)->create();
+
+        Livewire::actingAs($user)
+            ->test('pages::applications.index')
+            ->assertSee($application->vacancy->title);
     }
 }

@@ -75,6 +75,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the vacancies for user.
+     */
+    public function vacancies(): HasMany
+    {
+        return $this->hasMany(Vacancy::class);
+    }
+
+    /**
      * Get the experiences for user.
      */
     public function profiles(): HasMany

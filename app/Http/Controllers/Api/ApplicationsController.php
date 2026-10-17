@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\CreateAnalytics;
+use App\Actions\CreateApplicationFromVacancy;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\App;
 class ApplicationsController extends Controller
 {
     public function __construct(
-        private readonly CreateAnalytics $createAnalytics
+        private readonly CreateAnalytics $createAnalytics,
+        private readonly CreateApplicationFromVacancy $createApplicationFromVacancy,
     ) {}
 
     public function fetch(Request $request, Application $application): JsonResource|JsonResponse
@@ -52,12 +54,14 @@ class ApplicationsController extends Controller
 
             $validated['company'] = $validated['name'];
 
-            $application = $request->user()->applications()->create([
+            $vacancy = $request->user()->vacancies()->create([
                 'source' => $request->headers->get('referer'),
                 'company_name' => $validated['company'],
                 'contact_name' => $validated['name'],
                 'contact_email' => $validated['email'],
             ]);
+
+            $application = $this->createApplicationFromVacancy->handle($vacancy);
         }
 
         $this->createAnalytics->create(

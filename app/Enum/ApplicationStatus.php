@@ -4,7 +4,6 @@ namespace App\Enum;
 
 enum ApplicationStatus: string
 {
-    case Bookmarked = 'bookmarked';
     case Sent = 'sent';
     case Invited = 'invited';
     case Accepted = 'accepted';

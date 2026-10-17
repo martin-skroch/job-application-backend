@@ -40,8 +40,8 @@ class ApplicationResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'title' => $this->whenHas('title'),
-            'source' => $this->whenHas('source'),
+            'title' => $this->vacancy?->title,
+            'source' => $this->vacancy?->source,
             'salary_desire' => $salaryDesire,
             'earliest_entry_date' => $this->earliest_entry_date?->toDateString(),
             'text' => $this->markdown($this->text),
