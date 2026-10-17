@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\SkillObserver;
+use Database\Factories\SkillFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ObservedBy([SkillObserver::class])]
 class Skill extends Model
 {
-    /** @use HasFactory<\Database\Factories\SkillFactory> */
+    /** @use HasFactory<SkillFactory> */
     use HasFactory;
 
     use HasUlids;

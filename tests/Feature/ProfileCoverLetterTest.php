@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Application;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,7 +71,7 @@ class ProfileCoverLetterTest extends TestCase
         $profile = Profile::factory()->for($user)->create([
             'cover_letter' => 'My default cover letter text.',
         ]);
-        $application = \App\Models\Application::factory()->for($user)->for($profile)->create([
+        $application = Application::factory()->for($user)->for($profile)->create([
             'text' => 'Existing application text.',
         ]);
 

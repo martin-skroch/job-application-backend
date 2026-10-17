@@ -7,6 +7,7 @@ use App\Models\Scopes\OrderScope;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\OwnerObserver;
 use App\Policies\ContentPolicy;
+use Database\Factories\ContentFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ScopedBy([OwnerScope::class, OrderScope::class, ActiveScope::class])]
 class Content extends Model
 {
-    /** @use HasFactory<\Database\Factories\ContentFactory> */
+    /** @use HasFactory<ContentFactory> */
     use HasFactory;
 
     use HasUlids;

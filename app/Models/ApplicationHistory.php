@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enum\ApplicationStatus;
+use Database\Factories\ApplicationHistoryFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApplicationHistory extends Model
 {
-    /** @use HasFactory<\Database\Factories\ApplicationHistoryFactory> */
+    /** @use HasFactory<ApplicationHistoryFactory> */
     use HasFactory;
 
     use HasUlids;

@@ -4,10 +4,11 @@ namespace Database\Factories;
 
 use App\Enum\ApplicationStatus;
 use App\Models\Application;
+use App\Models\ApplicationHistory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ApplicationHistory>
+ * @extends Factory<ApplicationHistory>
  */
 class ApplicationHistoryFactory extends Factory
 {

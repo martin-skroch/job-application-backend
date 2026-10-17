@@ -6,6 +6,7 @@ use App\Enum\ApplicationStatus;
 use App\Enum\FormOfAddress;
 use App\Enum\SalaryBehaviors;
 use App\Policies\ApplicationPolicy;
+use Database\Factories\ApplicationFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsUri;
@@ -22,7 +23,7 @@ use Illuminate\Support\Str;
 #[UsePolicy(ApplicationPolicy::class)]
 class Application extends Model
 {
-    /** @use HasFactory<\Database\Factories\ApplicationFactory> */
+    /** @use HasFactory<ApplicationFactory> */
     use HasFactory;
 
     use HasUlids;

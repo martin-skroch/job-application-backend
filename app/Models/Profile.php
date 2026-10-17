@@ -6,6 +6,7 @@ use App\Enum\ExperienceType;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\ProfileObserver;
 use App\Policies\ProfilePolicy;
+use Database\Factories\ResumeFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -24,7 +25,7 @@ use Throwable;
 #[ObservedBy([ProfileObserver::class])]
 class Profile extends Model
 {
-    /** @use HasFactory<\Database\Factories\ResumeFactory> */
+    /** @use HasFactory<ResumeFactory> */
     use HasFactory;
 
     use HasUlids;

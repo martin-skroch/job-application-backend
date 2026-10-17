@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enum\SalaryBehaviors;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateApplicationRequest extends StoreApplicationRequest
 {
@@ -17,7 +18,7 @@ class UpdateApplicationRequest extends StoreApplicationRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(?SalaryBehaviors $salaryBehavior = null): array
     {

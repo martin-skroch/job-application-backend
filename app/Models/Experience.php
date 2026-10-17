@@ -6,6 +6,7 @@ use App\Enum\ExperienceType;
 use App\Models\Scopes\ActiveScope;
 use App\Models\Scopes\OwnerScope;
 use App\Observers\ExperienceObserver;
+use Database\Factories\ExperienceFactory;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -23,7 +24,7 @@ use Illuminate\Support\Carbon;
 #[ScopedBy([ActiveScope::class])]
 class Experience extends Model
 {
-    /** @use HasFactory<\Database\Factories\ExperienceFactory> */
+    /** @use HasFactory<ExperienceFactory> */
     use HasFactory;
 
     use HasUlids;

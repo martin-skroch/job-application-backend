@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Profile;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateExperienceRequest extends StoreExperienceRequest
 {
@@ -17,7 +18,7 @@ class UpdateExperienceRequest extends StoreExperienceRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(Profile $profile): array
     {

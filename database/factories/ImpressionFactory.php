@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Impression;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Impression>
+ * @extends Factory<Impression>
  */
 class ImpressionFactory extends Factory
 {
