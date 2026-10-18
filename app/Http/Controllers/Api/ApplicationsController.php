@@ -6,11 +6,12 @@ use App\Actions\CreateAnalytics;
 use App\Actions\CreateApplicationFromVacancy;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApplicationResource;
+use App\Http\Resources\VacancyResource;
 use App\Models\Application;
 use App\Notifications\ApplicationRequestedNotification;
+use App\Notifications\VacancyRequestedNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\App;
 
 class ApplicationsController extends Controller
@@ -20,7 +21,7 @@ class ApplicationsController extends Controller
         private readonly CreateApplicationFromVacancy $createApplicationFromVacancy,
     ) {}
 
-    public function fetch(Request $request, Application $application): JsonResource|JsonResponse
+    public function fetch(Request $request, Application $application): ApplicationResource|JsonResponse
     {
 
         if (! $application->isPublic()) {
@@ -38,13 +39,19 @@ class ApplicationsController extends Controller
         return new ApplicationResource($application);
     }
 
-    public function request(Request $request)
+    public function request(Request $request): ApplicationResource|VacancyResource
     {
         $publicId = $request->string('id');
         $query = Application::withTrashed()->where('public_id', $publicId);
 
         if ($request->filled('id') && $query->exists()) {
             $application = $query->first();
+
+            $this->createAnalytics->create($request, $application);
+
+            $request->user()->notify(new ApplicationRequestedNotification($application));
+
+            return new ApplicationResource($application);
         } else {
             $validated = $request->validate([
                 'company' => ['string', 'max:255'],
@@ -61,16 +68,9 @@ class ApplicationsController extends Controller
                 'contact_email' => $validated['email'],
             ]);
 
-            $application = $this->createApplicationFromVacancy->handle($vacancy);
+            $request->user()->notify(new VacancyRequestedNotification($vacancy));
+
+            return new VacancyResource($vacancy);
         }
-
-        $this->createAnalytics->create(
-            $request,
-            $application
-        );
-
-        $request->user()->notify(new ApplicationRequestedNotification($application));
-
-        return new ApplicationResource($application);
     }
 }

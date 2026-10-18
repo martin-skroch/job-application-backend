@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class CreateAnalytics
 {
-    public function create(Request $request, Application $application): void
+    public function create(Request $request, Application $application): Analytics
     {
         $data = $request->ip().'|'.$request->userAgent();
 
@@ -19,12 +19,12 @@ class CreateAnalytics
             ->first();
 
         if ($existing instanceof Analytics) {
-            $existing->increment('count');
+            $existing->increment('count', 1);
 
-            return;
+            return $existing;
         }
 
-        $application->analytics()->create([
+        return $application->analytics()->create([
             'session' => $sessionId,
             'method' => $request->method(),
             'path' => $request->path(),
